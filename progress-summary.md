@@ -28,20 +28,21 @@
   - Remove unnecessary educational system resources
 - Updated `domainTranslations.js` with Hebrew labels for all event-related entities
 
-## Current Focus: Cleanup & Schema Migration
+### Entity Cleanup (Completed)
+- Removed unused educational system entity files from:
+  - Client-side entity definitions (removed 15 .jsx files)
+  - Server-side entity module configurations (removed entity module config files)
+- Kept all shared entity files intact as they contain reusable components
+- Git committed all cleanup changes to maintain a clear history
+
+## Current Focus: Docker Setup & Schema Migration
 
 We are currently focusing on:
-1. **Removing Unused Entities**:
-   - Deleting entity files that are not needed for the event management system
-   - Cleaning up entity module configurations
-   - Removing view entities related to the educational system
-   - Ensuring all imports and references are updated
-
-2. **Docker Environment Setup**:
+1. **Docker Environment Setup**:
    - Running Docker containers to verify system works with new entity structure
    - Note: Docker environment must be running before TypeORM migrations can be executed
 
-3. **TypeORM Migrations**:
+2. **TypeORM Migrations**:
    - Generating initial TypeORM migrations based on entity definitions
    - Applying migrations to create the database schema
    - Verifying database structure matches entity definitions
