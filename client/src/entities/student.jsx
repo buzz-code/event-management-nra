@@ -1,13 +1,10 @@
-import { DateField, DateInput, DateTimeInput, Labeled, maxLength, ReferenceField, ReferenceManyField, required, SelectField, TextField, TextInput } from 'react-admin';
+import { DateField, DateInput, DateTimeInput, Labeled, maxLength, ReferenceField, required, TextField, TextInput } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { useUnique } from '@shared/utils/useUnique';
 import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
-import StudentReportCardReactButton from 'src/reports/studentReportCardReactButton';
 
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
@@ -15,33 +12,32 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
-    <TextInput source="tz:$cont" label="תז" />,
-    <TextInput source="name:$cont" alwaysOn />,
-];
-
-const filterDefaultValues = {
-    ...defaultYearFilter,
-};
-
-const additionalBulkButtons = [
-    // <BulkReportButton label='תעודה לתלמידה' icon={<NoteAltIcon />}
-    //     key='studentReportCard' name='studentReportCard' filename='תעודה' />,
-    <StudentReportCardReactButton key='studentReportCardReact' defaultRequestValues={filterDefaultValues} />,
+    <TextInput source="first_name:$cont" alwaysOn label="שם משתתף" />,
+    <TextInput source="last_name:$cont" label="שם משפחה" />,
+    <CommonReferenceInputFilter source="classReferenceId" reference="class" label="כיתה" />,
+    <TextInput source="address:$cont" label="כתובת" />,
+    <TextInput source="mother_name:$cont" label="שם האם" />,
+    <TextInput source="mother_contact:$cont" label="טלפון האם" />,
+    <TextInput source="father_name:$cont" label="שם האב" />,
+    <TextInput source="father_contact:$cont" label="טלפון האב" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
-        <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
+        <CommonDatagrid {...props}>
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="tz" />
-            <TextField source="name" />
-            <TextField source="comment" />
-            <TextField source="phone" />
-            <TextField source="address" />
-            {isAdmin && <DateField showDate showTime source="createdAt" />}
-            {isAdmin && <DateField showDate showTime source="updatedAt" />}
+            <TextField source="first_name" label="שם משתתף" />
+            <TextField source="last_name" label="שם משפחה" />
+            <ReferenceField source="classReferenceId" reference="class" label="כיתה" />
+            <TextField source="address" label="כתובת" />
+            <TextField source="mother_name" label="שם האם" />
+            <TextField source="mother_contact" label="טלפון האם" />
+            <TextField source="father_name" label="שם האב" />
+            <TextField source="father_contact" label="טלפון האב" />
+            {isAdmin && <DateField showDate showTime source="created_at" label="נוצר ב" />}
+            {isAdmin && <DateField showDate showTime source="updated_at" label="עודכן ב" />}
         </CommonDatagrid>
     );
 }
@@ -51,28 +47,23 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="tz" validate={[required(), maxLength(10), unique()]} />
-        <TextInput source="name" validate={[required(), maxLength(500)]} />
-        <TextInput source="comment" validate={[maxLength(1000)]} />
-        <TextInput source="phone" validate={[maxLength(1000)]} />
-        <TextInput source="address" validate={[maxLength(1000)]} />
-        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
-        {!isCreate && <Labeled label="שיוך לכיתות">
-            <ReferenceManyField reference="student_klass" target="studentReferenceId">
-                <CommonDatagrid>
-                    <MultiReferenceField source="klassReferenceId" sortBy="klass.name" optionalSource="klassId" reference="klass" optionalTarget="key" />
-                    <SelectField source="year" choices={yearChoices} />
-                </CommonDatagrid>
-            </ReferenceManyField>
-        </Labeled>}
+        <TextInput source="first_name" validate={[required(), maxLength(255)]} label="שם משתתף" />
+        <TextInput source="last_name" validate={[required(), maxLength(255)]} label="שם משפחה" />
+        <CommonReferenceInput source="classReferenceId" reference="class" label="כיתה" />
+        <TextInput source="address" validate={[maxLength(1000)]} label="כתובת" multiline />
+        <TextInput source="mother_name" validate={[maxLength(255)]} label="שם האם" />
+        <TextInput source="mother_contact" validate={[maxLength(255)]} label="טלפון האם" />
+        <TextInput source="father_name" validate={[maxLength(255)]} label="שם האב" />
+        <TextInput source="father_contact" validate={[maxLength(255)]} label="טלפון האב" />
+        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled label="נוצר ב" />}
+        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled label="עודכן ב" />}
     </>
 }
 
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'name', 'comment', 'phone', 'address'],
+    fields: ['first_name', 'last_name', 'classReferenceId', 'address', 'mother_name', 'mother_contact', 'father_name', 'father_contact'],
 }
 
 const entity = {

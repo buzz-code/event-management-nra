@@ -1,9 +1,8 @@
-import { DateField, DateInput, DateTimeInput, ReferenceField, required, TextField, TextInput, maxLength } from 'react-admin';
+import { DateField, DateInput, DateTimeInput, maxLength, ReferenceField, required, TextField, TextInput } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
-import { useUnique } from '@shared/utils/useUnique';
 import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
 
 const filters = [
@@ -12,8 +11,7 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
-    <TextInput source="first_name:$cont" alwaysOn label="שם מארגן" />,
-    <TextInput source="last_name:$cont" label="שם משפחה" />,
+    <TextInput source="name:$cont" alwaysOn label="שם סוג האירוע" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -22,30 +20,29 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="first_name" label="שם מארגן" />
-            <TextField source="last_name" label="שם משפחה" />
-            {isAdmin && <DateField showDate showTime source="created_at" label="נוצר ב" />}
-            {isAdmin && <DateField showDate showTime source="updated_at" label="עודכן ב" />}
+            <TextField source="name" label="שם סוג האירוע" />
+            <TextField source="description" label="תיאור" />
+            {isAdmin && <DateField showDate showTime source="createdAt" />}
+            {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
 }
 
 const Inputs = ({ isCreate, isAdmin }) => {
-    const unique = useUnique();
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="first_name" validate={[required(), maxLength(255)]} label="שם מארגן" />
-        <TextInput source="last_name" validate={[required(), maxLength(255)]} label="שם משפחה" />
-        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled label="נוצר ב" />}
-        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled label="עודכן ב" />}
+        <TextInput source="name" validate={[required(), maxLength(100)]} label="שם סוג האירוע" />
+        <TextInput source="description" multiline validate={[maxLength(500)]} label="תיאור" />
+        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
 }
 
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['first_name', 'last_name'],
+    fields: ['name', 'description'],
 }
 
 const entity = {

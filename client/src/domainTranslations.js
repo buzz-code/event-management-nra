@@ -2,12 +2,93 @@ import { generalResourceFieldsTranslation } from "@shared/providers/i18nProvider
 
 export default {
     menu_groups: {
+        events: 'אירועים',
         data: 'נתונים',
         report: 'דוחות',
         settings: 'הגדרות',
         admin: 'ניהול',
     },
     resources: {
+        // Event Management System Entities
+        event: {
+            name: 'אירוע |||| אירועים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם האירוע',
+                eventTypeReferenceId: 'סוג האירוע',
+                eventDate: 'תאריך האירוע',
+                location: 'מיקום',
+                maxParticipants: 'מספר משתתפים מקסימלי',
+                description: 'תיאור',
+            }
+        },
+        event_type: {
+            name: 'סוג אירוע |||| סוגי אירועים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם סוג האירוע',
+                description: 'תיאור',
+            }
+        },
+        event_note: {
+            name: 'הערה לאירוע |||| הערות לאירועים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                eventReferenceId: 'אירוע',
+                note: 'הערה',
+            }
+        },
+        gift: {
+            name: 'מתנה |||| מתנות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם המתנה',
+                description: 'תיאור',
+                value: 'ערך',
+                stock: 'מלאי',
+            }
+        },
+        event_gift: {
+            name: 'מתנה לאירוע |||| מתנות לאירועים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                eventReferenceId: 'אירוע',
+                giftReferenceId: 'מתנה',
+                quantity: 'כמות',
+            }
+        },
+        class: {
+            name: 'כיתה |||| כיתות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם הכיתה',
+                description: 'תיאור',
+                maxCapacity: 'קיבולת מקסימלית',
+            }
+        },
+        student: {
+            name: 'משתתף |||| משתתפים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                tz: 'תז',
+                comment: 'הערה',
+                phone: 'טלפון',
+                address: 'כתובת',
+            }
+        },
+        teacher: {
+            name: 'מארגן |||| מארגנים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                tz: 'תז',
+                phone: 'טלפון',
+                phone2: 'טלפון 2',
+                email: 'כתובת מייל',
+                displayName: 'שם תצוגה'
+            }
+        },
+        
+        // Common Settings and Utilities
         settings: {
             name: 'הגדרות',
             fields: {
@@ -37,165 +118,6 @@ export default {
                 'reportCardSettings.downComment': 'הצג הערה מתחת שם תלמידה',
                 'reportCardSettings.lastGrade': 'חשב ציון אחרון',
                 'reportCardSettings.debug': 'הצג פירוט',
-            }
-        },
-        att_report: {
-            name: 'רשומת נוכחות |||| נוכחות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                'studentBaseKlass.klassName': 'כיתת בסיס',
-                teacherId: 'מורה',
-                teacherReferenceId: 'מורה',
-                klassId: 'כיתה',
-                klassReferenceId: 'כיתה',
-                'klass.klassTypeReferenceId': 'שיוך כיתה',
-                lessonId: 'שיעור',
-                lessonReferenceId: 'שיעור',
-                reportDate: 'תאריך דיווח',
-                howManyLessons: 'מספר שיעורים',
-                absCount: 'חיסורים',
-                approvedAbsCount: 'חיסורים מאושרים',
-                comments: 'הערה',
-                sheetName: 'חודש דיווח',
-            }
-        },
-        att_report_with_report_month: {
-            name: 'רשומת נוכחות |||| נוכחות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                'studentBaseKlass.klassName': 'כיתת בסיס',
-                teacherId: 'מורה',
-                teacherReferenceId: 'מורה',
-                klassId: 'כיתה',
-                klassReferenceId: 'כיתה',
-                'klass.klassTypeReferenceId': 'שיוך כיתה',
-                lessonId: 'שיעור',
-                lessonReferenceId: 'שיעור',
-                reportMonthReferenceId: 'חודש דיווח',
-                reportDate: 'תאריך דיווח',
-                howManyLessons: 'מספר שיעורים',
-                absCount: 'חיסורים',
-                approvedAbsCount: 'חיסורים מאושרים',
-                comments: 'הערה',
-                sheetName: 'חודש דיווח',
-            }
-        },
-        grade: {
-            name: 'רשומת ציונים |||| ציונים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                'studentBaseKlass.klassName': 'כיתת בסיס',
-                teacherId: 'מורה',
-                teacherReferenceId: 'מורה',
-                klassId: 'כיתה',
-                klassReferenceId: 'כיתה',
-                lessonId: 'שיעור',
-                lessonReferenceId: 'שיעור',
-                reportDate: 'תאריך דיווח',
-                howManyLessons: 'מספר שיעורים',
-                grade: 'ציון',
-                estimation: 'הערכה',
-                comments: 'הערה',
-            }
-        },
-        klass: {
-            name: 'כיתה |||| כיתות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                displayName: 'שם לתעודה',
-                klassTypeId: 'שיוך כיתה',
-                klassTypeReferenceId: 'שיוך כיתה',
-                teacherId: 'מורה',
-                teacherReferenceId: 'מורה',
-            }
-        },
-        klass_type: {
-            name: 'שיוך כיתה |||| שיוך כיתות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                klassTypeEnum: 'סוג כיתה בדו"ח',
-                teacherId: 'מורה אחראית',
-                teacherReferenceId: 'מורה אחראית',
-            }
-        },
-        known_absence: {
-            name: 'חיסור מאושר |||| חיסורים מאושרים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                klassId: 'כיתה',
-                klassReferenceId: 'כיתה',
-                lessonId: 'שיעור',
-                lessonReferenceId: 'שיעור',
-                reportDate: 'תאריך דיווח',
-                absnceCount: 'מספר חיסורים',
-                absnceCode: 'קוד חיסור',
-                senderName: 'שולחת',
-                reason: 'סיבה',
-                comment: 'הערה',
-                isApproved: 'מאושר',
-            }
-        },
-        lesson: {
-            name: 'שיעור |||| שיעורים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                klasses: 'כיתות',
-                klassReferenceIds: 'כיתות',
-                teacherId: 'מורה',
-                teacherReferenceId: 'מורה',
-                startDate: 'תאריך התחלה',
-                endDate: 'תאריך סיום',
-                comment: 'הערה',
-                howManyLessons: 'מספר שיעורים',
-                displayName: 'שם לתעודה',
-                order: 'סדר',
-            }
-        },
-        student_klass: {
-            name: 'רשומת שיוך תלמידות לכיתות |||| שיוך תלמידות לכיתות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                klassId: 'כיתה',
-                klassReferenceId: 'כיתה',
-            }
-        },
-        student: {
-            name: 'תלמידה |||| תלמידות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                tz: 'תז',
-                comment: 'הערה',
-                phone: 'טלפון',
-                address: 'כתובת',
-            }
-        },
-        student_by_year: {
-            name: 'תלמידה |||| תלמידות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                tz: 'תז',
-                year: 'שנה',
-            }
-        },
-        teacher: {
-            name: 'מורה |||| מורות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                tz: 'תז',
-                phone: 'טלפון',
-                phone2: 'טלפון 2',
-                email: 'כתובת מייל',
-                displayName: 'שם לתעודה'
             }
         },
         text: {
@@ -239,38 +161,6 @@ export default {
                 'additionalData.trialEndDate': 'תאריך חובת תשלום',
                 'additionalData.customTrialMessage': 'הודעה מקדימה חובת תשלום',
                 'additionalData.customTrialEndedMessage': 'הודעת סיום חובת תשלום',
-            }
-        },
-        yemot_call: {
-            name: 'שיחה |||| שיחות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                phone: 'מאת',
-                'phone:$cont': 'מאת',
-                currentStep: 'שלב נוכחי',
-                hasError: 'שגיאה?',
-                errorMessage: 'הודעת שגיאה',
-                'errorMessage:$cont': 'הודעת שגיאה',
-                history: 'שלבים',
-                data: 'נתונים',
-                isOpen: 'פעיל?',
-                apiCallId: 'מזהה שיחה (ימות)',
-            },
-        },
-        student_klass_report: {
-            name: 'דוח שיוך תלמידה',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                klassReferenceId1: 'כיתת אם',
-                'klassReferenceId1:$cont': 'כיתת אם',
-                klassReferenceId2: 'מסלול',
-                'klassReferenceId2:$cont': 'מסלול',
-                klassReferenceId3: 'התמחות',
-                'klassReferenceId3:$cont': 'התמחות',
-                klassReferenceIdNull: 'אחר',
-                'klassReferenceIdNull:$cont': 'אחר',
             }
         },
         import_file: {
@@ -413,19 +303,204 @@ export default {
                 description: 'תיאור',
                 monthlyPrice: 'מחיר חודשי',
                 annualPrice: 'מחיר שנתי',
-                studentNumberLimit: 'מספר תלמידות',
+                studentNumberLimit: 'מספר משתתפים',
             }
         },
-        teacher_salary_report: {
-            name: 'דוח שכר למורה',
+        yemot_call: {
+            name: 'שיחה |||| שיחות',
             fields: {
                 ...generalResourceFieldsTranslation,
+                phone: 'מאת',
+                'phone:$cont': 'מאת',
+                currentStep: 'שלב נוכחי',
+                hasError: 'שגיאה?',
+                errorMessage: 'הודעת שגיאה',
+                'errorMessage:$cont': 'הודעת שגיאה',
+                history: 'שלבים',
+                data: 'נתונים',
+                isOpen: 'פעיל?',
+                apiCallId: 'מזהה שיחה (ימות)',
+            },
+        },
+        student_klass_report: {
+            name: 'דוח שיוך תלמידה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                klassReferenceId1: 'כיתת אם',
+                'klassReferenceId1:$cont': 'כיתת אם',
+                klassReferenceId2: 'מסלול',
+                'klassReferenceId2:$cont': 'מסלול',
+                klassReferenceId3: 'התמחות',
+                'klassReferenceId3:$cont': 'התמחות',
+                klassReferenceIdNull: 'אחר',
+                'klassReferenceIdNull:$cont': 'אחר',
+            }
+        },
+        att_report: {
+            name: 'רשומת נוכחות |||| נוכחות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                'studentBaseKlass.klassName': 'כיתת בסיס',
+                teacherId: 'מורה',
                 teacherReferenceId: 'מורה',
-                lessonReferenceId: 'שיעור',
+                klassId: 'כיתה',
                 klassReferenceId: 'כיתה',
                 'klass.klassTypeReferenceId': 'שיוך כיתה',
-                reportMonthReferenceId: 'תקופת דיווח',
+                lessonId: 'שיעור',
+                lessonReferenceId: 'שיעור',
+                reportDate: 'תאריך דיווח',
                 howManyLessons: 'מספר שיעורים',
+                absCount: 'חיסורים',
+                approvedAbsCount: 'חיסורים מאושרים',
+                comments: 'הערה',
+                sheetName: 'חודש דיווח',
+            }
+        },
+        att_report_with_report_month: {
+            name: 'רשומת נוכחות |||| נוכחות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                'studentBaseKlass.klassName': 'כיתת בסיס',
+                teacherId: 'מורה',
+                teacherReferenceId: 'מורה',
+                klassId: 'כיתה',
+                klassReferenceId: 'כיתה',
+                'klass.klassTypeReferenceId': 'שיוך כיתה',
+                lessonId: 'שיעור',
+                lessonReferenceId: 'שיעור',
+                reportMonthReferenceId: 'חודש דיווח',
+                reportDate: 'תאריך דיווח',
+                howManyLessons: 'מספר שיעורים',
+                absCount: 'חיסורים',
+                approvedAbsCount: 'חיסורים מאושרים',
+                comments: 'הערה',
+                sheetName: 'חודש דיווח',
+            }
+        },
+        grade: {
+            name: 'רשומת ציונים |||| ציונים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                'studentBaseKlass.klassName': 'כיתת בסיס',
+                teacherId: 'מורה',
+                teacherReferenceId: 'מורה',
+                klassId: 'כיתה',
+                klassReferenceId: 'כיתה',
+                lessonId: 'שיעור',
+                lessonReferenceId: 'שיעור',
+                reportDate: 'תאריך דיווח',
+                howManyLessons: 'מספר שיעורים',
+                grade: 'ציון',
+                estimation: 'הערכה',
+                comments: 'הערה',
+            }
+        },
+        klass: {
+            name: 'כיתה |||| כיתות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                displayName: 'שם לתעודה',
+                klassTypeId: 'שיוך כיתה',
+                klassTypeReferenceId: 'שיוך כיתה',
+                teacherId: 'מורה',
+                teacherReferenceId: 'מורה',
+            }
+        },
+        klass_type: {
+            name: 'שיוך כיתה |||| שיוך כיתות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                klassTypeEnum: 'סוג כיתה בדו"ח',
+                teacherId: 'מורה אחראית',
+                teacherReferenceId: 'מורה אחראית',
+            }
+        },
+        known_absence: {
+            name: 'חיסור מאושר |||| חיסורים מאושרים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                klassId: 'כיתה',
+                klassReferenceId: 'כיתה',
+                lessonId: 'שיעור',
+                lessonReferenceId: 'שיעור',
+                reportDate: 'תאריך דיווח',
+                absnceCount: 'מספר חיסורים',
+                absnceCode: 'קוד חיסור',
+                senderName: 'שולחת',
+                reason: 'סיבה',
+                comment: 'הערה',
+                isApproved: 'מאושר',
+            }
+        },
+        lesson: {
+            name: 'שיעור |||| שיעורים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                klasses: 'כיתות',
+                klassReferenceIds: 'כיתות',
+                teacherId: 'מורה',
+                teacherReferenceId: 'מורה',
+                startDate: 'תאריך התחלה',
+                endDate: 'תאריך סיום',
+                comment: 'הערה',
+                howManyLessons: 'מספר שיעורים',
+                displayName: 'שם לתעודה',
+                order: 'סדר',
+            }
+        },
+        student_klass: {
+            name: 'רשומת שיוך תלמידות לכיתות |||| שיוך תלמידות לכיתות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                klassId: 'כיתה',
+                klassReferenceId: 'כיתה',
+            }
+        },
+        student_by_year: {
+            name: 'תלמידה |||| תלמידות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                tz: 'תז',
+                year: 'שנה',
+            }
+        },
+        teacher: {
+            name: 'מורה |||| מורות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                tz: 'תז',
+                phone: 'טלפון',
+                phone2: 'טלפון 2',
+                email: 'כתובת מייל',
+                displayName: 'שם לתעודה'
+            }
+        },
+        student_klass_report: {
+            name: 'דוח שיוך תלמידה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                klassReferenceId1: 'כיתת אם',
+                'klassReferenceId1:$cont': 'כיתת אם',
+                klassReferenceId2: 'מסלול',
+                'klassReferenceId2:$cont': 'מסלול',
+                klassReferenceId3: 'התמחות',
+                'klassReferenceId3:$cont': 'התמחות',
+                klassReferenceIdNull: 'אחר',
+                'klassReferenceIdNull:$cont': 'אחר',
             }
         },
         grade_name: {
