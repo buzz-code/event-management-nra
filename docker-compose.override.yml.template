@@ -1,0 +1,19 @@
+version: "3"
+name: event-management-nra-dev
+services:
+    event-frontend:
+        container_name: event-frontend-dev
+        build:
+            target: development
+
+    event-backend:
+        container_name: event-backend-dev
+        build:
+            target: development
+
+    event-db:
+        container_name: event-db-dev
+
+    event-phpmyadmin:
+        container_name: event-phpmyadmin-dev
+

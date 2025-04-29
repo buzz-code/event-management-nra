@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "jsx": "react",
+        "paths": {
+            "@shared/*": [
+                "./shared/*"
+            ],
+            "src/*": [
+                "./src/*"
+            ]
+        },
+        "resolveJsonModule": true,
+    },
+}

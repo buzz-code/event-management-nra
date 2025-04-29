@@ -1,0 +1,67 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    name: 'Build'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Build:checkout"
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            client:
+              - 'client/**'
+            server:
+              - 'server/**'
+
+      - name: Login to Docker Hub
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.PAT }}
+
+      - name: 'Build:dockerimage-client'
+        if: steps.changes.outputs.client == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-client:latest
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-client:${{github.sha}}
+
+      - name: 'Build:dockerimage-server'
+        if: steps.changes.outputs.server == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-server:latest
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-server:${{github.sha}}
+
+      - name: 'Update client service'
+        if: steps.changes.outputs.client == 'true'
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://docker2.yoman.online/api/webhooks/83c901ca-3ea4-405c-a256-d3632da40bf9'
+          preventFailureOnNoResponse: true
+
+      - name: 'Update server service'
+        if: steps.changes.outputs.server == 'true'
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://docker2.yoman.online/api/webhooks/40f04d31-7ed6-42e7-b54f-54ca82a408c4'
+          preventFailureOnNoResponse: true

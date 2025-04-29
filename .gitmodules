@@ -1,0 +1,6 @@
+[submodule "client/shared"]
+	path = client/shared
+	url = https://github.com/buzz-code/nra-client
+[submodule "server/shared"]
+	path = server/shared
+	url = https://github.com/buzz-code/nra-server

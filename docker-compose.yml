@@ -1,0 +1,104 @@
+version: "3"
+services:
+    event-frontend:
+        container_name: event-frontend
+        restart: unless-stopped
+        depends_on:
+            - event-backend
+        build:
+            context: ./client
+            target: production
+            args:
+                REACT_APP_API_URL: https://api.$DOMAIN_NAME
+        pull_policy: build
+        environment:
+            PORT: 80
+            REACT_APP_API_URL: https://api.$DOMAIN_NAME
+        labels:
+            caddy: $DOMAIN_NAME
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        volumes:
+            - ./client:/app
+            - /app/node_modules
+            - /app/dist
+        networks:
+            - private-network
+            - caddy
+            - elknet
+
+
+    event-backend:
+        container_name: event-backend
+        restart: unless-stopped
+        build:
+            context: ./server
+            target: production
+        pull_policy: build
+        environment:
+            DOMAIN_NAME: $DOMAIN_NAME
+            MYSQL_HOST: $MYSQL_HOST
+            MYSQL_USER: $MYSQL_USER
+            MYSQL_PASSWORD: $MYSQL_PASSWORD
+            MYSQL_DATABASE: $MYSQL_DATABASE
+            JWT_SECRET: $JWT_SECRET
+            ADMIN_USER: $ADMIN_USER
+            SMTP_USER: $SMTP_USER
+            SMTP_PASSWORD: $SMTP_PASSWORD
+        depends_on:
+            - event-db
+        labels:
+            caddy: api.$DOMAIN_NAME
+            caddy.reverse_proxy: "{{upstreams 3000}}"
+        volumes: 
+            - ./server:/app
+        networks:
+            - private-network
+            - caddy
+            - elknet
+
+    event-db:
+        container_name: event-db
+        restart: unless-stopped
+        build:
+            context: ./db
+        cap_add:
+            - SYS_NICE
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_DATABASE: $MYSQL_DATABASE
+            MYSQL_USER: $MYSQL_USER
+            MYSQL_PASSWORD: $MYSQL_PASSWORD
+            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+        volumes:
+            - "db_data:/var/lib/mysql"
+        networks:
+            - private-network
+
+    event-phpmyadmin:
+        container_name: event-phpmyadmin
+        restart: unless-stopped
+        depends_on:
+            - event-db
+        image: phpmyadmin
+        labels:
+            caddy: sql.$DOMAIN_NAME
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        environment:
+            PMA_HOST: event-db
+            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+        # ports:
+        #   - "80"
+        networks:
+            - private-network
+            - caddy
+
+
+volumes:
+    db_data:
+
+networks:
+    private-network:
+    caddy:
+        external: true
+    elknet:
+        external: true
