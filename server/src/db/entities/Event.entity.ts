@@ -1,0 +1,153 @@
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn, Index, BeforeInsert, BeforeUpdate, DataSource } from 'typeorm';
+import { EventType } from './EventType.entity';
+import { Teacher } from './Teacher.entity';
+import { Student } from './Student.entity';
+import { EventNote } from './EventNote.entity';
+import { EventGift } from './EventGift.entity';
+import { IsOptional, ValidateIf } from 'class-validator';
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty, MaxLength, IsDate, IsNumber, Min } from '@shared/utils/validation/class-validator-he';
+import { StringType, DateType, NumberType } from '@shared/utils/entity/class-transformer';
+import { IHasUserId } from '@shared/base-entity/interface';
+import { User } from './User.entity';
+import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
+
+@Entity('events')
+@Index('events_user_id_idx', ['userId'], {})
+@Index('events_event_type_id_idx', ['eventTypeReferenceId'], {})
+@Index('events_teacher_id_idx', ['teacherReferenceId'], {})
+@Index('events_student_id_idx', ['studentReferenceId'], {})
+@Index('events_start_date_idx', ['start_date'], {})
+@Index('events_end_date_idx', ['end_date'], {})
+export class Event implements IHasUserId {
+  @BeforeInsert()
+  @BeforeUpdate()
+  async fillFields() {
+    cleanDateFields(this, ['start_date', 'end_date']);
+
+    let dataSource: DataSource;
+    try {
+      dataSource = await getDataSource([EventType, Teacher, Student, User]);
+
+      this.eventTypeReferenceId = await findOneAndAssignReferenceId(
+        dataSource, EventType, { id: this.eventTypeId }, null, this.eventTypeReferenceId, this.eventTypeId
+      );
+      
+      this.teacherReferenceId = await findOneAndAssignReferenceId(
+        dataSource, Teacher, { id: this.teacherId }, this.userId, this.teacherReferenceId, this.teacherId
+      );
+      
+      this.studentReferenceId = await findOneAndAssignReferenceId(
+        dataSource, Student, { id: this.studentId }, this.userId, this.studentReferenceId, this.studentId
+      );
+    } finally {
+      dataSource?.destroy();
+    }
+  }
+
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("int", { name: "user_id" })
+  userId: number;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255 })
+  title: string;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(1000, { always: true })
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @DateType
+  @IsDate({ always: true })
+  @Column()
+  start_date: Date;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @DateType
+  @IsDate({ always: true })
+  @Column()
+  end_date: Date;
+
+  @IsOptional({ always: true })
+  @Column({ default: false })
+  completed: boolean;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 2 }, { always: true })
+  @Min(0, { always: true })
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  grade: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.eventTypeReferenceId), { always: true })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  eventTypeId: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.eventTypeId) && Boolean(event.eventTypeReferenceId), { always: true })
+  @Column({ nullable: true })
+  eventTypeReferenceId: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.teacherReferenceId), { always: true })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  teacherId: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.teacherId) && Boolean(event.teacherReferenceId), { always: true })
+  @Column({ nullable: true })
+  teacherReferenceId: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.studentReferenceId), { always: true })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  studentId: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.studentId) && Boolean(event.studentReferenceId), { always: true })
+  @Column({ nullable: true })
+  studentReferenceId: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @ManyToOne(() => EventType, eventType => eventType.events, { nullable: true })
+  @JoinColumn({ name: 'eventTypeReferenceId' })
+  eventType: EventType;
+
+  @ManyToOne(() => Teacher, teacher => teacher.events, { nullable: true })
+  @JoinColumn({ name: 'teacherReferenceId' })
+  teacher: Teacher;
+
+  @ManyToOne(() => Student, student => student.events, { nullable: true })
+  @JoinColumn({ name: 'studentReferenceId' })
+  student: Student;
+
+  @ManyToOne(() => User, { createForeignKeyConstraints: false })
+  @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
+  user: User;
+
+  @OneToMany(() => EventNote, note => note.event)
+  notes: EventNote[];
+
+  @OneToMany(() => EventGift, eventGift => eventGift.event)
+  eventGifts: EventGift[];
+}

@@ -2,89 +2,79 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
+  BeforeInsert,
+  BeforeUpdate,
+  DataSource
 } from "typeorm";
-import { IHasUserId } from "@shared/base-entity/interface";
-import { User } from "src/db/entities/User.entity";
-import { IsOptional } from "class-validator";
+import { User } from "./User.entity";
+import { Event } from "./Event.entity";
+import { IsOptional, ValidateIf } from "class-validator";
 import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, IsUniqueCombination, MaxLength } from "@shared/utils/validation/class-validator-he";
-import { StringType } from "@shared/utils/entity/class-transformer";
+import { IsNotEmpty, MaxLength, IsNumber } from "@shared/utils/validation/class-validator-he";
+import { StringType, NumberType } from "@shared/utils/entity/class-transformer";
+import { IHasUserId } from "@shared/base-entity/interface";
+import { findOneAndAssignReferenceId, getDataSource } from "@shared/utils/entity/foreignKey.util";
 
-@Index("teachers_users_idx", ["userId"], {})
-@Index(["userId", "tz", "year"], { unique: true })
-@Index("teachers_user_id_phone_idx", ["userId", "phone"])
-@Index("teachers_user_id_phone2_idx", ["userId", "phone2"])
 @Entity("teachers")
+@Index("teachers_user_id_idx", ["userId"], {})
+@Index("teachers_name_idx", ["first_name", "last_name"], {})
 export class Teacher implements IHasUserId {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @BeforeInsert()
+  @BeforeUpdate()
+  async fillFields() {
+    let dataSource: DataSource;
+    try {
+      dataSource = await getDataSource([User]);
+
+      if (this.userId) {
+        this.userReferenceId = await findOneAndAssignReferenceId(
+          dataSource, User, { id: this.userId }, null, this.userReferenceId, this.userId
+        );
+      }
+    } finally {
+      dataSource?.destroy();
+    }
+  }
+
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column("int", { name: "user_id", nullable: true })
   userId: number;
 
   @Column({ nullable: true })
-  year: number;
+  userReferenceId: number;
 
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
-  @MaxLength(10, { always: true })
-  @IsUniqueCombination(['userId'], [Teacher, User], { always: true })
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @Column("varchar", { name: "tz", length: 10 })
-  tz: string;
+  @MaxLength(255, { always: true })
+  @Column({ name: "first_name", length: 255 })
+  first_name: string;
 
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
-  @MaxLength(500, { always: true })
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @Column("varchar", { name: "name", length: 500 })
-  name: string;
+  @MaxLength(255, { always: true })
+  @Column({ name: "last_name", length: 255 })
+  last_name: string;
 
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(10, { always: true })
-  @Column("varchar", { name: "phone", nullable: true, length: 10 })
-  phone: string | null;
+  @CreateDateColumn({ name: "created_at" })
+  created_at: Date;
 
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(10, { always: true })
-  @Column("varchar", { name: "phone2", nullable: true, length: 10 })
-  phone2: string | null;
+  @UpdateDateColumn({ name: "updated_at" })
+  updated_at: Date;
 
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(500, { always: true })
-  @Column("varchar", { name: "email", nullable: true, length: 500 })
-  email: string | null;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(1000, { always: true })
-  @Column("varchar", { name: "comment", nullable: true, length: 1000 })
-  comment: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(500, { always: true })
-  @Column("varchar", { name: "displayName", nullable: true, length: 500 })
-  displayName: string;
-
-  @CreateDateColumn({ name: "created_at", type: "timestamp" })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: "updated_at", type: 'timestamp' })
-  updatedAt: Date;
-
-  @ManyToOne(() => User, (user) => user.teachers, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "userReferenceId" })
   user: User;
+
+  @OneToMany(() => Event, event => event.teacher)
+  events: Event[];
 }

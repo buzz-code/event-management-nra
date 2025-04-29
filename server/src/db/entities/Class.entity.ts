@@ -1,0 +1,47 @@
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  Index,
+} from "typeorm";
+import { Student } from "./Student.entity";
+import { IsOptional } from "class-validator";
+import { CrudValidationGroups } from "@dataui/crud";
+import { IsNotEmpty, MaxLength } from "@shared/utils/validation/class-validator-he";
+import { StringType } from "@shared/utils/entity/class-transformer";
+import { IHasUserId } from "@shared/base-entity/interface";
+
+@Entity("classes")
+@Index("classes_name_idx", ["name"], {})
+export class Class implements IHasUserId {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("int", { name: "user_id" })
+  userId: number;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255 })
+  name: string;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  grade_level: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @OneToMany(() => Student, student => student.class)
+  students: Student[];
+}

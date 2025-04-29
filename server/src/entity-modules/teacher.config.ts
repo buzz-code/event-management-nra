@@ -1,3 +1,4 @@
+import { CrudRequest } from "@dataui/crud";
 import { BaseEntityModuleOptions } from "@shared/base-entity/interface";
 import { IHeader } from "@shared/utils/exporter/types";
 import { Teacher } from "src/db/entities/Teacher.entity";
@@ -5,18 +6,31 @@ import { Teacher } from "src/db/entities/Teacher.entity";
 function getConfig(): BaseEntityModuleOptions {
     return {
         entity: Teacher,
-        exporter: {
-            getExportHeaders(): IHeader[] {
-                return [
-                    { value: 'tz', label: 'תז' },
-                    { value: 'name', label: 'שם' },
-                    { value: 'phone', label: 'טלפון' },
-                    { value: 'phone2', label: 'טלפון 2' },
-                    { value: 'email', label: 'כתובת מייל' },
-                    { value: 'displayName', label: 'שם לתצוגה' },
-                ];
+        query: {
+            join: {
+                user: {},
+                events: {}
             }
         },
+        exporter: {
+            processReqForExport(req: CrudRequest, innerFunc) {
+                req.options.query.join = {
+                    user: { eager: true }
+                };
+                return innerFunc(req);
+            },
+            getExportHeaders(): IHeader[] {
+                return [
+                    { value: 'id', label: 'מזהה' },
+                    { value: 'first_name', label: 'שם פרטי' },
+                    { value: 'last_name', label: 'שם משפחה' },
+                    { value: 'user.email', label: 'כתובת מייל' },
+                    { value: 'user.username', label: 'שם משתמש' },
+                    { value: 'created_at', label: 'תאריך יצירה' },
+                    { value: 'updated_at', label: 'תאריך עדכון' },
+                ];
+            }
+        }
     }
 }
 
