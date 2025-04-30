@@ -54,7 +54,6 @@ import { RegisterPage } from '@shared/components/layout/RegisterPage';
 import { LoginPage } from '@shared/components/layout/LoginPage';
 import Tutorial from '@shared/components/views/Tutorial';
 import PageList from '@shared/components/views/PageList';
-// import ScannerUpload from '@shared/components/views/ScannerUpload';
 import Roadmap from '@shared/components/views/Roadmap';
 
 // Icons
@@ -66,7 +65,6 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import ClassIcon from '@mui/icons-material/Class';
 import CommentIcon from '@mui/icons-material/Comment';
-import DateRangeIcon from '@mui/icons-material/DateRange';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import ImageIcon from '@mui/icons-material/Image';
@@ -131,7 +129,6 @@ const App = () => (
               <Route path="/yemot-simulator" element={<YemotSimulator />} />
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/pages-view" element={<PageList />} />
-              {/* <Route path="/scanner-upload" element={<ScannerUpload />} /> */}
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
             </CustomRoutes>
 
