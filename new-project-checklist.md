@@ -1,4 +1,4 @@
-# Checklist for Creating a New Project Based on react-admin-nestjs
+# Checklist for Creating a New Project Based on event-management-nra
 
 ## 1. Project Setup & Structure
 

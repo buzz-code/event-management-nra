@@ -5,7 +5,7 @@
 ### Root Directory
 - `/docker-compose.yml` - Defines services for frontend, backend, MySQL database, and phpMyAdmin
 - `/docker-compose.override.yml` - Environment-specific Docker override configuration
-- `/react-admin-nestjs.code-workspace` - VS Code workspace configuration
+- `/event-management-nra.code-workspace` - VS Code workspace configuration
 
 ### Key Directories
 - `/client` - React Admin frontend application

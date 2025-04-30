@@ -13,7 +13,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   const config = new DocumentBuilder()
-    .setTitle('react-admin-nestjs')
+    .setTitle('event-management-nra')
     .setDescription('Demo website description')
     .setVersion('1.0')
     .addTag('demo')
