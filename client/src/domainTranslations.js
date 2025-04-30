@@ -4,7 +4,6 @@ export default {
     menu_groups: {
         events: 'אירועים',
         data: 'נתונים',
-        report: 'דוחות',
         settings: 'הגדרות',
         admin: 'ניהול',
     },
