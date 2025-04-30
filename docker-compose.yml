@@ -14,6 +14,7 @@ services:
         environment:
             PORT: 80
             REACT_APP_API_URL: https://api.$DOMAIN_NAME
+            YARN_CACHE_FOLDER: /yarn-cache
         labels:
             caddy: $DOMAIN_NAME
             caddy.reverse_proxy: "{{upstreams 80}}"
@@ -21,6 +22,7 @@ services:
             - ./client:/app
             - /app/node_modules
             - /app/dist
+            - /usr/local/share/.cache/yarn:/yarn-cache
         networks:
             - private-network
             - caddy
@@ -44,6 +46,7 @@ services:
             ADMIN_USER: $ADMIN_USER
             SMTP_USER: $SMTP_USER
             SMTP_PASSWORD: $SMTP_PASSWORD
+            YARN_CACHE_FOLDER: /yarn-cache
         depends_on:
             - event-db
         labels:
@@ -51,6 +54,9 @@ services:
             caddy.reverse_proxy: "{{upstreams 3000}}"
         volumes: 
             - ./server:/app
+            - /app/node_modules
+            - /app/dist
+            - /usr/local/share/.cache/yarn:/yarn-cache
         networks:
             - private-network
             - caddy
@@ -63,7 +69,7 @@ services:
             context: ./db
         cap_add:
             - SYS_NICE
-        command: --default-authentication-plugin=mysql_native_password
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
         environment:
             MYSQL_DATABASE: $MYSQL_DATABASE
             MYSQL_USER: $MYSQL_USER

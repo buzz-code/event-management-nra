@@ -1,15 +1,12 @@
-FROM node:18-alpine as development
+FROM node:18-alpine AS development
 
-RUN apk add git
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-COPY package*.json /app/
-COPY yarn.lock /app/
+COPY package*.json yarn.lock ./
 
 RUN yarn install
-
-# COPY . .
 
 CMD ["yarn", "start"]
 
