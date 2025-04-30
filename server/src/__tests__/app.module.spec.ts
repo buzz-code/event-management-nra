@@ -135,7 +135,10 @@ describe('AppModule', () => {
 
   it('should import AuthModule', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
-    expect(imports.includes(AuthModule)).toBe(true);
+    const authModuleImport = imports.find(
+      (imp: any) => imp && imp.module === AuthModule
+    );
+    expect(authModuleImport).toBeDefined();
   });
 
   it('should configure YemotModule with chain', () => {
