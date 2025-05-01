@@ -26,17 +26,14 @@ export function DashboardItemsInput() {
             <CommonEntityNameInput
               source="resource"
               allowedEntities={[
-                'att_report_with_report_month',
-                'grade',
-                'known_absence',
-                'student_klass_report',
-                'teacher_report_status',
-                'teacher_grade_report_status',
-                'student_percent_report',
-                'student_by_year',
+                'event',
+                'event_type',
+                'event_note',
+                'gift',
+                'event_gift',
+                'class',
+                'student',
                 'teacher',
-                'klass',
-                'lesson'
               ]}
               helperText="בחר את מקור הנתונים שברצונך להציג"
               fullWidth
@@ -49,7 +46,7 @@ export function DashboardItemsInput() {
                 { id: 'year', name: 'סינון שנה רגיל' },
                 { id: 'year:$cont', name: 'סינון שנה מורחב' }
               ]}
-              defaultValue="year"
+              defaultValue="none"
               fullWidth
               disableClearable
             />

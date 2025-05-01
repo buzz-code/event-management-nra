@@ -25,11 +25,6 @@ export function GeneralSettingsInput() {
           disableClearable
           validate={required()}
         />
-        <NumberInput
-          source="lateValue"
-          fullWidth
-          validate={required()}
-        />
       </AccordionDetails>
     </Accordion >
   );

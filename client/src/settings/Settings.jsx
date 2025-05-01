@@ -2,11 +2,10 @@ import React from 'react';
 import { Card, CardContent } from '@mui/material';
 import { SimpleForm, Title, useNotify, useGetIdentity, useDataProvider, SaveButton, Toolbar, useAuthProvider, ResourceContextProvider } from 'react-admin';
 import { useNavigate } from 'react-router-dom';
-import { getDefaultPageSize, getLateValue, getDashboardItems, getReportStyles, getReportCardSettings } from '@shared/utils/settingsUtil';
+import { getDefaultPageSize } from '@shared/utils/settingsUtil';
+import { getDashboardItems } from './settingsUtil';
 import { DashboardItemsInput } from './DashboardItemsInput';
-import { ReportStylesInput } from './ReportStylesInput';
 import { GeneralSettingsInput } from './GeneralSettingsInput';
-import { ReportCardSettingsInput } from './ReportCardSettingsInput';
 
 const SettingsToolbar = () => (
     <Toolbar>
@@ -23,10 +22,7 @@ export default function Settings() {
 
     const defaultValues = {
         defaultPageSize: getDefaultPageSize(identity),
-        lateValue: getLateValue(identity),
         dashboardItems: getDashboardItems(identity),
-        reportStyles: getReportStyles(identity),
-        reportCardSettings: getReportCardSettings(identity),
     };
 
     const handleSave = async (values) => {
@@ -53,8 +49,6 @@ export default function Settings() {
                     >
                         <GeneralSettingsInput />
                         <DashboardItemsInput />
-                        <ReportStylesInput />
-                        <ReportCardSettingsInput />
                     </SimpleForm>
                 </ResourceContextProvider>
             </CardContent>
