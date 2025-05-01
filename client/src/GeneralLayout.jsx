@@ -27,12 +27,7 @@ const customMenuItems = [
 
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
-    {
-        name: 'events', icon: <AnalyticsIcon />, routes: [
-            <MenuItemLink key="student-attendance" to="/student/student-attendance" primaryText="דוח נוכחות (פיבוט)" leftIcon={<SummarizeIcon />} />,
-            <MenuItemLink key="percent-report-with-dates" to="/percent-report-with-dates" primaryText="דוח אחוזים לתלמידה" leftIcon={<PercentIcon />} />,
-        ]
-    },
+    { name: 'events', icon: <AnalyticsIcon /> },
     { name: 'settings', icon: <SettingsIcon /> },
     { name: 'admin', icon: <AdminPanelSettingsIcon /> },
 ];
