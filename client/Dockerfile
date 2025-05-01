@@ -4,9 +4,10 @@ RUN apk add --no-cache git
 
 WORKDIR /app
 
-COPY package*.json yarn.lock ./
-
-RUN yarn install
+# No need to do this, because external node_modules are mounted
+# COPY package*.json yarn.lock ./
+# RUN yarn install
+# COPY . .
 
 CMD ["yarn", "start"]
 

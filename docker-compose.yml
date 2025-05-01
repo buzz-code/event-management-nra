@@ -20,9 +20,6 @@ services:
             caddy.reverse_proxy: "{{upstreams 80}}"
         volumes:
             - ./client:/app
-            - /app/node_modules
-            - /app/dist
-            - /usr/local/share/.cache/yarn:/yarn-cache
         networks:
             - private-network
             - caddy
@@ -54,9 +51,6 @@ services:
             caddy.reverse_proxy: "{{upstreams 3000}}"
         volumes: 
             - ./server:/app
-            - /app/node_modules
-            - /app/dist
-            - /usr/local/share/.cache/yarn:/yarn-cache
         networks:
             - private-network
             - caddy

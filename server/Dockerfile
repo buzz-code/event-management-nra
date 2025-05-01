@@ -9,11 +9,10 @@ ENV NODE_ENV development
 
 WORKDIR /app
 
-COPY package*.json /app/
-COPY yarn.lock /app/
-
-RUN yarn install
-
+# No need to do this, because external node_modules are mounted
+# COPY package*.json /app/
+# COPY yarn.lock /app/
+# RUN yarn install
 # COPY . .
 
 CMD ["yarn", "start:dev"]
