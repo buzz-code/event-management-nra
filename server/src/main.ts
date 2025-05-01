@@ -26,6 +26,7 @@ async function bootstrap() {
     origin: [
       new RegExp('http(s?)://' + process.env.DOMAIN_NAME),
       process.env.IP_ADDRESS && new RegExp('http(s?)://' + process.env.IP_ADDRESS + ':[\d]*'),
+      'http://localhost:' + process.env.CLIENT_PORT,
     ],
   });
   app.use(bodyParser.json({ limit: '50mb' }));
