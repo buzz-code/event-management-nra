@@ -5,15 +5,23 @@ services:
         container_name: event-frontend-dev
         build:
             target: development
+        ports:
+          - "30013:80"
 
     event-backend:
         container_name: event-backend-dev
         build:
             target: development
+            args:
+                CLIENT_PORT: 30013
+        ports:
+          - "30014:3000"
 
     event-db:
         container_name: event-db-dev
 
     event-phpmyadmin:
         container_name: event-phpmyadmin-dev
+        ports:
+          - "30015:80"
 
