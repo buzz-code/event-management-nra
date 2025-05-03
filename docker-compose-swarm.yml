@@ -25,7 +25,7 @@ services:
             - elknet
 
     event-backend:
-        image: 'ghcr.io/buzz-code/react-admin-nestjs-server:latest'
+        image: 'ghcr.io/buzz-code/event-management-nra-server:latest'
         container_name: event-backend
         depends_on:
             - event-db
