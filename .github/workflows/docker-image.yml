@@ -56,12 +56,12 @@ jobs:
         if: steps.changes.outputs.client == 'true'
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://docker2.yoman.online/api/webhooks/83c901ca-3ea4-405c-a256-d3632da40bf9'
+          url: ${{ secrets.CLIENT_WEBHOOK }}
           preventFailureOnNoResponse: true
 
       - name: 'Update server service'
         if: steps.changes.outputs.server == 'true'
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://docker2.yoman.online/api/webhooks/40f04d31-7ed6-42e7-b54f-54ca82a408c4'
+          url: ${{ secrets.SERVER_WEBHOOK }}
           preventFailureOnNoResponse: true
