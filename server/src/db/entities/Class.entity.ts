@@ -49,6 +49,6 @@ export class Class implements IHasUserId {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Student, student => student.class)
-  students: Student[];
+  // @OneToMany(() => Student, student => student.class)
+  // students: Student[];
 }

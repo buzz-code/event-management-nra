@@ -7,6 +7,15 @@ import { Student } from "src/db/entities/Student.entity";
 import { EventType } from "src/db/entities/EventType.entity";
 import { StudentHandler } from "./student-handler";
 import { EventTypeHandler } from "./event-type-handler";
+import { EventDateHandler } from "./event-date-handler";
+import { Event } from "src/db/entities/Event.entity";
+import { Teacher } from "src/db/entities/Teacher.entity";
+import { User } from "src/db/entities/User.entity";
+import { CoursePath } from "src/db/entities/CoursePath.entity";
+import { EventNote } from "src/db/entities/EventNote.entity";
+import { EventGift } from "src/db/entities/EventGift.entity";
+import { Gift } from "src/db/entities/Gift.entity";
+import { Class } from "src/db/entities/Class.entity";
 
 /**
  * Class to handle Yemot calls
@@ -17,6 +26,7 @@ export class YemotCallHandlerClass {
   private dataSource: DataSource;
   private studentHandler: StudentHandler;
   private eventTypeHandler: EventTypeHandler;
+  private eventDateHandler: EventDateHandler;
 
   /**
    * Constructor for the YemotCallHandlerClass
@@ -34,11 +44,12 @@ export class YemotCallHandlerClass {
    */
   async initializeDataSource(): Promise<void> {
     try {
-      this.dataSource = await getDataSource([Student, EventType]);
+      this.dataSource = await getDataSource([Student, EventType, Event, Teacher, User, CoursePath, EventNote, EventGift, Gift, Class]);
       this.logger.log('Data source initialized successfully');
       // Initialize handlers with the data source
       this.studentHandler = new StudentHandler(this.logger, this.call, this.dataSource);
       this.eventTypeHandler = new EventTypeHandler(this.logger, this.call, this.dataSource);
+      this.eventDateHandler = new EventDateHandler(this.logger, this.call);
     } catch (error) {
       this.logger.error(`Failed to initialize data source: ${error.message}`);
       throw error;
@@ -103,7 +114,12 @@ export class YemotCallHandlerClass {
     // The user will be prompted to select a valid event type
     await this.eventTypeHandler.handleEventTypeSelection();
     
-    // If we reach here, both student identification and event type selection were successful
+    // Handle event date selection
+    // The user will be prompted to enter a Hebrew date
+    await this.eventDateHandler.handleEventDateSelection();
+    
+    // If we reach here, student identification, event type selection, 
+    // and event date selection were all successful
     await this.collectAddress(name);
     this.finishCall();
   }

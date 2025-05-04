@@ -2,9 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
@@ -13,7 +10,6 @@ import {
   DataSource
 } from "typeorm";
 import { Class } from "./Class.entity";
-import { Event } from "./Event.entity";
 import { IsOptional, ValidateIf } from "class-validator";
 import { CrudValidationGroups } from "@dataui/crud";
 import { IsNotEmpty, MaxLength, IsNumber } from "@shared/utils/validation/class-validator-he";
@@ -115,10 +111,10 @@ export class Student implements IHasUserId {
   @UpdateDateColumn({ name: "updated_at" })
   updated_at: Date;
 
-  @ManyToOne(() => Class, cls => cls.students, { nullable: true })
-  @JoinColumn({ name: "classReferenceId" })
-  class: Class;
+  // @ManyToOne(() => Class, cls => cls.students, { nullable: true })
+  // @JoinColumn({ name: "classReferenceId" })
+  // class: Class;
 
-  @OneToMany(() => Event, event => event.student)
-  events: Event[];
+  // @OneToMany(() => Event, event => event.student)
+  // events: Event[];
 }

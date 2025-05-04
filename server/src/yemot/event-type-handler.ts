@@ -32,21 +32,16 @@ export class EventTypeHandler {
    * Fetches all event types from the database
    */
   private async fetchEventTypes(): Promise<void> {
-    try {
-      this.eventTypes = await this.dataSource.getRepository(EventType).find({
-        order: {
-          key: 'ASC'
-        }
-      });
-      
-      if (this.eventTypes.length === 0) {
-        this.logger.warn('No event types found in the database');
-      } else {
-        this.logger.log(`Found ${this.eventTypes.length} event types`);
+    this.eventTypes = await this.dataSource.getRepository(EventType).find({
+      order: {
+        key: 'ASC'
       }
-    } catch (error) {
-      this.logger.error(`Error fetching event types: ${error.message}`);
-      throw error;
+    });
+
+    if (this.eventTypes.length === 0) {
+      this.logger.warn('No event types found in the database');
+    } else {
+      this.logger.log(`Found ${this.eventTypes.length} event types`);
     }
   }
 
@@ -55,7 +50,7 @@ export class EventTypeHandler {
    */
   private createEventTypeSelectionPrompt(): string {
     let prompt = 'אנא בחר את סוג האירוע על ידי הקשת המספר המתאים:\n';
-    
+
     this.eventTypes.forEach(eventType => {
       prompt += `להקשת ${eventType.key} עבור ${eventType.name}`;
       if (eventType.description) {
@@ -63,7 +58,7 @@ export class EventTypeHandler {
       }
       prompt += '\n';
     });
-    
+
     return prompt;
   }
 
@@ -74,14 +69,14 @@ export class EventTypeHandler {
   private async promptForEventTypeSelection(): Promise<number> {
     const maxDigits = Math.max(...this.eventTypes.map(et => et.key.toString().length));
     const allowedKeys = this.eventTypes.map(et => et.key.toString());
-    
+
     const prompt = this.createEventTypeSelectionPrompt();
-    
+
     const selection = await this.call.read([{ type: 'text', data: prompt }], 'tap', {
       max_digits: maxDigits,
       digits_allowed: allowedKeys
     });
-    
+
     return parseInt(selection);
   }
 
@@ -92,39 +87,33 @@ export class EventTypeHandler {
   async handleEventTypeSelection(): Promise<void> {
     // First fetch the event types
     await this.fetchEventTypes();
-    
+
     if (this.eventTypes.length === 0) {
       return id_list_message_with_hangup(this.call, 'אין סוגי אירועים במערכת כרגע. אנא פנה למנהל המערכת.');
     }
-    
+
     let validSelection = false;
     let attempts = 0;
     const maxAttempts = 3;
-    
+
     while (!validSelection && attempts < maxAttempts) {
-      try {
-        const selectedKey = await this.promptForEventTypeSelection();
-        
-        // Find the selected event type
-        this.selectedEventType = this.eventTypes.find(et => et.key === selectedKey) || null;
-        
-        if (this.selectedEventType) {
-          this.logger.log(`User selected event type: ${this.selectedEventType.name} (${this.selectedEventType.key})`);
-          id_list_message(this.call, `בחרת באירוע מסוג: ${this.selectedEventType.name}`);
-          validSelection = true;
-        } else {
-          // This shouldn't happen due to digits_allowed, but just in case
-          this.logger.warn(`Invalid event type selection: ${selectedKey}`);
-          id_list_message(this.call, 'בחירה לא תקינה, אנא נסה שנית');
-          attempts++;
-        }
-      } catch (error) {
-        this.logger.error(`Error during event type selection: ${error.message}`);
-        id_list_message(this.call, 'אירעה שגיאה, אנא נסה שנית');
+      const selectedKey = await this.promptForEventTypeSelection();
+
+      // Find the selected event type
+      this.selectedEventType = this.eventTypes.find(et => et.key === selectedKey) || null;
+
+      if (this.selectedEventType) {
+        this.logger.log(`User selected event type: ${this.selectedEventType.name} (${this.selectedEventType.key})`);
+        id_list_message(this.call, `בחרת באירוע מסוג: ${this.selectedEventType.name}`);
+        validSelection = true;
+      } else {
+        // This shouldn't happen due to digits_allowed, but just in case
+        this.logger.warn(`Invalid event type selection: ${selectedKey}`);
+        id_list_message(this.call, 'בחירה לא תקינה, אנא נסה שנית');
         attempts++;
       }
     }
-    
+
     if (!validSelection) {
       return id_list_message_with_hangup(this.call, 'מספר נסיונות הבחירה הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.');
     }

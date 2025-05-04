@@ -5435,10 +5435,10 @@ jest@^29.7.0:
     import-local "^3.0.2"
     jest-cli "^29.7.0"
 
-jewish-date@^2.0.8:
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/jewish-date/-/jewish-date-2.0.8.tgz#430b655070f00f955e53173f91bcbc422bd8fd15"
-  integrity sha512-gBKBSuTJpXRzUthT7l+ixLz3hPFVAxnRDpUPr+mQGZEDqbwYP9zpKWn4F+0sNfb/EU8C8kkEzKxPXiKrfNCJ+g==
+jewish-date@^2.0.20:
+  version "2.0.20"
+  resolved "https://registry.yarnpkg.com/jewish-date/-/jewish-date-2.0.20.tgz#abb8a43c0341373dec401e6467ab141a20770f10"
+  integrity sha512-QY280ka/4c8t4tULb6qM103dAFZn4qrNEt3TJRaDo5y4nTA9EdlUgqjCJZI1Pa9pTc9+5VDXX+fhxP+SZKToKw==
   dependencies:
     gematriya "^2.0.0"
 

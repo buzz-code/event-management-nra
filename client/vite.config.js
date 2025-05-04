@@ -10,8 +10,11 @@ export default ({ mode }) => {
             host: '0.0.0.0',
             port: Number(process.env.PORT || 3000),
             hmr: {
-                port: 11122,
-                protocol: 'wss',
+                overlay: true,
+                port: 24678,
+                timeout: 1000,
+                clientPort: 24678,
+                host: 'localhost',
             },
         },
         define: {

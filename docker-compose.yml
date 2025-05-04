@@ -11,7 +11,6 @@ services:
         pull_policy: build
         environment:
             PORT: 80
-            REACT_APP_API_URL: https://api.$DOMAIN_NAME
             YARN_CACHE_FOLDER: /yarn-cache
         labels:
             caddy: $DOMAIN_NAME

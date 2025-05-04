@@ -2,6 +2,8 @@ FROM node:18-alpine AS development
 
 RUN apk add --no-cache git
 
+ENV NODE_ENV development
+
 WORKDIR /app
 
 # No need to do this, because external node_modules are mounted

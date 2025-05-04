@@ -59,22 +59,17 @@ export class StudentHandler {
    * @private Internal method used by handleStudentIdentification
    */
   private async findStudentByTz(tz: string): Promise<void> {
-    try {
-      this.student = await this.dataSource.getRepository(Student).findOne({ 
-        where: { tz }
-      });
-      
-      if (this.student) {
-        this.logger.log(`Found student: ${this.student.first_name} ${this.student.last_name}`);
-      } else {
-        this.logger.log(`No student found with ID number: ${tz}`);
-        // Handle not found scenario internally
-        // This will automatically terminate the function
-        id_list_message_with_hangup(this.call, 'לא נמצא תלמיד עם מספר תעודת זהות זה במערכת. אנא פנה למזכירות.');
-      }
-    } catch (error) {
-      this.logger.error(`Error searching for student: ${error.message}`);
-      id_list_message_with_hangup(this.call, 'אירעה שגיאה בחיפוש התלמיד. אנא פנה למזכירות.');
+    this.student = await this.dataSource.getRepository(Student).findOne({
+      where: { tz }
+    });
+
+    if (this.student) {
+      this.logger.log(`Found student: ${this.student.first_name} ${this.student.last_name}`);
+    } else {
+      this.logger.log(`No student found with ID number: ${tz}`);
+      // Handle not found scenario internally
+      // This will automatically terminate the function
+      id_list_message_with_hangup(this.call, 'לא נמצא תלמיד עם מספר תעודת זהות זה במערכת. אנא פנה למזכירות.');
     }
   }
 
