@@ -1,0 +1,55 @@
+// filepath: /root/code-server/config/workspace/event-management-nra/client/src/entities/course-path.jsx
+import { DateField, DateInput, DateTimeInput, maxLength, required, TextField, TextInput } from 'react-admin';
+import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
+import { CommonRepresentation } from '@shared/components/CommonRepresentation';
+import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
+import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
+
+const filters = [
+    ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
+    ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$gte" />,
+    ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
+    ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
+    ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
+    <TextInput source="name:$cont" alwaysOn />,
+    <TextInput source="description:$cont" />,
+];
+
+const Datagrid = ({ isAdmin, children, ...props }) => {
+    return (
+        <CommonDatagrid {...props}>
+            {children}
+            {isAdmin && <TextField source="id" />}
+            <TextField source="name" />
+            <TextField source="description" />
+            {isAdmin && <DateField showDate showTime source="created_at" />}
+            {isAdmin && <DateField showDate showTime source="updated_at" />}
+        </CommonDatagrid>
+    );
+}
+
+const Inputs = ({ isCreate, isAdmin }) => {
+    return <>
+        {!isCreate && isAdmin && <TextInput source="id" disabled />}
+        <TextInput source="name" validate={[required(), maxLength(255)]} />
+        <TextInput source="description" validate={[maxLength(1000)]} multiline />
+        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled />}
+    </>
+}
+
+const Representation = CommonRepresentation;
+
+const importer = {
+    fields: ['name', 'description'],
+}
+
+const entity = {
+    Datagrid,
+    Inputs,
+    Representation,
+    filters,
+    importer,
+};
+
+export default getResourceComponents(entity);

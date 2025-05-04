@@ -26,6 +26,7 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
     <TextInput source="name:$cont" alwaysOn />,
     <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" />,
+    <CommonReferenceInputFilter source="coursePathReferenceId" reference="course_path" />,
     <DateInput source="eventDate:$gte" />,
     <DateInput source="eventDate:$lte" />,
 ];
@@ -38,6 +39,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="name" />
             <ReferenceField source="eventTypeReferenceId" reference="event_type" />
+            <ReferenceField source="coursePathReferenceId" reference="course_path" />
             <DateField source="eventDate" />
             <TextField source="location" />
             <NumberField source="maxParticipants" />
@@ -54,6 +56,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="name" validate={[required(), maxLength(200)]} />
         <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} />
+        <CommonReferenceInput source="coursePathReferenceId" reference="course_path" />
         <DateInput source="eventDate" validate={required()} />
         <TextInput source="location" validate={[maxLength(200)]} />
         <NumberInput source="maxParticipants" />
@@ -82,7 +85,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['name', 'eventTypeReferenceId', 'eventDate', 'location', 'maxParticipants', 'description'],
+    fields: ['name', 'eventTypeReferenceId', 'coursePathReferenceId', 'eventDate', 'location', 'maxParticipants', 'description'],
 }
 
 const entity = {

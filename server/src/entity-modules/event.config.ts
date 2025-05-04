@@ -11,6 +11,7 @@ function getConfig(): BaseEntityModuleOptions {
                 eventType: {},
                 teacher: {},
                 student: {},
+                coursePath: {},
                 notes: {},
                 eventGifts: {},
             }
@@ -20,7 +21,8 @@ function getConfig(): BaseEntityModuleOptions {
                 req.options.query.join = {
                     eventType: { eager: true },
                     teacher: { eager: true },
-                    student: { eager: true }
+                    student: { eager: true },
+                    coursePath: { eager: true }
                 };
                 return innerFunc(req);
             },
@@ -38,6 +40,7 @@ function getConfig(): BaseEntityModuleOptions {
                     { value: 'teacher.last_name', label: 'שם מורה משפחה' },
                     { value: 'student.first_name', label: 'שם תלמיד פרטי' },
                     { value: 'student.last_name', label: 'שם תלמיד משפחה' },
+                    { value: 'coursePath.name', label: 'מסלול' },
                     { value: 'created_at', label: 'תאריך יצירה' },
                     { value: 'updated_at', label: 'תאריך עדכון' },
                 ];

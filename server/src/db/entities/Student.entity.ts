@@ -25,6 +25,7 @@ import { findOneAndAssignReferenceId, getDataSource } from "@shared/utils/entity
 @Index("students_user_id_idx", ["userId"], {})
 @Index("students_class_id_idx", ["classReferenceId"], {})
 @Index("students_name_idx", ["first_name", "last_name"], {})
+@Index("students_tz_idx", ["tz"], {})
 export class Student implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -46,6 +47,12 @@ export class Student implements IHasUserId {
 
   @Column("int", { name: "user_id" })
   userId: number;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(9, { always: true })
+  @Column({ length: 9, nullable: true })
+  tz: string;
 
   @ValidateIf((student: Student) => !Boolean(student.classReferenceId), { always: true })
   @IsOptional({ always: true })

@@ -28,6 +28,7 @@ import eventNote from "src/entities/event-note";
 import gift from "src/entities/gift";
 import eventGift from "src/entities/event-gift";
 import classEntity from "src/entities/class";
+import coursePath from "src/entities/course-path";
 
 // Keep required shared entities
 import student from "src/entities/student";
@@ -76,6 +77,7 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import RouteIcon from '@mui/icons-material/Route';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -95,6 +97,7 @@ const App = () => (
             <Resource name="gift" {...gift} options={{ menuGroup: 'events' }} icon={CardGiftcardIcon} />
             <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
             <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
+            <Resource name="course_path" {...coursePath} options={{ menuGroup: 'data' }} icon={RouteIcon} />
             
             {/* Keep Student and Teacher from original system */}
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />

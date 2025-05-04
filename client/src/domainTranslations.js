@@ -14,6 +14,7 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 eventTypeReferenceId: 'סוג האירוע',
+                coursePathReferenceId: 'מסלול',
                 eventDate: 'תאריך האירוע',
                 'eventDate:$gte': 'תאריך האירוע מ-',
                 'eventDate:$lte': 'תאריך האירוע עד-',
@@ -27,6 +28,14 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
+            }
+        },
+        course_path: {
+            name: 'מסלול |||| מסלולים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                description: 'תיאור',
+                'description:$cont': 'חיפוש בתיאור',
             }
         },
         event_note: {
@@ -69,6 +78,7 @@ export default {
             name: 'משתתף |||| משתתפים',
             fields: {
                 ...generalResourceFieldsTranslation,
+                tz: 'תעודת זהות',
                 first_name: 'שם פרטי',
                 'first_name:$cont': 'חיפוש בשם פרטי',
                 last_name: 'שם משפחה',
