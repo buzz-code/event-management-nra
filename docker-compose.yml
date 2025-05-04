@@ -8,8 +8,6 @@ services:
         build:
             context: ./client
             target: production
-            args:
-                REACT_APP_API_URL: https://api.$DOMAIN_NAME
         pull_policy: build
         environment:
             PORT: 80
