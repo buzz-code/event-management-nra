@@ -11,7 +11,7 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
-    <TextInput source="name:$cont" alwaysOn label="שם סוג האירוע" />,
+    <TextInput source="name:$cont" alwaysOn />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -20,8 +20,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="name" label="שם סוג האירוע" />
-            <TextField source="description" label="תיאור" />
+            <TextField source="name" />
+            <TextField source="description" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -32,8 +32,8 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="name" validate={[required(), maxLength(100)]} label="שם סוג האירוע" />
-        <TextInput source="description" multiline validate={[maxLength(500)]} label="תיאור" />
+        <TextInput source="name" validate={[required(), maxLength(100)]} />
+        <TextInput source="description" multiline validate={[maxLength(500)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>

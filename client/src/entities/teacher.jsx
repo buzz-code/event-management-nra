@@ -12,8 +12,8 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
-    <TextInput source="first_name:$cont" alwaysOn label="שם מארגן" />,
-    <TextInput source="last_name:$cont" label="שם משפחה" />,
+    <TextInput source="first_name:$cont" alwaysOn />,
+    <TextInput source="last_name:$cont" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -22,10 +22,10 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="first_name" label="שם מארגן" />
-            <TextField source="last_name" label="שם משפחה" />
-            {isAdmin && <DateField showDate showTime source="created_at" label="נוצר ב" />}
-            {isAdmin && <DateField showDate showTime source="updated_at" label="עודכן ב" />}
+            <TextField source="first_name" />
+            <TextField source="last_name" />
+            {isAdmin && <DateField showDate showTime source="created_at" />}
+            {isAdmin && <DateField showDate showTime source="updated_at" />}
         </CommonDatagrid>
     );
 }
@@ -35,10 +35,10 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="first_name" validate={[required(), maxLength(255)]} label="שם מארגן" />
-        <TextInput source="last_name" validate={[required(), maxLength(255)]} label="שם משפחה" />
-        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled label="נוצר ב" />}
-        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled label="עודכן ב" />}
+        <TextInput source="first_name" validate={[required(), maxLength(255)]} />
+        <TextInput source="last_name" validate={[required(), maxLength(255)]} />
+        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled />}
     </>
 }
 

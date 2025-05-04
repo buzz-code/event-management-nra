@@ -11,8 +11,8 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
-    <TextInput source="name:$cont" alwaysOn label="שם הכיתה" />,
-    <TextInput source="description:$cont" label="תיאור" />,
+    <TextInput source="name:$cont" alwaysOn />,
+    <TextInput source="description:$cont" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -21,9 +21,9 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="name" label="שם הכיתה" />
-            <TextField source="description" label="תיאור" />
-            <NumberField source="maxCapacity" label="קיבולת מקסימלית" />
+            <TextField source="name" />
+            <TextField source="description" />
+            <NumberField source="maxCapacity" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -34,9 +34,9 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="name" validate={[required(), maxLength(100)]} label="שם הכיתה" />
-        <TextInput source="description" multiline validate={[maxLength(500)]} label="תיאור" />
-        <NumberInput source="maxCapacity" label="קיבולת מקסימלית" />
+        <TextInput source="name" validate={[required(), maxLength(100)]} />
+        <TextInput source="description" multiline validate={[maxLength(500)]} />
+        <NumberInput source="maxCapacity" />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
