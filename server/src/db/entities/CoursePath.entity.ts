@@ -35,7 +35,7 @@ export class CoursePath implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
   @IsNumber({}, { always: true })
-  @Column("int", { name: "key" })
+  @Column("int")
   key: number;
 
   @IsOptional({ always: true })
@@ -44,11 +44,11 @@ export class CoursePath implements IHasUserId {
   @Column({ type: "text", nullable: true })
   description: string;
 
-  @CreateDateColumn({ name: "created_at" })
-  created_at: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @UpdateDateColumn({ name: "updated_at" })
-  updated_at: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   // @OneToMany(() => Event, event => event.coursePath)
   // events: Event[];

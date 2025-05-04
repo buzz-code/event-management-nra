@@ -55,11 +55,11 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="name" validate={[required(), maxLength(200)]} />
+        <TextInput source="name" validate={[required(), maxLength(255)]} />
         <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} />
         <CommonReferenceInput source="coursePathReferenceId" reference="course_path" />
         <DateInput source="eventDate" validate={required()} />
-        <TextInput source="location" validate={[maxLength(200)]} />
+        <TextInput source="location" validate={[maxLength(255)]} />
         <NumberInput source="maxParticipants" />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
@@ -67,7 +67,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && <Labeled>
             <ReferenceManyField reference="event_note" target="eventReferenceId">
                 <CommonDatagrid>
-                    <TextField source="note" />
+                    <TextField source="noteText" />
                     <DateField showDate showTime source="createdAt" />
                 </CommonDatagrid>
             </ReferenceManyField>
@@ -76,7 +76,6 @@ const Inputs = ({ isCreate, isAdmin }) => {
             <ReferenceManyField reference="event_gift" target="eventReferenceId">
                 <CommonDatagrid>
                     <ReferenceField source="giftReferenceId" reference="gift" />
-                    <NumberField source="quantity" />
                 </CommonDatagrid>
             </ReferenceManyField>
         </Labeled>}

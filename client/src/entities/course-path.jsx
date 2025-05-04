@@ -12,8 +12,8 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
+    <NumberInput source="key" />,
     <TextInput source="name:$cont" alwaysOn />,
-    <NumberInput source="key:$eq" />,
     <TextInput source="description:$cont" />,
 ];
 
@@ -23,11 +23,11 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="name" />
             <NumberField source="key" />
+            <TextField source="name" />
             <TextField source="description" />
-            {isAdmin && <DateField showDate showTime source="created_at" />}
-            {isAdmin && <DateField showDate showTime source="updated_at" />}
+            {isAdmin && <DateField showDate showTime source="createdAt" />}
+            {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
 }
@@ -36,18 +36,18 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="name" validate={[required(), maxLength(255)]} />
         <NumberInput source="key" validate={[required(), number()]} />
+        <TextInput source="name" validate={[required(), maxLength(255)]} />
         <TextInput source="description" validate={[maxLength(1000)]} multiline />
-        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
 }
 
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['name', 'key', 'description'],
+    fields: ['key', 'name', 'description'],
 }
 
 const entity = {

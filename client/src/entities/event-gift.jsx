@@ -1,4 +1,4 @@
-import { DateField, DateInput, DateTimeInput, maxLength, NumberField, NumberInput, ReferenceField, required, TextField, TextInput } from 'react-admin';
+import { DateField, DateInput, DateTimeInput, NumberField, NumberInput, ReferenceField, required, TextField, TextInput } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -12,7 +12,6 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
     <CommonReferenceInputFilter source="eventReferenceId" reference="event" alwaysOn />,
-    <CommonReferenceInputFilter source="giftReferenceId" reference="gift" alwaysOn />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -23,7 +22,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <ReferenceField source="eventReferenceId" reference="event" />
             <ReferenceField source="giftReferenceId" reference="gift" />
-            <NumberField source="quantity" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -35,8 +33,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <CommonReferenceInput source="eventReferenceId" reference="event" validate={required()} />
-        <CommonReferenceInput source="giftReferenceId" reference="gift" validate={required()} />
-        <NumberInput source="quantity" validate={required()} />
+        <CommonReferenceInput source="giftReferenceId" reference="gift" />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
@@ -45,7 +42,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['eventReferenceId', 'giftReferenceId', 'quantity'],
+    fields: ['eventReferenceId', 'giftKey'],
 }
 
 const entity = {

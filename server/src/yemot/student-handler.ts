@@ -64,7 +64,7 @@ export class StudentHandler {
     });
 
     if (this.student) {
-      this.logger.log(`Found student: ${this.student.first_name} ${this.student.last_name}`);
+      this.logger.log(`Found student: ${this.student.firstName} ${this.student.lastName}`);
     } else {
       this.logger.log(`No student found with ID number: ${tz}`);
       // Handle not found scenario internally

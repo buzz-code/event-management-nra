@@ -28,21 +28,17 @@ function getConfig(): BaseEntityModuleOptions {
             },
             getExportHeaders(): IHeader[] {
                 return [
-                    { value: 'id', label: 'מזהה' },
-                    { value: 'title', label: 'כותרת' },
+                    { value: 'name', label: 'כותרת' },
                     { value: 'description', label: 'תיאור' },
-                    { value: 'start_date', label: 'תאריך התחלה' },
-                    { value: 'end_date', label: 'תאריך סיום' },
+                    { value: 'eventDate', label: 'תאריך אירוע' },
                     { value: 'completed', label: 'הושלם' },
                     { value: 'grade', label: 'ציון' },
                     { value: 'eventType.name', label: 'סוג אירוע' },
-                    { value: 'teacher.first_name', label: 'שם מורה פרטי' },
-                    { value: 'teacher.last_name', label: 'שם מורה משפחה' },
-                    { value: 'student.first_name', label: 'שם תלמיד פרטי' },
-                    { value: 'student.last_name', label: 'שם תלמיד משפחה' },
-                    { value: 'coursePath.name', label: 'מסלול' },
-                    { value: 'created_at', label: 'תאריך יצירה' },
-                    { value: 'updated_at', label: 'תאריך עדכון' },
+                    { value: 'teacher.firstName', label: 'שם מורה פרטי' },
+                    { value: 'teacher.lastName', label: 'שם מורה משפחה' },
+                    { value: 'student.firstName', label: 'שם תלמיד פרטי' },
+                    { value: 'student.lastName', label: 'שם תלמיד משפחה' },
+                    { value: 'coursePath.name', label: 'מסלול' }
                 ];
             }
         }

@@ -42,7 +42,7 @@ export class EventExistenceHandler {
       where: {
         studentReferenceId: student.id,
         eventTypeReferenceId: eventType.id,
-        start_date: eventDate
+        eventDate: eventDate
       },
       relations: ['eventType', 'coursePath', 'eventGifts', 'eventGifts.gift']
     });

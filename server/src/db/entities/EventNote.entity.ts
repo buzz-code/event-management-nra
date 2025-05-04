@@ -28,13 +28,13 @@ export class EventNote {
   @StringType
   @MaxLength(2000, { always: true })
   @Column({ type: 'text' })
-  note_text: string;
+  noteText: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => Event, event => event.notes, { nullable: false })
   @JoinColumn({ name: 'eventReferenceId' })

@@ -46,10 +46,10 @@ export class EventGift {
   giftReferenceId: number;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => Event, event => event.eventGifts, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'eventReferenceId' })

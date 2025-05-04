@@ -13,11 +13,9 @@ function getConfig(): BaseEntityModuleOptions {
         exporter: {
             getExportHeaders(): IHeader[] {
                 return [
-                    { value: 'id', label: 'מזהה' },
+                    { value: 'key', label: 'מפתח' },
                     { value: 'name', label: 'שם' },
-                    { value: 'grade_level', label: 'רמת כיתה' },
-                    { value: 'created_at', label: 'תאריך יצירה' },
-                    { value: 'updated_at', label: 'תאריך עדכון' },
+                    { value: 'gradeLevel', label: 'רמת כיתה' }
                 ];
             }
         }

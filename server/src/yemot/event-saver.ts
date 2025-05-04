@@ -51,9 +51,8 @@ export class EventSaver {
         event = new Event();
         event.studentReferenceId = student.id;
         event.eventTypeReferenceId = eventType.id;
-        event.start_date = eventDate;
-        event.end_date = eventDate; // Assuming same start and end date
-        event.title = `${eventType.name} - ${student.first_name} ${student.last_name}`;
+        event.eventDate = eventDate; // Using the new eventDate field
+        event.name = `${eventType.name} - ${student.firstName} ${student.lastName}`; // Using camelCase property names
         event.userId = 1; // Default user ID; this might need to be adjusted
         
         if (coursePath) {

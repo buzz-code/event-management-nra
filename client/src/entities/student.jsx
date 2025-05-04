@@ -14,14 +14,14 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
     <TextInput source="tz" />,
-    <TextInput source="first_name:$cont" alwaysOn />,
-    <TextInput source="last_name:$cont" />,
+    <TextInput source="firstName:$cont" alwaysOn />,
+    <TextInput source="lastName:$cont" />,
     <CommonReferenceInputFilter source="classReferenceId" reference="class" />,
     <TextInput source="address:$cont" />,
-    <TextInput source="mother_name:$cont" />,
-    <TextInput source="mother_contact:$cont" />,
-    <TextInput source="father_name:$cont" />,
-    <TextInput source="father_contact:$cont" />,
+    <TextInput source="motherName:$cont" />,
+    <TextInput source="motherContact:$cont" />,
+    <TextInput source="fatherName:$cont" />,
+    <TextInput source="fatherContact:$cont" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -31,16 +31,16 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="tz" />
-            <TextField source="first_name" />
-            <TextField source="last_name" />
+            <TextField source="firstName" />
+            <TextField source="lastName" />
             <MultiReferenceField source="classReferenceId" reference="class" optionalSource="classKey" optionalTarget="key" />
             <TextField source="address" />
-            <TextField source="mother_name" />
-            <TextField source="mother_contact" />
-            <TextField source="father_name" />
-            <TextField source="father_contact" />
-            {isAdmin && <DateField showDate showTime source="created_at" />}
-            {isAdmin && <DateField showDate showTime source="updated_at" />}
+            <TextField source="motherName" />
+            <TextField source="motherContact" />
+            <TextField source="fatherName" />
+            <TextField source="fatherContact" />
+            {isAdmin && <DateField showDate showTime source="createdAt" />}
+            {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
 }
@@ -51,23 +51,23 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="tz" validate={[maxLength(9)]} />
-        <TextInput source="first_name" validate={[required(), maxLength(255)]} />
-        <TextInput source="last_name" validate={[required(), maxLength(255)]} />
+        <TextInput source="firstName" validate={[required(), maxLength(255)]} />
+        <TextInput source="lastName" validate={[required(), maxLength(255)]} />
         <CommonReferenceInput source="classReferenceId" reference="class" />
         <TextInput source="address" validate={[maxLength(1000)]} multiline />
-        <TextInput source="mother_name" validate={[maxLength(255)]} />
-        <TextInput source="mother_contact" validate={[maxLength(255)]} />
-        <TextInput source="father_name" validate={[maxLength(255)]} />
-        <TextInput source="father_contact" validate={[maxLength(255)]} />
-        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled />}
+        <TextInput source="motherName" validate={[maxLength(255)]} />
+        <TextInput source="motherContact" validate={[maxLength(255)]} />
+        <TextInput source="fatherName" validate={[maxLength(255)]} />
+        <TextInput source="fatherContact" validate={[maxLength(255)]} />
+        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
 }
 
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'first_name', 'last_name', 'classKey', 'address', 'mother_name', 'mother_contact', 'father_name', 'father_contact'],
+    fields: ['tz', 'firstName', 'lastName', 'classKey', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact'],
 }
 
 const entity = {

@@ -20,13 +20,12 @@ import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
 @Index('events_teacher_id_idx', ['teacherReferenceId'], {})
 @Index('events_student_id_idx', ['studentReferenceId'], {})
 @Index('events_course_path_id_idx', ['coursePathReferenceId'], {})
-@Index('events_start_date_idx', ['start_date'], {})
-@Index('events_end_date_idx', ['end_date'], {})
+@Index('events_event_date_idx', ['eventDate'], {})
 export class Event implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
-    cleanDateFields(this, ['start_date', 'end_date']);
+    cleanDateFields(this, ['eventDate']);
 
     let dataSource: DataSource;
     try {
@@ -63,7 +62,7 @@ export class Event implements IHasUserId {
   @StringType
   @MaxLength(255, { always: true })
   @Column({ length: 255 })
-  title: string;
+  name: string;
 
   @IsOptional({ always: true })
   @StringType
@@ -76,14 +75,7 @@ export class Event implements IHasUserId {
   @DateType
   @IsDate({ always: true })
   @Column()
-  start_date: Date;
-
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @DateType
-  @IsDate({ always: true })
-  @Column()
-  end_date: Date;
+  eventDate: Date;
 
   @IsOptional({ always: true })
   @Column({ default: false })
@@ -141,10 +133,10 @@ export class Event implements IHasUserId {
   coursePathReferenceId: number;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => EventType, { nullable: true })
   @JoinColumn({ name: 'eventTypeReferenceId' })

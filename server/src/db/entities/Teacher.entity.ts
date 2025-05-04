@@ -19,7 +19,7 @@ import { IHasUserId } from "@shared/base-entity/interface";
 
 @Entity("teachers")
 @Index("teachers_user_id_idx", ["userId"], {})
-@Index("teachers_name_idx", ["first_name", "last_name"], {})
+@Index("teachers_name_idx", ["firstName", "lastName"], {})
 export class Teacher implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
@@ -37,21 +37,21 @@ export class Teacher implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ name: "first_name", length: 255 })
-  first_name: string;
+  @Column({ length: 255 })
+  firstName: string;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ name: "last_name", length: 255 })
-  last_name: string;
+  @Column({ length: 255 })
+  lastName: string;
 
-  @CreateDateColumn({ name: "created_at" })
-  created_at: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @UpdateDateColumn({ name: "updated_at" })
-  updated_at: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: "userReferenceId" })

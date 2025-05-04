@@ -11,8 +11,8 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
+    <NumberInput source="key" />,
     <TextInput source="name:$cont" alwaysOn />,
-    <NumberInput source="key:$eq" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -21,8 +21,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="name" />
             <NumberField source="key" />
+            <TextField source="name" />
             <TextField source="description" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -34,9 +34,9 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="name" validate={[required(), maxLength(100)]} />
         <NumberInput source="key" validate={[required(), number()]} />
-        <TextInput source="description" multiline validate={[maxLength(500)]} />
+        <TextInput source="name" validate={[required(), maxLength(255)]} />
+        <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
@@ -45,7 +45,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['name', 'key', 'description'],
+    fields: ['key', 'name', 'description'],
 }
 
 const entity = {

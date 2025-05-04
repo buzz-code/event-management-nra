@@ -24,18 +24,15 @@ function getConfig(): BaseEntityModuleOptions {
             },
             getExportHeaders(): IHeader[] {
                 return [
-                    { value: 'id', label: 'מזהה' },
                     { value: 'tz', label: 'ת.ז.' },
-                    { value: 'first_name', label: 'שם פרטי' },
-                    { value: 'last_name', label: 'שם משפחה' },
+                    { value: 'firstName', label: 'שם פרטי' },
+                    { value: 'lastName', label: 'שם משפחה' },
                     { value: 'address', label: 'כתובת' },
-                    { value: 'mother_name', label: 'שם האם' },
-                    { value: 'mother_contact', label: 'טלפון האם' },
-                    { value: 'father_name', label: 'שם האב' },
-                    { value: 'father_contact', label: 'טלפון האב' },
-                    { value: 'class.name', label: 'שם כיתה' },
-                    { value: 'created_at', label: 'תאריך יצירה' },
-                    { value: 'updated_at', label: 'תאריך עדכון' },
+                    { value: 'motherName', label: 'שם האם' },
+                    { value: 'motherContact', label: 'טלפון האם' },
+                    { value: 'fatherName', label: 'שם האב' },
+                    { value: 'fatherContact', label: 'טלפון האב' },
+                    { value: 'class.name', label: 'שם כיתה' }
                 ];
             }
         },

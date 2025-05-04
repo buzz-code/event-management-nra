@@ -13,8 +13,8 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
     <TextInput source="tz" />,
-    <TextInput source="first_name:$cont" alwaysOn />,
-    <TextInput source="last_name:$cont" />,
+    <TextInput source="firstName:$cont" alwaysOn />,
+    <TextInput source="lastName:$cont" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -24,10 +24,10 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="tz" />
-            <TextField source="first_name" />
-            <TextField source="last_name" />
-            {isAdmin && <DateField showDate showTime source="created_at" />}
-            {isAdmin && <DateField showDate showTime source="updated_at" />}
+            <TextField source="firstName" />
+            <TextField source="lastName" />
+            {isAdmin && <DateField showDate showTime source="createdAt" />}
+            {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
 }
@@ -38,17 +38,17 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="tz" validate={[maxLength(9)]} />
-        <TextInput source="first_name" validate={[required(), maxLength(255)]} />
-        <TextInput source="last_name" validate={[required(), maxLength(255)]} />
-        {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled />}
+        <TextInput source="firstName" validate={[required(), maxLength(255)]} />
+        <TextInput source="lastName" validate={[required(), maxLength(255)]} />
+        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
 }
 
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'first_name', 'last_name'],
+    fields: ['tz', 'firstName', 'lastName'],
 }
 
 const entity = {

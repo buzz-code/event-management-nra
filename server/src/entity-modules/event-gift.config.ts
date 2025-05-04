@@ -14,11 +14,8 @@ function getConfig(): BaseEntityModuleOptions {
         exporter: {
             getExportHeaders(): IHeader[] {
                 return [
-                    { value: 'id', label: 'מזהה' },
                     { value: 'event.title', label: 'כותרת אירוע' },
                     { value: 'gift.name', label: 'שם מתנה' },
-                    { value: 'created_at', label: 'תאריך יצירה' },
-                    { value: 'updated_at', label: 'תאריך עדכון' },
                 ];
             }
         }

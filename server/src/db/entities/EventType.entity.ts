@@ -21,7 +21,7 @@ export class EventType {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
   @IsNumber({}, { always: true })
-  @Column("int", { name: "key" })
+  @Column("int")
   key: number;
 
   @IsOptional({ always: true })
@@ -31,10 +31,10 @@ export class EventType {
   description: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   // @OneToMany(() => Event, event => event.eventType)
   // events: Event[];

@@ -20,7 +20,7 @@ import { findOneAndAssignReferenceId, getDataSource } from "@shared/utils/entity
 @Entity("students")
 @Index("students_user_id_idx", ["userId"], {})
 @Index("students_class_id_idx", ["classReferenceId"], {})
-@Index("students_name_idx", ["first_name", "last_name"], {})
+@Index("students_name_idx", ["firstName", "lastName"], {})
 @Index("students_tz_idx", ["tz"], {})
 export class Student implements IHasUserId {
   @BeforeInsert()
@@ -65,15 +65,15 @@ export class Student implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ length: 255, name: "first_name" })
-  first_name: string;
+  @Column({ length: 255 })
+  firstName: string;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ length: 255, name: "last_name" })
-  last_name: string;
+  @Column({ length: 255 })
+  lastName: string;
 
   @IsOptional({ always: true })
   @StringType
@@ -84,32 +84,32 @@ export class Student implements IHasUserId {
   @IsOptional({ always: true })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true, name: "mother_name" })
-  mother_name: string;
+  @Column({ length: 255, nullable: true })
+  motherName: string;
 
   @IsOptional({ always: true })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true, name: "mother_contact" })
-  mother_contact: string;
+  @Column({ length: 255, nullable: true })
+  motherContact: string;
 
   @IsOptional({ always: true })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true, name: "father_name" })
-  father_name: string;
+  @Column({ length: 255, nullable: true })
+  fatherName: string;
 
   @IsOptional({ always: true })
   @StringType
   @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true, name: "father_contact" })
-  father_contact: string;
+  @Column({ length: 255, nullable: true })
+  fatherContact: string;
 
-  @CreateDateColumn({ name: "created_at" })
-  created_at: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @UpdateDateColumn({ name: "updated_at" })
-  updated_at: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   // @ManyToOne(() => Class, cls => cls.students, { nullable: true })
   // @JoinColumn({ name: "classReferenceId" })

@@ -27,7 +27,7 @@ export class Class implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
   @IsNumber({}, { always: true })
-  @Column("int", { name: "key" })
+  @Column("int")
   key: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
@@ -41,13 +41,13 @@ export class Class implements IHasUserId {
   @StringType
   @MaxLength(255, { always: true })
   @Column({ length: 255, nullable: true })
-  grade_level: string;
+  gradeLevel: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   // @OneToMany(() => Student, student => student.class)
   // students: Student[];

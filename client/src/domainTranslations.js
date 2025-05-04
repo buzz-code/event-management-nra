@@ -14,7 +14,9 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 eventTypeReferenceId: 'סוג האירוע',
+                eventTypeKey: 'מפתח סוג האירוע',
                 coursePathReferenceId: 'מסלול',
+                coursePathKey: 'מפתח מסלול',
                 eventDate: 'תאריך האירוע',
                 'eventDate:$gte': 'תאריך האירוע מ-',
                 'eventDate:$lte': 'תאריך האירוע עד-',
@@ -43,8 +45,8 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 eventReferenceId: 'אירוע',
-                note: 'הערה',
-                'note:$cont': 'חיפוש בהערה',
+                noteText: 'הערה',
+                'noteText:$cont': 'חיפוש בהערה',
             }
         },
         gift: {
@@ -52,8 +54,6 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
-                value: 'ערך',
-                stock: 'מלאי',
             }
         },
         event_gift: {
@@ -62,16 +62,15 @@ export default {
                 ...generalResourceFieldsTranslation,
                 eventReferenceId: 'אירוע',
                 giftReferenceId: 'מתנה',
-                quantity: 'כמות',
+                giftKey: 'מפתח מתנה',
             }
         },
         class: {
             name: 'כיתה |||| כיתות',
             fields: {
                 ...generalResourceFieldsTranslation,
-                description: 'תיאור',
-                'description:$cont': 'חיפוש בתיאור',
-                maxCapacity: 'קיבולת מקסימלית',
+                gradeLevel: 'שכבה',
+                'gradeLevel:$cont': 'חיפוש בשכבה',
             }
         },
         student: {
@@ -79,23 +78,22 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
-                first_name: 'שם פרטי',
-                'first_name:$cont': 'חיפוש בשם פרטי',
-                last_name: 'שם משפחה',
-                'last_name:$cont': 'חיפוש בשם משפחה',
+                firstName: 'שם פרטי',
+                'firstName:$cont': 'חיפוש בשם פרטי',
+                lastName: 'שם משפחה',
+                'lastName:$cont': 'חיפוש בשם משפחה',
                 classReferenceId: 'כיתה',
+                classKey: 'מפתח כיתה',
                 address: 'כתובת',
                 'address:$cont': 'חיפוש בכתובת',
-                mother_name: 'שם האם',
-                'mother_name:$cont': 'חיפוש בשם האם',
-                mother_contact: 'יצירת קשר עם האם',
-                'mother_contact:$cont': 'חיפוש ביצירת קשר עם האם',
-                father_name: 'שם האב',
-                'father_name:$cont': 'חיפוש בשם האב',
-                father_contact: 'יצירת קשר עם האב',
-                'father_contact:$cont': 'חיפוש ביצירת קשר עם האב',
-                created_at: 'נוצר',
-                updated_at: 'עודכן',
+                motherName: 'שם האם',
+                'motherName:$cont': 'חיפוש בשם האם',
+                motherContact: 'יצירת קשר עם האם',
+                'motherContact:$cont': 'חיפוש ביצירת קשר עם האם',
+                fatherName: 'שם האב',
+                'fatherName:$cont': 'חיפוש בשם האב',
+                fatherContact: 'יצירת קשר עם האב',
+                'fatherContact:$cont': 'חיפוש ביצירת קשר עם האב',
             }
         },
         teacher: {
@@ -103,12 +101,10 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
-                first_name: 'שם פרטי',
-                'first_name:$cont': 'חיפוש בשם פרטי',
-                last_name: 'שם משפחה',
-                'last_name:$cont': 'חיפוש בשם משפחה',
-                created_at: 'נוצר',
-                updated_at: 'עודכן',
+                firstName: 'שם פרטי',
+                'firstName:$cont': 'חיפוש בשם פרטי',
+                lastName: 'שם משפחה',
+                'lastName:$cont': 'חיפוש בשם משפחה',
             }
         },
         

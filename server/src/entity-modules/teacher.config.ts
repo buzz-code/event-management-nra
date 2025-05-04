@@ -21,13 +21,11 @@ function getConfig(): BaseEntityModuleOptions {
             },
             getExportHeaders(): IHeader[] {
                 return [
-                    { value: 'id', label: 'מזהה' },
-                    { value: 'first_name', label: 'שם פרטי' },
-                    { value: 'last_name', label: 'שם משפחה' },
+                    { value: 'tz', label: 'ת.ז.' },
+                    { value: 'firstName', label: 'שם פרטי' },
+                    { value: 'lastName', label: 'שם משפחה' },
                     { value: 'user.email', label: 'כתובת מייל' },
-                    { value: 'user.username', label: 'שם משתמש' },
-                    { value: 'created_at', label: 'תאריך יצירה' },
-                    { value: 'updated_at', label: 'תאריך עדכון' },
+                    { value: 'user.username', label: 'שם משתמש' }
                 ];
             }
         }
