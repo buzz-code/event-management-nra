@@ -1,5 +1,9 @@
 # Event Management NRA Project Index
 
+## Executive Summary
+
+The Event Management NRA system is a comprehensive platform designed to track and manage events, participants, gifts, and event-related activities. Built with a React Admin frontend and NestJS backend, the system enables organizations to create and organize events, manage attendee registration, track gift distribution, and generate reports. The application features robust entity relationships centered around events, with support for RTL Hebrew text, customizable settings, and integration with the Yemot telephony system. This dockerized application uses MySQL for data persistence and follows a modular architecture with shared components for extensibility and code reuse.
+
 ## Table of Contents
 - [1. Project Overview](#1-project-overview)
 - [2. Project Structure](#2-project-structure)
@@ -8,6 +12,22 @@
 - [5. Database](#5-database)
 - [6. Yemot Integration](#6-yemot-integration)
 - [7. Development Workflow](#7-development-workflow)
+
+## Key Concepts
+
+1. **Event-Centered Data Model** - Events are the primary entity around which the entire system revolves. All other entities (participants, gifts, notes) connect to events either directly or indirectly.
+
+2. **Modular Architecture** - Both frontend and backend use a modular approach with shared components/modules stored in separate Git submodule repositories, enabling code reuse across multiple projects.
+
+3. **Entity Configuration** - Each domain entity has a dedicated configuration file that defines its properties, relationships, validation rules, and UI representation, following a convention-over-configuration approach.
+
+4. **Multi-tenancy** - The system supports multiple organizations with data separation through tenant IDs, allowing each organization to have its own isolated data while sharing the same infrastructure.
+
+5. **i18n and RTL Support** - Full internationalization with Hebrew language and right-to-left text support throughout the application, managed through dedicated translation providers.
+
+6. **Dockerized Deployment** - The entire stack runs in Docker containers orchestrated with Docker Compose, with configurations for development, production, and Docker Swarm multi-node deployments.
+
+7. **Telephony Integration** - Yemot integration enables phone-based interaction with the system, allowing automated calls and information collection through an interactive voice response system.
 
 ## 1. Project Overview
 
@@ -74,123 +94,57 @@ The project uses several external Docker networks for infrastructure integration
 ### Architecture Overview
 The client side uses React Admin as the foundation for the administrative interface, with customizations for event management. The architecture follows a component-based structure with resource definitions for entities, reusable UI components, and service providers.
 
-### Main Configuration Files
-- `/client/package.json` - Frontend dependencies and scripts (React 18.2, React Admin 5.3.3, Vite with modern HMR support)
-- `/client/vite.config.js` - Vite build configuration with WebSocket HMR and module alias support
-- `/client/babel.config.js` - Babel configuration for JavaScript transpilation
-- `/client/jest.config.js` - Jest configuration for frontend testing (using Jest 29.7.0)
-- `/client/index.html` - Entry HTML file for the Vite build system
-- `/client/src/openopserve.config.ts` - Configuration for OpenObserve browser monitoring
+### Key Configuration Files
+- `/client/package.json` - Frontend dependencies and scripts (React 18.2, React Admin 5.3.3)
+- `/client/vite.config.js` - Vite build configuration with WebSocket HMR
+- `/client/src/openopserve.config.ts` - Browser monitoring configuration
 
 ### Core Application Files
 - `/client/src/index.jsx` - Frontend application entry point
-- `/client/src/App.jsx` - Main React Admin application configuration with resource definitions
-- `/client/src/GeneralLayout.jsx` - Custom layout components (Dashboard and Layout)
+- `/client/src/App.jsx` - Main React Admin application configuration
 - `/client/src/domainTranslations.js` - Domain-specific translation strings
 
-### Entity Definitions (Resources)
-- `/client/src/entities/event.jsx` - Event entity configuration (core entity for event management)
-- `/client/src/entities/event-type.jsx` - Event type entity configuration (categorizes events)
-- `/client/src/entities/event-note.jsx` - Event note entity configuration (notes/comments attached to events)
-- `/client/src/entities/event-gift.jsx` - Event gift association entity (connects events with gifts)
-- `/client/src/entities/gift.jsx` - Gift entity configuration (items given at events)
-- `/client/src/entities/student.jsx` - Student entity configuration (event participants)
-- `/client/src/entities/teacher.jsx` - Teacher entity configuration (event organizers)
-- `/client/src/entities/class.jsx` - Class entity configuration (event venues/locations)
-- `/client/src/entities/klass-type.jsx` - Class type entity configuration (categorizes venues)
+### Essential Entity Definitions
+- `/client/src/entities/event.jsx` - Core entity for event management
+- `/client/src/entities/event-gift.jsx` - Connects events with gifts
+- `/client/src/entities/student.jsx` - Event participants
+- `/client/src/entities/teacher.jsx` - Event organizers
 
-### Providers
-- `/client/shared/providers/dataProvider.js` - Data provider for React Admin API communication
-- `/client/shared/providers/i18nProvider.js` - Internationalization provider with Hebrew support
-- `/client/shared/providers/authProvider.js` - Authentication provider
-- `/client/shared/providers/themeProvider.js` - Custom theme configuration
-- `/client/shared/providers/constantsProvider.js` - Application constants
-- `/client/shared/providers/baseDataProvider.ts` - Base data provider functionality
+### Critical Providers
+- `/client/shared/providers/dataProvider.js` - API communication
+- `/client/shared/providers/i18nProvider.js` - Hebrew RTL support
+- `/client/shared/providers/authProvider.js` - Authentication
 
-### Components
-- `/client/shared/components/layout/` - Layout components (Menu, Login, Register, RTLStyle)
-- `/client/shared/components/crudContainers/` - Reusable CRUD components
-- `/client/shared/components/fields/` - Custom field components
-- `/client/shared/components/common-entities/` - Common entity components
-- `/client/shared/components/views/` - Custom view components
-- `/client/shared/components/import/` - Import functionality components
-
-### Dashboard Components
-- `/client/src/dashboard/UpcomingEvents.jsx` - Displays upcoming events with details and filtering
-- `/client/src/dashboard/EventStatsCard.jsx` - Shows statistics for various event entities
-- `/client/src/dashboard/EventStatsContainer.jsx` - Container for event statistics cards
-
-### Utilities
-- `/client/shared/utils/permissionsUtil.js` - Permission handling utilities
-- `/client/shared/utils/fileUtil.ts` - File handling utilities
-- `/client/shared/utils/notifyUtil.js` - Notification utilities
-- `/client/shared/utils/deepMerge.js` - Deep object merging utility
-- `/client/shared/utils/settingsUtil.js` - Settings management utilities
-- `/client/shared/utils/yearFilter.js` - Year filtering utility
-- `/client/shared/utils/filtersUtil.js` - General filtering utilities
-- `/client/shared/utils/numericUtil.ts` - Numeric operation utilities
-- `/client/shared/utils/httpUtil.js` - HTTP request utilities
-
-### Settings & Reports
-- `/client/src/settings/Settings.jsx` - Settings management component
-- `/client/src/settings/ReportStylesInput.jsx` - Report styles configuration
-
-### Testing Tools
-- `/client/babel.config.js` - Babel configuration for JSX/TSX transpilation in tests
-- `/client/jest.config.js` - Configuration for Jest 29.7.0 including:
-  - JSDOM environment setup
-  - Coverage reporting configuration
-  - Module transformation settings 
-  - Test match patterns
+### Key Components
+- `/client/shared/components/layout/` - Layout components with RTL support
+- `/client/src/dashboard/UpcomingEvents.jsx` - Main dashboard component 
+- `/client/src/settings/Settings.jsx` - System configuration
 
 ## 4. Server Side (NestJS Backend)
 
 ### Architecture Overview
-The server side is built with NestJS, providing a modular and scalable backend architecture. It follows domain-driven design principles with clearly separated entity modules, data persistence through TypeORM, and a comprehensive authentication system. The backend exposes a RESTful API for the React Admin frontend and includes integrations with external services like Yemot telephony.
+The server side is built with NestJS, providing a modular and scalable backend architecture. It follows domain-driven design principles with clearly separated entity modules, data persistence through TypeORM, and a comprehensive authentication system.
 
-### Main Configuration Files
-- `/server/package.json` - Backend dependencies and scripts (NestJS 9, TypeORM)
+### Key Configuration Files
+- `/server/package.json` - Backend dependencies (NestJS 9, TypeORM)
 - `/server/nest-cli.json` - NestJS CLI configuration
-- `/server/tsconfig.json` - TypeScript configuration
-- `/server/jest.config.js` - Jest configuration for backend testing
 
 ### Core Application Files
 - `/server/src/main.ts` - Backend application entry point
 - `/server/src/app.module.ts` - Main application module with imports
-- `/server/src/app.controller.ts` - Main application controller
-- `/server/src/app.service.ts` - Main application service
-- `/server/src/entities.module.ts` - Module for registering all entities
+- `/server/src/entities.module.ts` - Entity registration
 
-### Entity Modules
-- `/server/src/entity-modules/event.config.ts` - Event entity configuration (primary event management entity)
-- `/server/src/entity-modules/event-type.config.ts` - Event type entity configuration (categorizes events)
-- `/server/src/entity-modules/event-note.config.ts` - Event note entity configuration (comments/notes for events)
-- `/server/src/entity-modules/event-gift.config.ts` - Event gift entity configuration (tracking gifts at events)
-- `/server/src/entity-modules/gift.config.ts` - Gift entity configuration (items distributed at events)
-- `/server/src/entity-modules/class.config.ts` - Class entity configuration (venues/locations for events)
-- `/server/src/entity-modules/student.config.ts` - Student entity configuration (event participants)
-- `/server/src/entity-modules/teacher.config.ts` - Teacher entity configuration (event organizers)
-- `/server/src/entity-modules/user.config.ts` - User entity configuration (system users and authentication)
-- `/server/src/entity-modules/page.config.ts` - Page entity configuration (content pages for the system)
-- `/server/src/entity-modules/payment-track.config.ts` - Payment track entity configuration (payment options)
-- `/server/src/entity-modules/import-file.config.ts` - Import file configuration (bulk data import)
-- `/server/src/entity-modules/audit-log.config.ts` - Audit log configuration (system activity tracking)
-- `/server/src/entity-modules/text.config.ts` - Text entity configuration (system-wide text content)
+### Primary Entity Modules
+- `/server/src/entity-modules/event.config.ts` - Primary event entity
+- `/server/src/entity-modules/student.config.ts` - Participant management
+- `/server/src/entity-modules/teacher.config.ts` - Organizer management
+- `/server/src/entity-modules/gift.config.ts` - Gift tracking
+- `/server/src/entity-modules/user.config.ts` - User authentication
 
-### Database Entities
-- `/server/src/db/entities/` - Core database entity definitions
-- `/server/src/db/view-entities/` - Database view entity definitions
-- `/server/shared/entities/` - Shared entity definitions
-- `/server/shared/view-entities/` - Shared view entity definitions
-
-### Auth & Security
-- `/server/shared/auth/auth.module.ts` - Authentication module
-- `/server/src/app.module.ts` - Contains ThrottlerModule for rate limiting
-
-### Utilities & Helpers
-- `/server/helpers/clean-migrations.js` - Migration cleaning helper
-- `/server/helpers/db-reference-fix.ts` - Database reference fixing utility
-- `/server/shared/utils/mail/mail-send.module.ts` - Email sending functionality
+### Critical Infrastructure
+- `/server/shared/auth/auth.module.ts` - Authentication system
+- `/server/shared/utils/mail/mail-send.module.ts` - Email notifications
+- `/server/src/yemot-handler.ts` - Telephony integration
 
 ## 5. Database
 - `/db/data.sql` - Initial database data
