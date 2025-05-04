@@ -57,41 +57,6 @@ export class YemotCallHandlerClass {
   }
 
   /**
-   * Initial greeting step that requests the user to press 10
-   */
-  async initialGreeting(): Promise<void> {
-    await this.call.read([{ type: 'text', data: 'היי, תקיש 10' }], 'tap', {
-      max_digits: 2,
-      min_digits: 2,
-      digits_allowed: ['10']
-    });
-  }
-
-  /**
-   * Collects the user's name
-   * @returns The user's name input
-   */
-  async collectName(): Promise<string> {
-    const name = await this.call.read([{ type: 'text', data: 'שלום, אנא הקש את שמך המלא' }], 'tap', {
-      typing_playback_mode: 'HebrewKeyboard'
-    });
-    this.logger.log(`User entered name: ${name}`);
-    return name;
-  }
-
-  /**
-   * Greets the user by name and collects address information
-   * @param name The user's name
-   * @returns The path to the recorded address file
-   */
-  async collectAddress(name: string): Promise<string> {
-    id_list_message(this.call, 'שלום ' + name);
-    const addressFilePath = await this.call.read([{ type: 'text', data: 'אנא הקלט את הרחוב בו אתה גר' }], 'record');
-    this.logger.log(`Address file path: ${addressFilePath}`);
-    return addressFilePath;
-  }
-
-  /**
    * Completes the call with a success message and hangs up
    */
   finishCall() {
@@ -103,24 +68,21 @@ export class YemotCallHandlerClass {
    */
   async execute() {
     await this.initializeDataSource();
-    await this.initialGreeting();
-    const name = await this.collectName();
-    
+
     // Handle student identification in a self-contained way
     // If student is not found, this method will terminate the call
     await this.studentHandler.handleStudentIdentification();
-    
+
     // Handle event type selection
     // The user will be prompted to select a valid event type
     await this.eventTypeHandler.handleEventTypeSelection();
-    
+
     // Handle event date selection
     // The user will be prompted to enter a Hebrew date
     await this.eventDateHandler.handleEventDateSelection();
-    
+
     // If we reach here, student identification, event type selection, 
     // and event date selection were all successful
-    await this.collectAddress(name);
     this.finishCall();
   }
 }
