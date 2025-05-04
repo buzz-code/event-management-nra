@@ -36,12 +36,20 @@ The application includes a comprehensive settings system that allows customizati
 - Dashboard configuration
 - User permissions and access control
 
+### Monitoring and Logging
+The application integrates with OpenObserve for comprehensive browser-based logging and Real User Monitoring (RUM). This provides:
+- Client-side error tracking and performance metrics
+- User interaction monitoring
+- Detailed browser diagnostics for troubleshooting
+- Runtime performance analysis
+
 ## 2. Project Structure
 
 ### Root Directory
 - `/docker-compose.yml` - Defines services for frontend, backend, MySQL database, and phpMyAdmin
 - `/docker-compose.override.yml` - Environment-specific Docker override configuration
 - `/event-management-nra.code-workspace` - VS Code workspace configuration
+- `/.env` - Environment variables for Docker services including database credentials, JWT secrets, SMTP settings, and domain configuration
 
 ### Key Directories
 - `/client` - React Admin frontend application
@@ -56,6 +64,11 @@ The application includes a comprehensive settings system that allows customizati
   - This is a submodule that contains reusable NestJS modules used across multiple projects
   - Contains critical authentication, entity management, and utility functions
 
+### External Networks
+The project uses several external Docker networks for infrastructure integration:
+- `caddy` - For reverse proxy and HTTPS termination
+- `elknet` - For connectivity to the ELK stack (Elasticsearch, Logstash, Kibana) monitoring
+
 ## 3. Client Side (React Admin Frontend)
 
 ### Architecture Overview
@@ -65,7 +78,9 @@ The client side uses React Admin as the foundation for the administrative interf
 - `/client/package.json` - Frontend dependencies and scripts (React 18.2, React Admin 5.3.3, Vite with modern HMR support)
 - `/client/vite.config.js` - Vite build configuration with WebSocket HMR and module alias support
 - `/client/babel.config.js` - Babel configuration for JavaScript transpilation
-- `/client/jest.config.js` - Jest configuration for frontend testing
+- `/client/jest.config.js` - Jest configuration for frontend testing (using Jest 29.7.0)
+- `/client/index.html` - Entry HTML file for the Vite build system
+- `/client/src/openopserve.config.ts` - Configuration for OpenObserve browser monitoring
 
 ### Core Application Files
 - `/client/src/index.jsx` - Frontend application entry point
@@ -119,6 +134,14 @@ The client side uses React Admin as the foundation for the administrative interf
 ### Settings & Reports
 - `/client/src/settings/Settings.jsx` - Settings management component
 - `/client/src/settings/ReportStylesInput.jsx` - Report styles configuration
+
+### Testing Tools
+- `/client/babel.config.js` - Babel configuration for JSX/TSX transpilation in tests
+- `/client/jest.config.js` - Configuration for Jest 29.7.0 including:
+  - JSDOM environment setup
+  - Coverage reporting configuration
+  - Module transformation settings 
+  - Test match patterns
 
 ## 4. Server Side (NestJS Backend)
 
