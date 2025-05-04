@@ -6,7 +6,7 @@ import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { setupYemotRouter } from '@shared/utils/yemot/yemot-router';
-import { yemotHandler, yemotProcessor } from './yemot-handler';
+import { yemotHandler, yemotProcessor } from './yemot/yemot-handler';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

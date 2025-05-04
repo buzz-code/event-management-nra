@@ -1,6 +1,10 @@
 import { Logger } from "@nestjs/common";
 import { YemotCallHandler, YemotCallProcessor, id_list_message, id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
 import { Call } from "yemot-router2";
+import { DataSource } from "typeorm";
+import { getDataSource } from "@shared/utils/entity/foreignKey.util";
+import { Student } from "src/db/entities/Student.entity";
+import { StudentHandler } from "./student-handler";
 
 /**
  * Class to handle Yemot calls
@@ -8,6 +12,8 @@ import { Call } from "yemot-router2";
 export class YemotCallHandlerClass {
   private logger: Logger;
   private call: Call;
+  private dataSource: DataSource;
+  private studentHandler: StudentHandler;
 
   /**
    * Constructor for the YemotCallHandlerClass
@@ -18,6 +24,21 @@ export class YemotCallHandlerClass {
     this.logger = logger;
     this.call = call;
     this.logger.log(`Handling call from ${this.call.phone}`);
+  }
+
+  /**
+   * Initializes the data source connection
+   */
+  async initializeDataSource(): Promise<void> {
+    try {
+      this.dataSource = await getDataSource([Student]);
+      this.logger.log('Data source initialized successfully');
+      // Initialize StudentHandler with the data source
+      this.studentHandler = new StudentHandler(this.logger, this.call, this.dataSource);
+    } catch (error) {
+      this.logger.error(`Failed to initialize data source: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -66,8 +87,15 @@ export class YemotCallHandlerClass {
    * Executes the full call handling flow
    */
   async execute() {
+    await this.initializeDataSource();
     await this.initialGreeting();
     const name = await this.collectName();
+    
+    // Handle student identification in a self-contained way
+    // If student is not found, this method will terminate the call
+    await this.studentHandler.handleStudentIdentification();
+
+    // If we reach here, the student was found successfully
     await this.collectAddress(name);
     this.finishCall();
   }
