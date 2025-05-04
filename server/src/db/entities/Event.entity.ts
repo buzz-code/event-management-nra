@@ -146,19 +146,19 @@ export class Event implements IHasUserId {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToOne(() => EventType, eventType => eventType.events, { nullable: true })
+  @ManyToOne(() => EventType, { nullable: true })
   @JoinColumn({ name: 'eventTypeReferenceId' })
   eventType: EventType;
 
-  @ManyToOne(() => Teacher, teacher => teacher.events, { nullable: true })
+  @ManyToOne(() => Teacher, { nullable: true })
   @JoinColumn({ name: 'teacherReferenceId' })
   teacher: Teacher;
 
-  // @ManyToOne(() => Student, student => student.events, { nullable: true })
+  // @ManyToOne(() => Student, { nullable: true })
   // @JoinColumn({ name: 'studentReferenceId' })
   // student: Student;
 
-  @ManyToOne(() => CoursePath, coursePath => coursePath.events, { nullable: true })
+  @ManyToOne(() => CoursePath, { nullable: true })
   @JoinColumn({ name: 'coursePathReferenceId' })
   coursePath: CoursePath;
 

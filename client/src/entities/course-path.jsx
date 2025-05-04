@@ -1,9 +1,10 @@
 // filepath: /root/code-server/config/workspace/event-management-nra/client/src/entities/course-path.jsx
-import { DateField, DateInput, DateTimeInput, maxLength, number, required, TextField, TextInput, NumberInput, NumberField } from 'react-admin';
+import { DateField, DateInput, DateTimeInput, maxLength, number, required, TextField, TextInput, NumberInput, NumberField, ReferenceField } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
+import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
@@ -21,6 +22,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <CommonDatagrid {...props}>
             {children}
             {isAdmin && <TextField source="id" />}
+            {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="name" />
             <NumberField source="key" />
             <TextField source="description" />
@@ -33,6 +35,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
+        {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="name" validate={[required(), maxLength(255)]} />
         <NumberInput source="key" validate={[required(), number()]} />
         <TextInput source="description" validate={[maxLength(1000)]} multiline />

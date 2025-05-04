@@ -50,6 +50,6 @@ export class CoursePath implements IHasUserId {
   @UpdateDateColumn({ name: "updated_at" })
   updated_at: Date;
 
-  @OneToMany(() => Event, event => event.coursePath)
-  events: Event[];
+  // @OneToMany(() => Event, event => event.coursePath)
+  // events: Event[];
 }

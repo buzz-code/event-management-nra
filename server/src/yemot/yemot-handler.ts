@@ -8,6 +8,10 @@ import { EventType } from "src/db/entities/EventType.entity";
 import { StudentHandler } from "./student-handler";
 import { EventTypeHandler } from "./event-type-handler";
 import { EventDateHandler } from "./event-date-handler";
+import { EventExistenceHandler } from "./event-existence-handler";
+import { CourseTrackHandler } from "./course-track-handler";
+import { GiftHandler } from "./gift-handler";
+import { EventSaver } from "./event-saver";
 import { Event } from "src/db/entities/Event.entity";
 import { Teacher } from "src/db/entities/Teacher.entity";
 import { User } from "src/db/entities/User.entity";
@@ -27,6 +31,10 @@ export class YemotCallHandlerClass {
   private studentHandler: StudentHandler;
   private eventTypeHandler: EventTypeHandler;
   private eventDateHandler: EventDateHandler;
+  private eventExistenceHandler: EventExistenceHandler;
+  private courseTrackHandler: CourseTrackHandler;
+  private giftHandler: GiftHandler;
+  private eventSaver: EventSaver;
 
   /**
    * Constructor for the YemotCallHandlerClass
@@ -43,24 +51,23 @@ export class YemotCallHandlerClass {
    * Initializes the data source connection
    */
   async initializeDataSource(): Promise<void> {
-    try {
-      this.dataSource = await getDataSource([Student, EventType, Event, Teacher, User, CoursePath, EventNote, EventGift, Gift, Class]);
-      this.logger.log('Data source initialized successfully');
-      // Initialize handlers with the data source
-      this.studentHandler = new StudentHandler(this.logger, this.call, this.dataSource);
-      this.eventTypeHandler = new EventTypeHandler(this.logger, this.call, this.dataSource);
-      this.eventDateHandler = new EventDateHandler(this.logger, this.call);
-    } catch (error) {
-      this.logger.error(`Failed to initialize data source: ${error.message}`);
-      throw error;
-    }
+    this.dataSource = await getDataSource([Student, EventType, Event, Teacher, User, CoursePath, EventNote, EventGift, Gift, Class]);
+    this.logger.log('Data source initialized successfully');
+    // Initialize handlers with the data source
+    this.studentHandler = new StudentHandler(this.logger, this.call, this.dataSource);
+    this.eventTypeHandler = new EventTypeHandler(this.logger, this.call, this.dataSource);
+    this.eventDateHandler = new EventDateHandler(this.logger, this.call);
+    this.eventExistenceHandler = new EventExistenceHandler(this.logger, this.call, this.dataSource);
+    this.courseTrackHandler = new CourseTrackHandler(this.logger, this.call, this.dataSource);
+    this.giftHandler = new GiftHandler(this.logger, this.call, this.dataSource);
+    this.eventSaver = new EventSaver(this.logger, this.dataSource);
   }
 
   /**
    * Completes the call with a success message and hangs up
    */
   finishCall() {
-    id_list_message_with_hangup(this.call, 'תגובתך התקבלה בהצלחה');
+    id_list_message_with_hangup(this.call, 'תודה על הדיווח. האירוע נשמר בהצלחה במערכת');
   }
 
   /**
@@ -69,20 +76,46 @@ export class YemotCallHandlerClass {
   async execute() {
     await this.initializeDataSource();
 
-    // Handle student identification in a self-contained way
-    // If student is not found, this method will terminate the call
+    // Step 1: Handle student identification
     await this.studentHandler.handleStudentIdentification();
+    const student = this.studentHandler.getStudent();
 
-    // Handle event type selection
-    // The user will be prompted to select a valid event type
+    // Step 2: Handle event type selection
     await this.eventTypeHandler.handleEventTypeSelection();
+    const eventType = this.eventTypeHandler.getSelectedEventType();
 
-    // Handle event date selection
-    // The user will be prompted to enter a Hebrew date
+    // Step 3: Handle event date selection
     await this.eventDateHandler.handleEventDateSelection();
+    const dateInfo = this.eventDateHandler.getSelectedDate();
 
-    // If we reach here, student identification, event type selection, 
-    // and event date selection were all successful
+    // Step 4: Check if event exists with same student, type, and date
+    await this.eventExistenceHandler.checkEventExists(student, eventType, dateInfo.gregorianDate);
+    const existingEvent = this.eventExistenceHandler.getExistingEvent();
+    const isNewEvent = this.eventExistenceHandler.getIsNewEvent();
+
+    // Step 5: Course track selection
+    // Use the newly created method that handles existing course paths
+    await this.courseTrackHandler.handleCourseTrackSelectionWithExisting(existingEvent?.coursePath || null);
+    const coursePath = this.courseTrackHandler.getSelectedCourseTrack();
+
+    // Step 6: Gift selection (up to 3)
+    // Use the newly created method that handles existing gifts
+    await this.giftHandler.handleGiftSelectionWithExisting(existingEvent?.eventGifts);
+    const selectedGifts = this.giftHandler.getSelectedGifts();
+
+    // Step 7: Save the event
+    const savedEvent = await this.eventSaver.saveEvent(
+      existingEvent,
+      student,
+      eventType,
+      dateInfo.gregorianDate,
+      coursePath,
+      selectedGifts
+    );
+    
+    this.logger.log(`Event ${isNewEvent ? 'created' : 'updated'} successfully with ID: ${savedEvent.id}`);
+    
+    // Finish the call
     this.finishCall();
   }
 }

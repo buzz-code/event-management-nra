@@ -147,9 +147,18 @@ export class EventDateHandler {
     }
 
     if (!dateConfirmed) {
+      this.logger.error('Maximum date selection attempts reached');
       return id_list_message_with_hangup(
         this.call,
         'מספר נסיונות הזנת התאריך הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.'
+      );
+    }
+
+    if (!this.gregorianDate) {
+      this.logger.error('No valid date was selected');
+      return id_list_message_with_hangup(
+        this.call,
+        'אירעה שגיאה בבחירת תאריך האירוע. אנא נסה להתקשר שנית מאוחר יותר.'
       );
     }
 

@@ -36,6 +36,6 @@ export class EventType {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Event, event => event.eventType)
-  events: Event[];
+  // @OneToMany(() => Event, event => event.eventType)
+  // events: Event[];
 }

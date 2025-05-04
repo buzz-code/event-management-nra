@@ -57,6 +57,6 @@ export class Teacher implements IHasUserId {
   @JoinColumn({ name: "userReferenceId" })
   user: User;
 
-  @OneToMany(() => Event, event => event.teacher)
-  events: Event[];
+  // @OneToMany(() => Event, event => event.teacher)
+  // events: Event[];
 }
