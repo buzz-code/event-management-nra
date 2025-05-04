@@ -44,7 +44,7 @@ export class EventExistenceHandler {
         eventTypeReferenceId: eventType.id,
         eventDate: eventDate
       },
-      relations: ['eventType', 'coursePath', 'eventGifts', 'eventGifts.gift']
+      relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift']
     });
 
     if (this.existingEvent) {

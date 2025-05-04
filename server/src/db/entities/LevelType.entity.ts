@@ -1,4 +1,4 @@
-// filepath: /root/code-server/config/workspace/event-management-nra/server/src/db/entities/CoursePath.entity.ts
+// filepath: /root/code-server/config/workspace/event-management-nra/server/src/db/entities/LevelType.entity.ts
 import {
   Column,
   CreateDateColumn,
@@ -15,9 +15,9 @@ import { StringType, NumberType } from "@shared/utils/entity/class-transformer";
 import { IsOptional } from "class-validator";
 import { IHasUserId } from "@shared/base-entity/interface";
 
-@Entity("course_paths")
-@Index("course_paths_user_id_idx", ["userId"], {})
-export class CoursePath implements IHasUserId {
+@Entity("level_types")
+@Index("level_types_user_id_idx", ["userId"], {})
+export class LevelType implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -50,6 +50,6 @@ export class CoursePath implements IHasUserId {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // @OneToMany(() => Event, event => event.coursePath)
+  // @OneToMany(() => Event, event => event.levelType)
   // events: Event[];
 }

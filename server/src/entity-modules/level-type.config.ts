@@ -1,14 +1,14 @@
-// filepath: /root/code-server/config/workspace/event-management-nra/server/src/entity-modules/course-path.config.ts
+// filepath: /root/code-server/config/workspace/event-management-nra/server/src/entity-modules/level-type.config.ts
 import { CrudRequest } from "@dataui/crud";
 import { BaseEntityService } from "@shared/base-entity/base-entity.service";
 import { BaseEntityModuleOptions, Entity } from "@shared/base-entity/interface";
 import { IHeader } from "@shared/utils/exporter/types";
-import { CoursePath } from "src/db/entities/CoursePath.entity";
+import { LevelType } from "src/db/entities/LevelType.entity";
 import { CommonReportData } from "@shared/utils/report/types";
 
 function getConfig(): BaseEntityModuleOptions {
     return {
-        entity: CoursePath,
+        entity: LevelType,
         query: {
             join: {
                 events: { eager: false }
@@ -24,16 +24,16 @@ function getConfig(): BaseEntityModuleOptions {
             getExportHeaders(): IHeader[] {
                 return [
                     { value: 'key', label: 'מפתח' },
-                    { value: 'name', label: 'שם המסלול' },
+                    { value: 'name', label: 'שם הסוג רמה' },
                     { value: 'description', label: 'תיאור' }
                 ];
             }
         },
-        service: CoursePathService,
+        service: LevelTypeService,
     }
 }
 
-class CoursePathService<T extends Entity | CoursePath> extends BaseEntityService<T> {
+class LevelTypeService<T extends Entity | LevelType> extends BaseEntityService<T> {
     async getReportData(req: CrudRequest<any, any>): Promise<CommonReportData> {
         return super.getReportData(req);
     }

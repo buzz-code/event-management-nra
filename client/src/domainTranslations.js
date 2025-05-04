@@ -15,8 +15,8 @@ export default {
                 ...generalResourceFieldsTranslation,
                 eventTypeReferenceId: 'סוג האירוע',
                 eventTypeKey: 'מפתח סוג האירוע',
-                coursePathReferenceId: 'מסלול',
-                coursePathKey: 'מפתח מסלול',
+                levelTypeReferenceId: 'סוג רמה',
+                levelTypeKey: 'מפתח סוג רמה',
                 eventDate: 'תאריך האירוע',
                 'eventDate:$gte': 'תאריך האירוע מ-',
                 'eventDate:$lte': 'תאריך האירוע עד-',
@@ -32,8 +32,8 @@ export default {
                 description: 'תיאור',
             }
         },
-        course_path: {
-            name: 'מסלול |||| מסלולים',
+        level_type: {
+            name: 'סוג רמה |||| סוגי רמה',
             fields: {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',

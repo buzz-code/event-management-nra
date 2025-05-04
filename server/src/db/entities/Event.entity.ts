@@ -4,7 +4,7 @@ import { Teacher } from './Teacher.entity';
 import { Student } from './Student.entity';
 import { EventNote } from './EventNote.entity';
 import { EventGift } from './EventGift.entity';
-import { CoursePath } from './CoursePath.entity';
+import { LevelType } from './LevelType.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsDate, IsNumber, Min } from '@shared/utils/validation/class-validator-he';
@@ -19,7 +19,7 @@ import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
 @Index('events_event_type_id_idx', ['eventTypeReferenceId'], {})
 @Index('events_teacher_id_idx', ['teacherReferenceId'], {})
 @Index('events_student_id_idx', ['studentReferenceId'], {})
-@Index('events_course_path_id_idx', ['coursePathReferenceId'], {})
+@Index('events_level_type_id_idx', ['levelTypeReferenceId'], {})
 @Index('events_event_date_idx', ['eventDate'], {})
 export class Event implements IHasUserId {
   @BeforeInsert()
@@ -29,7 +29,7 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, CoursePath]);
+      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource, EventType, { key: this.eventTypeId }, null, this.eventTypeReferenceId, this.eventTypeId
@@ -43,8 +43,8 @@ export class Event implements IHasUserId {
         dataSource, Student, { tz: this.studentTz }, this.userId, this.studentReferenceId, this.studentTz
       );
       
-      this.coursePathReferenceId = await findOneAndAssignReferenceId(
-        dataSource, CoursePath, { key: this.coursePathId }, this.userId, this.coursePathReferenceId, this.coursePathId
+      this.levelTypeReferenceId = await findOneAndAssignReferenceId(
+        dataSource, LevelType, { key: this.levelTypeId }, this.userId, this.levelTypeReferenceId, this.levelTypeId
       );
     } finally {
       dataSource?.destroy();
@@ -121,16 +121,16 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   studentReferenceId: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.coursePathReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.levelTypeReferenceId), { always: true })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
-  coursePathId: number;
+  levelTypeId: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.coursePathId) && Boolean(event.coursePathReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.levelTypeId) && Boolean(event.levelTypeReferenceId), { always: true })
   @Column({ nullable: true })
-  coursePathReferenceId: number;
+  levelTypeReferenceId: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -150,9 +150,9 @@ export class Event implements IHasUserId {
   // @JoinColumn({ name: 'studentReferenceId' })
   // student: Student;
 
-  @ManyToOne(() => CoursePath, { nullable: true })
-  @JoinColumn({ name: 'coursePathReferenceId' })
-  coursePath: CoursePath;
+  @ManyToOne(() => LevelType, { nullable: true })
+  @JoinColumn({ name: 'levelTypeReferenceId' })
+  levelType: LevelType;
 
   @ManyToOne(() => User, { createForeignKeyConstraints: false })
   @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])

@@ -3,7 +3,7 @@ import { DataSource } from "typeorm";
 import { Event } from "src/db/entities/Event.entity";
 import { Student } from "src/db/entities/Student.entity";
 import { EventType } from "src/db/entities/EventType.entity";
-import { CoursePath } from "src/db/entities/CoursePath.entity";
+import { LevelType } from "src/db/entities/LevelType.entity";
 import { Gift } from "src/db/entities/Gift.entity";
 import { EventGift } from "src/db/entities/EventGift.entity";
 
@@ -30,7 +30,7 @@ export class EventSaver {
    * @param student The student associated with the event
    * @param eventType The type of event
    * @param eventDate The date of the event
-   * @param coursePath The selected course path
+   * @param levelType The selected level type
    * @param selectedGifts The selected gifts
    * @returns The saved event
    */
@@ -39,7 +39,7 @@ export class EventSaver {
     student: Student,
     eventType: EventType,
     eventDate: Date,
-    coursePath: CoursePath | null,
+    levelType: LevelType | null,
     selectedGifts: Gift[]
   ): Promise<Event> {
     let event: Event;
@@ -55,15 +55,15 @@ export class EventSaver {
         event.name = `${eventType.name} - ${student.firstName} ${student.lastName}`; // Using camelCase property names
         event.userId = 1; // Default user ID; this might need to be adjusted
         
-        if (coursePath) {
-          event.coursePathReferenceId = coursePath.id;
+        if (levelType) {
+          event.levelTypeReferenceId = levelType.id;
         }
         this.logger.log(`Creating new event for student ID: ${student.id}`);
       } else {
         // Update existing event
         event = existingEvent!;
-        if (coursePath) {
-          event.coursePathReferenceId = coursePath.id;
+        if (levelType) {
+          event.levelTypeReferenceId = levelType.id;
         }
         this.logger.log(`Updating existing event ID: ${event.id}`);
 

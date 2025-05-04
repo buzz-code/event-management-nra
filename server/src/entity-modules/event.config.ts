@@ -11,7 +11,7 @@ function getConfig(): BaseEntityModuleOptions {
                 eventType: { eager: false },
                 teacher: { eager: false },
                 student: { eager: false },
-                coursePath: { eager: false },
+                levelType: { eager: false },
                 notes: { eager: false },
                 eventGifts: { eager: false },
             }
@@ -22,7 +22,7 @@ function getConfig(): BaseEntityModuleOptions {
                     eventType: { eager: true },
                     teacher: { eager: true },
                     student: { eager: true },
-                    coursePath: { eager: true }
+                    levelType: { eager: true }
                 };
                 return innerFunc(req);
             },
@@ -38,7 +38,7 @@ function getConfig(): BaseEntityModuleOptions {
                     { value: 'teacher.lastName', label: 'שם מורה משפחה' },
                     { value: 'student.firstName', label: 'שם תלמיד פרטי' },
                     { value: 'student.lastName', label: 'שם תלמיד משפחה' },
-                    { value: 'coursePath.name', label: 'מסלול' }
+                    { value: 'levelType.name', label: 'סוג רמה' }
                 ];
             }
         }

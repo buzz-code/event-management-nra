@@ -27,7 +27,7 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
     <TextInput source="name:$cont" alwaysOn />,
     <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" />,
-    <CommonReferenceInputFilter source="coursePathReferenceId" reference="course_path" />,
+    <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" />,
     <DateInput source="eventDate:$gte" />,
     <DateInput source="eventDate:$lte" />,
 ];
@@ -40,7 +40,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="name" />
             <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
-            <MultiReferenceField source="coursePathReferenceId" reference="course_path" optionalSource="coursePathKey" optionalTarget="key" />
+            <MultiReferenceField source="levelTypeReferenceId" reference="level_type" optionalSource="levelTypeKey" optionalTarget="key" />
             <DateField source="eventDate" />
             <TextField source="location" />
             <NumberField source="maxParticipants" />
@@ -57,7 +57,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="name" validate={[required(), maxLength(255)]} />
         <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} />
-        <CommonReferenceInput source="coursePathReferenceId" reference="course_path" />
+        <CommonReferenceInput source="levelTypeReferenceId" reference="level_type" />
         <DateInput source="eventDate" validate={required()} />
         <TextInput source="location" validate={[maxLength(255)]} />
         <NumberInput source="maxParticipants" />
@@ -85,7 +85,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['name', 'eventTypeKey', 'coursePathKey', 'eventDate', 'location', 'maxParticipants', 'description'],
+    fields: ['name', 'eventTypeKey', 'levelTypeKey', 'eventDate', 'location', 'maxParticipants', 'description'],
 }
 
 const entity = {

@@ -9,13 +9,13 @@ import { StudentHandler } from "./student-handler";
 import { EventTypeHandler } from "./event-type-handler";
 import { EventDateHandler } from "./event-date-handler";
 import { EventExistenceHandler } from "./event-existence-handler";
-import { CourseTrackHandler } from "./course-track-handler";
+import { LevelTypeHandler } from "./level-type-handler";
 import { GiftHandler } from "./gift-handler";
 import { EventSaver } from "./event-saver";
 import { Event } from "src/db/entities/Event.entity";
 import { Teacher } from "src/db/entities/Teacher.entity";
 import { User } from "src/db/entities/User.entity";
-import { CoursePath } from "src/db/entities/CoursePath.entity";
+import { LevelType } from "src/db/entities/LevelType.entity";
 import { EventNote } from "src/db/entities/EventNote.entity";
 import { EventGift } from "src/db/entities/EventGift.entity";
 import { Gift } from "src/db/entities/Gift.entity";
@@ -32,7 +32,7 @@ export class YemotCallHandlerClass {
   private eventTypeHandler: EventTypeHandler;
   private eventDateHandler: EventDateHandler;
   private eventExistenceHandler: EventExistenceHandler;
-  private courseTrackHandler: CourseTrackHandler;
+  private levelTypeHandler: LevelTypeHandler;
   private giftHandler: GiftHandler;
   private eventSaver: EventSaver;
 
@@ -51,14 +51,14 @@ export class YemotCallHandlerClass {
    * Initializes the data source connection
    */
   async initializeDataSource(): Promise<void> {
-    this.dataSource = await getDataSource([Student, EventType, Event, Teacher, User, CoursePath, EventNote, EventGift, Gift, Class]);
+    this.dataSource = await getDataSource([Student, EventType, Event, Teacher, User, LevelType, EventNote, EventGift, Gift, Class]);
     this.logger.log('Data source initialized successfully');
     // Initialize handlers with the data source
     this.studentHandler = new StudentHandler(this.logger, this.call, this.dataSource);
     this.eventTypeHandler = new EventTypeHandler(this.logger, this.call, this.dataSource);
     this.eventDateHandler = new EventDateHandler(this.logger, this.call);
     this.eventExistenceHandler = new EventExistenceHandler(this.logger, this.call, this.dataSource);
-    this.courseTrackHandler = new CourseTrackHandler(this.logger, this.call, this.dataSource);
+    this.levelTypeHandler = new LevelTypeHandler(this.logger, this.call, this.dataSource);
     this.giftHandler = new GiftHandler(this.logger, this.call, this.dataSource);
     this.eventSaver = new EventSaver(this.logger, this.dataSource);
   }
@@ -93,10 +93,10 @@ export class YemotCallHandlerClass {
     const existingEvent = this.eventExistenceHandler.getExistingEvent();
     const isNewEvent = this.eventExistenceHandler.getIsNewEvent();
 
-    // Step 5: Course track selection
-    // Use the newly created method that handles existing course paths
-    await this.courseTrackHandler.handleCourseTrackSelectionWithExisting(existingEvent?.coursePath || null);
-    const coursePath = this.courseTrackHandler.getSelectedCourseTrack();
+    // Step 5: Level type selection
+    // Use the newly created method that handles existing level types
+    await this.levelTypeHandler.handleLevelTypeSelectionWithExisting(existingEvent?.levelType || null);
+    const levelType = this.levelTypeHandler.getSelectedLevelType();
 
     // Step 6: Gift selection (up to 3)
     // Use the newly created method that handles existing gifts
@@ -109,7 +109,7 @@ export class YemotCallHandlerClass {
       student,
       eventType,
       dateInfo.gregorianDate,
-      coursePath,
+      levelType,
       selectedGifts
     );
     

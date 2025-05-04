@@ -18,7 +18,7 @@ import eventGiftConfig from './entity-modules/event-gift.config';
 import classConfig from './entity-modules/class.config';
 import studentConfig from './entity-modules/student.config';
 import teacherConfig from './entity-modules/teacher.config';
-import coursePathConfig from "./entity-modules/course-path.config";
+import levelTypeConfig from "./entity-modules/level-type.config";
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -39,7 +39,7 @@ import { Image } from "@shared/entities/Image.entity";
         BaseEntityModule.register(classConfig),
         BaseEntityModule.register(studentConfig),
         BaseEntityModule.register(teacherConfig),
-        BaseEntityModule.register(coursePathConfig),
+        BaseEntityModule.register(levelTypeConfig),
         
         // Common entities and utilities
         BaseEntityModule.register(textConfig),
