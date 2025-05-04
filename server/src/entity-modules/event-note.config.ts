@@ -7,8 +7,8 @@ function getConfig(): BaseEntityModuleOptions {
         entity: EventNote,
         query: {
             join: {
-                event: {},
-                author: {}
+                event: { eager: false },
+                author: { eager: false }
             }
         },
         exporter: {

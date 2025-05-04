@@ -11,7 +11,7 @@ function getConfig(): BaseEntityModuleOptions {
         entity: CoursePath,
         query: {
             join: {
-                events: {}
+                events: { eager: false }
             }
         },
         exporter: {

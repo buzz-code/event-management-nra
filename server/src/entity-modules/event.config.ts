@@ -8,12 +8,12 @@ function getConfig(): BaseEntityModuleOptions {
         entity: Event,
         query: {
             join: {
-                eventType: {},
-                teacher: {},
-                student: {},
-                coursePath: {},
-                notes: {},
-                eventGifts: {},
+                eventType: { eager: false },
+                teacher: { eager: false },
+                student: { eager: false },
+                coursePath: { eager: false },
+                notes: { eager: false },
+                eventGifts: { eager: false },
             }
         },
         exporter: {
