@@ -1,5 +1,5 @@
 // filepath: /root/code-server/config/workspace/event-management-nra/client/src/entities/course-path.jsx
-import { DateField, DateInput, DateTimeInput, maxLength, required, TextField, TextInput } from 'react-admin';
+import { DateField, DateInput, DateTimeInput, maxLength, number, required, TextField, TextInput, NumberInput, NumberField } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -12,6 +12,7 @@ const filters = [
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
     ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
     <TextInput source="name:$cont" alwaysOn />,
+    <NumberInput source="key:$eq" />,
     <TextInput source="description:$cont" />,
 ];
 
@@ -21,6 +22,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             <TextField source="name" />
+            <NumberField source="key" />
             <TextField source="description" />
             {isAdmin && <DateField showDate showTime source="created_at" />}
             {isAdmin && <DateField showDate showTime source="updated_at" />}
@@ -32,6 +34,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         <TextInput source="name" validate={[required(), maxLength(255)]} />
+        <NumberInput source="key" validate={[required(), number()]} />
         <TextInput source="description" validate={[maxLength(1000)]} multiline />
         {!isCreate && isAdmin && <DateTimeInput source="created_at" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updated_at" disabled />}
@@ -41,7 +44,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['name', 'description'],
+    fields: ['name', 'key', 'description'],
 }
 
 const entity = {

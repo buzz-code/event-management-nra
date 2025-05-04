@@ -2,8 +2,8 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { EventGift } from './EventGift.entity';
 import { IsOptional } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
-import { StringType } from '@shared/utils/entity/class-transformer';
+import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 
 @Entity('gifts')
 export class Gift {
@@ -16,6 +16,13 @@ export class Gift {
   @MaxLength(255, { always: true })
   @Column({ length: 255 })
   name: string;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @NumberType
+  @IsNumber({}, { always: true })
+  @Column("int", { name: "key" })
+  key: number;
 
   @IsOptional({ always: true })
   @StringType

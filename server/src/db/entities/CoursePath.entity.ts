@@ -10,8 +10,8 @@ import {
 } from "typeorm";
 import { Event } from "./Event.entity";
 import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, MaxLength } from "@shared/utils/validation/class-validator-he";
-import { StringType } from "@shared/utils/entity/class-transformer";
+import { IsNotEmpty, MaxLength, IsNumber } from "@shared/utils/validation/class-validator-he";
+import { StringType, NumberType } from "@shared/utils/entity/class-transformer";
 import { IsOptional } from "class-validator";
 import { IHasUserId } from "@shared/base-entity/interface";
 
@@ -30,6 +30,13 @@ export class CoursePath implements IHasUserId {
   @MaxLength(255, { always: true })
   @Column({ length: 255 })
   name: string;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @NumberType
+  @IsNumber({}, { always: true })
+  @Column("int", { name: "key" })
+  key: number;
 
   @IsOptional({ always: true })
   @StringType
