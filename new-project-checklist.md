@@ -168,7 +168,7 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
   ```
 - [ ] Generate a database migration:
   ```bash
-  docker compose exec server yarn typeorm:generate InitialSchema
+  docker compose exec server yarn typeorm:generate src/migrations/InitialSchema --pretty
   ```
 - [ ] Run the migration to create the database schema:
   ```bash

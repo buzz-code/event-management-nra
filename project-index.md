@@ -256,12 +256,12 @@ Database migrations must be run inside the Docker container:
 
 1. First, dry-run the migration to verify it's correct:
    ```bash
-   docker compose exec server yarn typeorm:generate MigrationName --dryrun
+   docker compose exec server yarn typeorm:generate src/migrations/MigrationName --dryrun --pretty
    ```
 
 2. Generate a migration after verifying the changes:
    ```bash
-   docker compose exec server yarn typeorm:generate MigrationName
+   docker compose exec server yarn typeorm:generate src/migrations/MigrationName --pretty
    ```
 
 3. Run migrations:
