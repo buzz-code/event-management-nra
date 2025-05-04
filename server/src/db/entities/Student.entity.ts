@@ -35,7 +35,7 @@ export class Student implements IHasUserId {
       dataSource = await getDataSource([Class]);
 
       this.classReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Class, { id: this.classId }, this.userId, this.classReferenceId, this.classId
+        dataSource, Class, { key: this.classKey }, this.userId, this.classReferenceId, this.classKey
       );
     } finally {
       dataSource?.destroy();
@@ -59,9 +59,9 @@ export class Student implements IHasUserId {
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true, name: "class_id" })
-  classId: number;
+  classKey: number;
 
-  @ValidateIf((student: Student) => !Boolean(student.classId) && Boolean(student.classReferenceId), { always: true })
+  @ValidateIf((student: Student) => !Boolean(student.classKey) && Boolean(student.classReferenceId), { always: true })
   @Column({ nullable: true })
   classReferenceId: number;
 

@@ -1,13 +1,13 @@
-import { 
-    DateField, 
-    DateInput, 
-    DateTimeInput, 
-    Labeled, 
-    maxLength, 
-    ReferenceField, 
-    ReferenceManyField, 
-    required, 
-    TextField, 
+import {
+    DateField,
+    DateInput,
+    DateTimeInput,
+    Labeled,
+    maxLength,
+    ReferenceField,
+    ReferenceManyField,
+    required,
+    TextField,
     TextInput,
     NumberInput,
     NumberField
@@ -17,6 +17,7 @@ import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
+import { CommonReferenceField, MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
@@ -38,8 +39,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="name" />
-            <ReferenceField source="eventTypeReferenceId" reference="event_type" />
-            <ReferenceField source="coursePathReferenceId" reference="course_path" />
+            <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
+            <MultiReferenceField source="coursePathReferenceId" reference="course_path" optionalSource="coursePathKey" optionalTarget="key" />
             <DateField source="eventDate" />
             <TextField source="location" />
             <NumberField source="maxParticipants" />
@@ -85,7 +86,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['name', 'eventTypeReferenceId', 'coursePathReferenceId', 'eventDate', 'location', 'maxParticipants', 'description'],
+    fields: ['name', 'eventTypeKey', 'coursePathKey', 'eventDate', 'location', 'maxParticipants', 'description'],
 }
 
 const entity = {

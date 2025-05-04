@@ -5,6 +5,7 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { useUnique } from '@shared/utils/useUnique';
 import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
+import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
@@ -32,7 +33,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="tz" />
             <TextField source="first_name" />
             <TextField source="last_name" />
-            <ReferenceField source="classReferenceId" reference="class" />
+            <MultiReferenceField source="classReferenceId" reference="class" optionalSource="classKey" optionalTarget="key" />
             <TextField source="address" />
             <TextField source="mother_name" />
             <TextField source="mother_contact" />
@@ -66,7 +67,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'first_name', 'last_name', 'classReferenceId', 'address', 'mother_name', 'mother_contact', 'father_name', 'father_contact'],
+    fields: ['tz', 'first_name', 'last_name', 'classKey', 'address', 'mother_name', 'mother_contact', 'father_name', 'father_contact'],
 }
 
 const entity = {

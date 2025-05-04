@@ -33,19 +33,19 @@ export class Event implements IHasUserId {
       dataSource = await getDataSource([EventType, Teacher, Student, User, CoursePath]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
-        dataSource, EventType, { id: this.eventTypeId }, null, this.eventTypeReferenceId, this.eventTypeId
+        dataSource, EventType, { key: this.eventTypeId }, null, this.eventTypeReferenceId, this.eventTypeId
       );
       
       this.teacherReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Teacher, { id: this.teacherId }, this.userId, this.teacherReferenceId, this.teacherId
+        dataSource, Teacher, { tz: this.teacherTz }, this.userId, this.teacherReferenceId, this.teacherTz
       );
       
       this.studentReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Student, { id: this.studentId }, this.userId, this.studentReferenceId, this.studentId
+        dataSource, Student, { tz: this.studentTz }, this.userId, this.studentReferenceId, this.studentTz
       );
       
       this.coursePathReferenceId = await findOneAndAssignReferenceId(
-        dataSource, CoursePath, { id: this.coursePathId }, this.userId, this.coursePathReferenceId, this.coursePathId
+        dataSource, CoursePath, { key: this.coursePathId }, this.userId, this.coursePathReferenceId, this.coursePathId
       );
     } finally {
       dataSource?.destroy();
@@ -112,9 +112,9 @@ export class Event implements IHasUserId {
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
-  teacherId: number;
+  teacherTz: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.teacherId) && Boolean(event.teacherReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.teacherTz) && Boolean(event.teacherReferenceId), { always: true })
   @Column({ nullable: true })
   teacherReferenceId: number;
 
@@ -123,9 +123,9 @@ export class Event implements IHasUserId {
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
-  studentId: number;
+  studentTz: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.studentId) && Boolean(event.studentReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.studentTz) && Boolean(event.studentReferenceId), { always: true })
   @Column({ nullable: true })
   studentReferenceId: number;
 

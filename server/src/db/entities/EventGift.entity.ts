@@ -17,14 +17,10 @@ export class EventGift {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([Event, Gift]);
+      dataSource = await getDataSource([Gift]);
 
-      this.eventReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Event, { id: this.eventId }, null, this.eventReferenceId, this.eventId
-      );
-      
       this.giftReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Gift, { id: this.giftId }, null, this.giftReferenceId, this.giftId
+        dataSource, Gift, { key: this.giftKey }, null, this.giftReferenceId, this.giftKey
       );
     } finally {
       dataSource?.destroy();
@@ -34,14 +30,7 @@ export class EventGift {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.eventReferenceId), { always: true })
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @NumberType
-  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
-  @Column({ nullable: true })
-  eventId: number;
-
-  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.eventId) && Boolean(eventGift.eventReferenceId), { always: true })
+  @IsNotEmpty({ always: true })
   @Column({ nullable: false })
   eventReferenceId: number;
 
@@ -50,9 +39,9 @@ export class EventGift {
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
-  giftId: number;
+  giftKey: number;
 
-  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftId) && Boolean(eventGift.giftReferenceId), { always: true })
+  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftKey) && Boolean(eventGift.giftReferenceId), { always: true })
   @Column({ nullable: false })
   giftReferenceId: number;
 

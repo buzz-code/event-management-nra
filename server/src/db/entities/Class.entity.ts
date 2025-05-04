@@ -10,8 +10,8 @@ import {
 import { Student } from "./Student.entity";
 import { IsOptional } from "class-validator";
 import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, MaxLength } from "@shared/utils/validation/class-validator-he";
-import { StringType } from "@shared/utils/entity/class-transformer";
+import { IsNotEmpty, IsNumber, MaxLength } from "@shared/utils/validation/class-validator-he";
+import { NumberType, StringType } from "@shared/utils/entity/class-transformer";
 import { IHasUserId } from "@shared/base-entity/interface";
 
 @Entity("classes")
@@ -22,6 +22,13 @@ export class Class implements IHasUserId {
 
   @Column("int", { name: "user_id" })
   userId: number;
+
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @NumberType
+  @IsNumber({}, { always: true })
+  @Column("int", { name: "key" })
+  key: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })

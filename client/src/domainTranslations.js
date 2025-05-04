@@ -102,6 +102,7 @@ export default {
             name: 'מארגן |||| מארגנים',
             fields: {
                 ...generalResourceFieldsTranslation,
+                tz: 'תעודת זהות',
                 first_name: 'שם פרטי',
                 'first_name:$cont': 'חיפוש בשם פרטי',
                 last_name: 'שם משפחה',
