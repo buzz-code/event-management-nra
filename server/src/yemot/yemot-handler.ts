@@ -4,7 +4,9 @@ import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
 import { getDataSource } from "@shared/utils/entity/foreignKey.util";
 import { Student } from "src/db/entities/Student.entity";
+import { EventType } from "src/db/entities/EventType.entity";
 import { StudentHandler } from "./student-handler";
+import { EventTypeHandler } from "./event-type-handler";
 
 /**
  * Class to handle Yemot calls
@@ -14,6 +16,7 @@ export class YemotCallHandlerClass {
   private call: Call;
   private dataSource: DataSource;
   private studentHandler: StudentHandler;
+  private eventTypeHandler: EventTypeHandler;
 
   /**
    * Constructor for the YemotCallHandlerClass
@@ -31,10 +34,11 @@ export class YemotCallHandlerClass {
    */
   async initializeDataSource(): Promise<void> {
     try {
-      this.dataSource = await getDataSource([Student]);
+      this.dataSource = await getDataSource([Student, EventType]);
       this.logger.log('Data source initialized successfully');
-      // Initialize StudentHandler with the data source
+      // Initialize handlers with the data source
       this.studentHandler = new StudentHandler(this.logger, this.call, this.dataSource);
+      this.eventTypeHandler = new EventTypeHandler(this.logger, this.call, this.dataSource);
     } catch (error) {
       this.logger.error(`Failed to initialize data source: ${error.message}`);
       throw error;
@@ -94,8 +98,12 @@ export class YemotCallHandlerClass {
     // Handle student identification in a self-contained way
     // If student is not found, this method will terminate the call
     await this.studentHandler.handleStudentIdentification();
-
-    // If we reach here, the student was found successfully
+    
+    // Handle event type selection
+    // The user will be prompted to select a valid event type
+    await this.eventTypeHandler.handleEventTypeSelection();
+    
+    // If we reach here, both student identification and event type selection were successful
     await this.collectAddress(name);
     this.finishCall();
   }
