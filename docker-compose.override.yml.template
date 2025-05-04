@@ -1,15 +1,15 @@
 version: "3"
 name: event-management-nra-dev
 services:
-    event-frontend:
-        container_name: event-frontend-dev
+    client:
+        container_name: client-dev
         build:
             target: development
         ports:
           - "30013:80"
 
-    event-backend:
-        container_name: event-backend-dev
+    server:
+        container_name: server-dev
         build:
             target: development
             args:
@@ -17,11 +17,11 @@ services:
         ports:
           - "30014:3000"
 
-    event-db:
-        container_name: event-db-dev
+    database:
+        container_name: database-dev
 
-    event-phpmyadmin:
-        container_name: event-phpmyadmin-dev
+    phpmyadmin:
+        container_name: phpmyadmin-dev
         ports:
           - "30015:80"
 

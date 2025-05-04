@@ -100,18 +100,18 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
   ```
 - [ ] Build and start the Docker environment:
   ```bash
-  docker-compose build
-  docker-compose up -d
+  docker compose build
+  docker compose up -d
   ```
 - [ ] Verify the containers are running correctly:
   ```bash
-  docker-compose ps
+  docker compose ps
   ```
 - [ ] Check application logs for any errors:
   ```bash
-  docker-compose logs client
-  docker-compose logs server
-  docker-compose logs db
+  docker compose logs client
+  docker compose logs server
+  docker compose logs db
   ```
 - [ ] Validate application access:
   - Client: http://localhost:30013
@@ -164,20 +164,20 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
 - [ ] Configure the database connection in server/shared/config/typeorm.config.ts
 - [ ] Restart the server to apply configuration changes:
   ```bash
-  docker-compose restart server
+  docker compose restart server
   ```
 - [ ] Generate a database migration:
   ```bash
-  docker-compose exec server yarn migration:generate -n InitialSchema
+  docker compose exec server yarn typeorm:generate InitialSchema
   ```
 - [ ] Run the migration to create the database schema:
   ```bash
-  docker-compose exec server yarn migration:run
+  docker compose exec server yarn typeorm:run
   ```
 - [ ] Update db/data.sql with initial seed data for the new entities
 - [ ] Import the seed data:
   ```bash
-  docker-compose exec db bash -c "mysql -u root -p\$MYSQL_ROOT_PASSWORD \$MYSQL_DATABASE < /docker-entrypoint-initdb.d/data.sql"
+  docker compose exec db bash -c "mysql -u root -p\$MYSQL_ROOT_PASSWORD \$MYSQL_DATABASE < /docker-entrypoint-initdb.d/data.sql"
   ```
 
 ## Testing and Validation
@@ -185,11 +185,11 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
 ### 11. Run Tests
 - [ ] Run server-side tests:
   ```bash
-  docker-compose exec server yarn test
+  docker compose exec server yarn test
   ```
 - [ ] Run client-side tests:
   ```bash
-  docker-compose exec client yarn test
+  docker compose exec client yarn test
   ```
 - [ ] Fix any failing tests relevant to the new project
 

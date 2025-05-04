@@ -1,11 +1,11 @@
 version: "3"
 
 services:
-    event-frontend:
+    client:
         image: 'ghcr.io/buzz-code/event-management-nra-client:latest'
-        container_name: event-frontend
+        container_name: client
         depends_on:
-            - event-backend
+            - server
         deploy:
             labels:
                 caddy: $DOMAIN_NAME
@@ -24,11 +24,11 @@ services:
             - caddy
             - elknet
 
-    event-backend:
+    server:
         image: 'ghcr.io/buzz-code/event-management-nra-server:latest'
-        container_name: event-backend
+        container_name: server
         depends_on:
-            - event-db
+            - database
         deploy:
             labels:
                 caddy: api.$DOMAIN_NAME
@@ -57,9 +57,9 @@ services:
             - caddy
             - elknet
 
-    event-db:
+    database:
         image: mysql:9.3
-        container_name: event-db
+        container_name: database
         cap_add:
             - SYS_NICE
         command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
@@ -77,11 +77,11 @@ services:
         networks:
             - private-network
 
-    event-phpmyadmin:
+    phpmyadmin:
         image: phpmyadmin:5.2.1
-        container_name: event-phpmyadmin
+        container_name: phpmyadmin
         depends_on:
-            - event-db
+            - database
         deploy:
             labels:
                 caddy: sql.$DOMAIN_NAME
@@ -102,7 +102,7 @@ services:
         image: tiredofit/db-backup:4.1.17
         container_name: mysql_dump
         depends_on:
-            - event-db
+            - database
         environment:
             DB_TYPE: mysql
             DB_HOST: $MYSQL_HOST

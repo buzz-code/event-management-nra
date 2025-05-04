@@ -209,7 +209,7 @@ The YemotSimulator component allows testing call flows without requiring actual 
 
 4. Start the Docker environment:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 5. Access the application:
@@ -226,7 +226,7 @@ The entire development environment runs in Docker containers. Local npm modules 
 2. Changes to the client will automatically be detected and hot-reloaded
 3. Changes to the server may require restarting the container:
    ```bash
-   docker-compose restart server
+   docker compose restart server
    ```
 
 ### Testing
@@ -236,13 +236,13 @@ Tests should be run inside the Docker containers:
 
 ```bash
 # Client tests
-docker-compose exec client yarn test
+docker compose exec client yarn test
 
 # Server tests
-docker-compose exec server yarn test
+docker compose exec server yarn test
 
 # E2E tests
-docker-compose exec server yarn test:e2e
+docker compose exec server yarn test:e2e
 ```
 
 #### Test Coverage
@@ -256,34 +256,23 @@ Database migrations must be run inside the Docker container:
 
 1. First, dry-run the migration to verify it's correct:
    ```bash
-   docker-compose exec server yarn migration:run -n MigrationName --dry-run
+   docker compose exec server yarn typeorm:generate MigrationName --dryrun
    ```
 
 2. Generate a migration after verifying the changes:
    ```bash
-   docker-compose exec server yarn migration:generate -n MigrationName
+   docker compose exec server yarn typeorm:generate MigrationName
    ```
 
 3. Run migrations:
    ```bash
-   docker-compose exec server yarn migration:run
+   docker compose exec server yarn typeorm:run
    ```
 
 ### Deployment
 
-#### Production Deployment
-1. Build production images:
-   ```bash
-   docker-compose -f docker-compose.yml -f docker-compose-prod.yml build
-   ```
-
-2. Deploy services:
-   ```bash
-   docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d
-   ```
-
 #### Docker Swarm Deployment
 For multi-node deployments, use the Docker Swarm configuration:
 ```bash
-docker stack deploy -c docker-compose.yml -c docker-compose-swarm.yml event-management
+docker stack deploy -c docker-compose-swarm.yml event-management
 ```

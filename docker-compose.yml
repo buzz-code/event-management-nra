@@ -1,10 +1,10 @@
 version: "3"
 services:
-    event-frontend:
-        container_name: event-frontend
+    client:
+        container_name: client
         restart: unless-stopped
         depends_on:
-            - event-backend
+            - server
         build:
             context: ./client
             target: production
@@ -24,8 +24,8 @@ services:
             - elknet
 
 
-    event-backend:
-        container_name: event-backend
+    server:
+        container_name: server
         restart: unless-stopped
         build:
             context: ./server
@@ -43,7 +43,7 @@ services:
             SMTP_PASSWORD: $SMTP_PASSWORD
             YARN_CACHE_FOLDER: /yarn-cache
         depends_on:
-            - event-db
+            - database
         labels:
             caddy: api.$DOMAIN_NAME
             caddy.reverse_proxy: "{{upstreams 3000}}"
@@ -54,8 +54,8 @@ services:
             - caddy
             - elknet
 
-    event-db:
-        container_name: event-db
+    database:
+        container_name: database
         restart: unless-stopped
         build:
             context: ./db
@@ -72,17 +72,17 @@ services:
         networks:
             - private-network
 
-    event-phpmyadmin:
-        container_name: event-phpmyadmin
+    phpmyadmin:
+        container_name: phpmyadmin
         restart: unless-stopped
         depends_on:
-            - event-db
-        image: phpmyadmin
+            - database
+        image: phpmyadmin:5.2.1
         labels:
             caddy: sql.$DOMAIN_NAME
             caddy.reverse_proxy: "{{upstreams 80}}"
         environment:
-            PMA_HOST: event-db
+            PMA_HOST: $MYSQL_HOST
             MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
         # ports:
         #   - "80"
