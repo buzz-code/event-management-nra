@@ -6,12 +6,15 @@ import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { NumberType } from '@shared/utils/entity/class-transformer';
 import { getDataSource, findOneAndAssignReferenceId } from '@shared/utils/entity/foreignKey.util';
+import { IHasUserId } from '@shared/base-entity/interface';
+import { User } from '@shared/entities/User.entity';
 
 @Entity('event_gifts')
 @Unique(['eventReferenceId', 'giftReferenceId'])
 @Index('event_gifts_event_id_idx', ['eventReferenceId'], {})
 @Index('event_gifts_gift_id_idx', ['giftReferenceId'], {})
-export class EventGift {
+@Index('event_gifts_user_id_idx', ['userId'], {})
+export class EventGift implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
@@ -20,7 +23,7 @@ export class EventGift {
       dataSource = await getDataSource([Gift]);
 
       this.giftReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Gift, { key: this.giftKey }, null, this.giftReferenceId, this.giftKey
+        dataSource, Gift, { key: this.giftKey }, this.userId, this.giftReferenceId, this.giftKey
       );
     } finally {
       dataSource?.destroy();
@@ -29,6 +32,9 @@ export class EventGift {
 
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column("int", { name: "user_id" })
+  userId: number;
 
   @IsNotEmpty({ always: true })
   @Column({ nullable: false })

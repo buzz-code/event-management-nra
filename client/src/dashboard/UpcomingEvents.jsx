@@ -21,8 +21,8 @@ export const UpcomingEvents = () => {
   const { mutate, isPending, data } = useMutation({
     mutationFn: () => dataProvider.getList('event', {
       pagination: { page: 1, perPage: 5 },
-      sort: { field: 'start_date', order: 'ASC' },
-      filter: { 'start_date:$gte': new Date().toISOString().split('T')[0] }
+      sort: { field: 'eventDate', order: 'ASC' },
+      filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] }
     }),
   });
 
@@ -61,7 +61,7 @@ export const UpcomingEvents = () => {
                     <Typography fontWeight="bold">{event.name}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    {new Date(event.start_date).toLocaleDateString('he-IL')}
+                    {new Date(event.eventDate).toLocaleDateString('he-IL')}
                   </TableCell>
                   <TableCell align="right">{event.location}</TableCell>
                   <TableCell align="right">

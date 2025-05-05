@@ -16,7 +16,7 @@ export function getDefaultDashboardItems() {
           icon: 'List',
           title: 'אירועים מתוכננים',
           yearFilterType: 'none',
-          filter: { 'start_date:$gte': new Date().toISOString().split('T')[0] }
+          filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] }
       },
       {
           resource: 'student',

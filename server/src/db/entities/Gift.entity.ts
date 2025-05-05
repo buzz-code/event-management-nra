@@ -1,14 +1,19 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
 import { EventGift } from './EventGift.entity';
 import { IsOptional } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
+import { IHasUserId } from '@shared/base-entity/interface';
 
 @Entity('gifts')
-export class Gift {
+@Index("gifts_user_id_idx", ["userId"], {})
+export class Gift implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column("int", { name: "user_id" })
+  userId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
