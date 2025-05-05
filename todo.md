@@ -1,2 +1,3 @@
 # todo
-* shared yarn cache, across all projects and containers
+* take out of permission util whatever is not really shared
+* update user.jsx to hold both shared and custom permissions
