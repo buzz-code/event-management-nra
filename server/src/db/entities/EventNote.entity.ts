@@ -5,13 +5,18 @@ import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
+import { IHasUserId } from '@shared/base-entity/interface';
 
 @Entity('event_notes')
 @Index('event_notes_event_id_idx', ['eventReferenceId'], {})
 @Index('event_notes_author_id_idx', ['authorReferenceId'], {})
-export class EventNote {
+@Index('event_notes_user_id_idx', ['userId'], {})
+export class EventNote implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column("int", { name: "user_id" })
+  userId: number;
 
   @IsNotEmpty({ always: true })
   @NumberType
