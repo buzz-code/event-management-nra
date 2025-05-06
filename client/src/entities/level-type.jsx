@@ -1,17 +1,12 @@
-// filepath: /root/code-server/config/workspace/event-management-nra/client/src/entities/course-path.jsx
-import { DateField, DateInput, DateTimeInput, maxLength, number, required, TextField, TextInput, NumberInput, NumberField, ReferenceField } from 'react-admin';
+import { DateField, DateTimeInput, maxLength, number, required, TextField, TextInput, NumberInput, NumberField, ReferenceField } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
-import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
+import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 
 const filters = [
-    ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
-    ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$gte" />,
-    ({ isAdmin }) => isAdmin && <DateInput source="createdAt:$lte" />,
-    ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$gte" />,
-    ({ isAdmin }) => isAdmin && <DateInput source="updatedAt:$lte" />,
+    ...commonAdminFilters,
     <NumberInput source="key" />,
     <TextInput source="name:$cont" alwaysOn />,
     <TextInput source="description:$cont" />,
