@@ -32,8 +32,7 @@ function getConfig(): BaseEntityModuleOptions {
             getExportHeaders(): IHeader[] {
                 return [
                     { value: 'tz', label: 'ת.ז.' },
-                    { value: 'firstName', label: 'שם פרטי' },
-                    { value: 'lastName', label: 'שם משפחה' },
+                    { value: 'name', label: 'שם' },
                     { value: 'ownUser.email', label: 'כתובת מייל' },
                     { value: 'ownUser.username', label: 'שם משתמש' }
                 ];

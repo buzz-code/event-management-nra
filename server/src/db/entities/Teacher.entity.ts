@@ -19,7 +19,7 @@ import { IHasUserId } from "@shared/base-entity/interface";
 
 @Entity("teachers")
 @Index("teachers_user_id_idx", ["userId"], {})
-@Index("teachers_name_idx", ["firstName", "lastName"], {})
+@Index("teachers_name_idx", ["name"], {})
 @Index("teachers_own_user_id_idx", ["ownUserId"], {})
 export class Teacher implements IHasUserId {
   @PrimaryGeneratedColumn()
@@ -42,14 +42,7 @@ export class Teacher implements IHasUserId {
   @StringType
   @MaxLength(255, { always: true })
   @Column({ length: 255 })
-  firstName: string;
-
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255 })
-  lastName: string;
+  name: string;
 
   @CreateDateColumn()
   createdAt: Date;

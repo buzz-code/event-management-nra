@@ -106,10 +106,6 @@ export default {
                 ...generalResourceFieldsTranslation,
                 ownUserId: 'משתמש משויך',
                 tz: 'תעודת זהות',
-                firstName: 'שם פרטי',
-                'firstName:$cont': 'חיפוש בשם פרטי',
-                lastName: 'שם משפחה',
-                'lastName:$cont': 'חיפוש בשם משפחה',
             }
         },
         
