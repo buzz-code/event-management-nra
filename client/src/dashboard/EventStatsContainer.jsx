@@ -24,14 +24,14 @@ export const EventStatsContainer = () => {
         </Grid>
         <Grid item xs={12} md={4}>
           <EventStatsCard
-            title="מיקומי אירועים"
+            title="כיתות"
             resource="class"
             icon={LocationOnIcon}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <EventStatsCard
-            title="מארגני אירועים"
+            title="מורות אחראיות"
             resource="teacher"
             icon={PeopleIcon}
           />

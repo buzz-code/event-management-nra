@@ -13,16 +13,20 @@ export default {
             name: 'אירוע |||| אירועים',
             fields: {
                 ...generalResourceFieldsTranslation,
+                studentTz: 'תלמידה',
+                studentReferenceId: 'תלמידה',
+                teacherTz: 'מורה אחראית',
+                teacherReferenceId: 'מורה אחראית',
                 eventTypeReferenceId: 'סוג האירוע',
-                eventTypeKey: 'מפתח סוג האירוע',
+                eventTypeId: 'סוג האירוע',
                 levelTypeReferenceId: 'סוג רמה',
-                levelTypeKey: 'מפתח סוג רמה',
+                levelTypeId: 'סוג רמה',
+                description: 'תיאור',
                 eventDate: 'תאריך האירוע',
                 'eventDate:$gte': 'תאריך האירוע מ-',
                 'eventDate:$lte': 'תאריך האירוע עד-',
-                location: 'מיקום',
-                maxParticipants: 'מספר משתתפים מקסימלי',
-                description: 'תיאור',
+                completed: 'הושלם?',
+                grade: 'ציון',
             }
         },
         event_type: {
@@ -74,7 +78,7 @@ export default {
             }
         },
         student: {
-            name: 'משתתף |||| משתתפים',
+            name: 'תלמידה |||| תלמידות',
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
@@ -97,9 +101,10 @@ export default {
             }
         },
         teacher: {
-            name: 'מארגן |||| מארגנים',
+            name: 'מורה |||| מורות',
             fields: {
                 ...generalResourceFieldsTranslation,
+                ownUserId: 'משתמש משויך',
                 tz: 'תעודת זהות',
                 firstName: 'שם פרטי',
                 'firstName:$cont': 'חיפוש בשם פרטי',
@@ -161,6 +166,9 @@ export default {
                 mailAddressTitle: 'שם כתובת המייל',
                 bccAddress: 'כתובת מייל לשליחת עותק',
                 paymentTrackId: 'תוכנית',
+                effective_id: 'משויך למשתמש',
+                permissions: 'הרשאות',
+                additionalData: 'נתונים נוספים',
                 'additionalData.trialEndDate': 'תאריך חובת תשלום',
                 'additionalData.customTrialMessage': 'הודעה מקדימה חובת תשלום',
                 'additionalData.customTrialEndedMessage': 'הודעת סיום חובת תשלום',

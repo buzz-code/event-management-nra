@@ -20,12 +20,16 @@ import { IHasUserId } from "@shared/base-entity/interface";
 @Entity("teachers")
 @Index("teachers_user_id_idx", ["userId"], {})
 @Index("teachers_name_idx", ["firstName", "lastName"], {})
+@Index("teachers_own_user_id_idx", ["ownUserId"], {})
 export class Teacher implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id", nullable: true })
+  @Column("int", { name: "user_id" })
   userId: number;
+
+  @Column("int", { name: "own_user_id", nullable: true })
+  ownUserId: number;
 
   @IsOptional({ always: true })
   @StringType
@@ -54,8 +58,12 @@ export class Teacher implements IHasUserId {
   updatedAt: Date;
 
   @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: "userReferenceId" })
+  @JoinColumn({ name: "user_id" })
   user: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "own_user_id" })
+  ownUser: User;
 
   // @OneToMany(() => Event, event => event.teacher)
   // events: Event[];

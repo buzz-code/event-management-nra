@@ -1,4 +1,6 @@
+import { DeepPartial } from "typeorm";
 import { CrudRequest } from "@dataui/crud";
+import { CrudAuthCustomFilter, getUserIdFilter } from "@shared/auth/crud-auth.filter";
 import { BaseEntityModuleOptions } from "@shared/base-entity/interface";
 import { IHeader } from "@shared/utils/exporter/types";
 import { Event } from "src/db/entities/Event.entity";
@@ -6,10 +8,17 @@ import { Event } from "src/db/entities/Event.entity";
 function getConfig(): BaseEntityModuleOptions {
     return {
         entity: Event,
+        crudAuth: CrudAuthCustomFilter(user => {
+            const userFilter: DeepPartial<Event> = getUserIdFilter(user);
+            if (user.permissions?.teacher) {
+                userFilter['teacher.ownUserId'] = user.id;
+            }
+            return userFilter;
+        }),
         query: {
             join: {
                 eventType: { eager: false },
-                teacher: { eager: false },
+                teacher: { eager: true },
                 student: { eager: false },
                 levelType: { eager: false },
                 notes: { eager: false },

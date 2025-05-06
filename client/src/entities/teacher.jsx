@@ -23,6 +23,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
+            <ReferenceField source="ownUserId" reference="user" />
             <TextField source="tz" />
             <TextField source="firstName" />
             <TextField source="lastName" />
@@ -37,6 +38,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
+        <CommonReferenceInput source="ownUserId" reference="user" />
         <TextInput source="tz" validate={[maxLength(9)]} />
         <TextInput source="firstName" validate={[required(), maxLength(255)]} />
         <TextInput source="lastName" validate={[required(), maxLength(255)]} />

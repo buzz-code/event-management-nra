@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { useDataProvider } from 'react-admin';
+import { useDataProvider, useCreatePath, useGetPathForRecordCallback } from 'react-admin';
 import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -25,6 +25,9 @@ export const UpcomingEvents = () => {
       filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] }
     }),
   });
+  const createPath = useCreatePath();
+  const getPathForRecord = useGetPathForRecordCallback();
+  const resource = 'event';
 
   useEffect(() => {
     mutate();
@@ -74,7 +77,7 @@ export const UpcomingEvents = () => {
                   </TableCell>
                   <TableCell align="right">{event.expectedParticipants || 'לא צוין'}</TableCell>
                   <TableCell align="right">
-                    <Link to={`/event/${event.id}/show`}>
+                    <Link to={getPathForRecord({ resource, record: event })}>
                       <Chip
                         label="צפה בפרטים"
                         size="small"
@@ -94,7 +97,7 @@ export const UpcomingEvents = () => {
             אין אירועים קרובים מתוכננים
           </Typography>
           <Box mt={2}>
-            <Link to="/event/create">
+            <Link to={createPath({ resource })}>
               <Chip
                 label="יצירת אירוע חדש"
                 color="primary"

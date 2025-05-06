@@ -42,8 +42,8 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    const userId = getUserIdFromUser(req.user);
-    if (!userId) {
+    const userId = req.user?.id;
+    if (!userId || userId === -1) {
       return req.user;
     }
     const user = await this.authService.getProfile(userId);
