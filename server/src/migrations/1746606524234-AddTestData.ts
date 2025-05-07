@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner, EntityManager } from "typeorm";
-import { User } from "src/db/entities/User.entity";
+import { User } from "@shared/entities/User.entity";
 import { EventType } from "src/db/entities/EventType.entity";
 import { LevelType } from "src/db/entities/LevelType.entity";
 import { Class } from "src/db/entities/Class.entity";
