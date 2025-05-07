@@ -1,3 +1,4 @@
+import 'tsconfig-paths/register';
 import '@shared/config/crud.config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from 'src/app.module';
