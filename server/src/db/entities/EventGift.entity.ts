@@ -61,7 +61,7 @@ export class EventGift implements IHasUserId {
   @JoinColumn({ name: 'eventReferenceId' })
   event: Event;
 
-  @ManyToOne(() => Gift, gift => gift.eventGifts, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Gift, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'giftReferenceId' })
   gift: Gift;
 }

@@ -35,8 +35,8 @@ export class Gift implements IHasUserId {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @OneToMany(() => EventGift, eventGift => eventGift.gift)
-  eventGifts: EventGift[];
+  // @OneToMany(() => EventGift, eventGift => eventGift.gift)
+  // eventGifts: EventGift[];
 
   @CreateDateColumn()
   createdAt: Date;
