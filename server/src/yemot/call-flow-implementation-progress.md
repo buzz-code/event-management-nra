@@ -17,22 +17,13 @@ Last Updated: May 8, 2025
 - [x] Change error message for invalid ID to allow retry instead of ending call
 - [x] Update validation logic to prevent call termination on identification errors
 
-=== STOP and re-think ===
-If you were to write this from scratch, would you do it the same way? What handlers would you create? Would you create more or less common functions?
-
 ### Task 3: Implement Event Existence Handling Changes ❌
 - [ ] Disable ability to edit existing events
 - [ ] Add notification with phone number (0533152632) to call for modifications
 - [ ] Update event existence check logic
 
-### Task 4: Update Event Types Enumeration ❌
-- [ ] Ensure all 5 event types are properly defined:
-  - Brother wedding
-  - Sister wedding
-  - Uncle wedding
-  - Aunt wedding
-  - Bar Mitzvah
-- [ ] Update event type selection menu options
+### Task 4: Handle End-of-Year ❌
+- [ ] If the student has selected a date that is more that 6 month in the past, assume the event is in the next year
 
 ### Task 5: Implement Post-Event Update Functionality ❌
 - [ ] Create new flow for updating path completion status after celebrations

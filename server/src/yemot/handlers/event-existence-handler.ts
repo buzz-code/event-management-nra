@@ -1,18 +1,15 @@
 import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
-import { id_list_message } from "@shared/utils/yemot/yemot-router";
+import { BaseYemotHandler } from "../core/base-yemot-handler";
 import { Event } from "src/db/entities/Event.entity";
 import { Student } from "src/db/entities/Student.entity";
 import { EventType } from "src/db/entities/EventType.entity";
 
 /**
- * Class to handle event existence checking operations
+ * Handler for checking if an event already exists
  */
-export class EventExistenceHandler {
-  private logger: Logger;
-  private call: Call;
-  private dataSource: DataSource;
+export class EventExistenceHandler extends BaseYemotHandler {
   private existingEvent: Event | null = null;
   private isNewEvent: boolean = true;
 
@@ -23,9 +20,7 @@ export class EventExistenceHandler {
    * @param dataSource The initialized data source
    */
   constructor(logger: Logger, call: Call, dataSource: DataSource) {
-    this.logger = logger;
-    this.call = call;
-    this.dataSource = dataSource;
+    super(logger, call, dataSource);
   }
 
   /**
@@ -33,8 +28,11 @@ export class EventExistenceHandler {
    * @param student The student associated with the event
    * @param eventType The type of event
    * @param eventDate The date of the event
+   * @returns True if this is a new event, false if an existing event was found
    */
-  async checkEventExists(student: Student, eventType: EventType, eventDate: Date): Promise<void> {
+  async checkEventExists(student: Student, eventType: EventType, eventDate: Date): Promise<boolean> {
+    this.logStart('checkEventExists');
+    
     this.logger.log(`Checking if event exists for student ID: ${student.id}, event type: ${eventType.id}, date: ${eventDate}`);
 
     // Query for existing event with the same student, type, and date
@@ -54,15 +52,22 @@ export class EventExistenceHandler {
       // Inform the user they are editing an existing event
       const message = `נמצא אירוע קיים מסוג ${eventType.name} בתאריך ${this.formatDateForMessage(eventDate)}. ` +
                       `את עומדת לערוך את פרטי האירוע הקיים.`;
-      await id_list_message(this.call, message);
+      await this.playMessage(message);
     } else {
       this.isNewEvent = true;
       this.logger.log('No existing event found, will create a new one');
       
       // Inform the user they are creating a new event
       const message = `יצירת אירוע חדש מסוג ${eventType.name} בתאריך ${this.formatDateForMessage(eventDate)}.`;
-      await id_list_message(this.call, message);
+      await this.playMessage(message);
     }
+    
+    this.logComplete('checkEventExists', { 
+      isNewEvent: this.isNewEvent,
+      existingEventId: this.existingEvent?.id 
+    });
+    
+    return this.isNewEvent;
   }
 
   /**
