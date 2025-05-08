@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
-import { id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
+import { id_list_message, id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
 
 // Import Student entity from the correct path
 import { Student } from "src/db/entities/Student.entity";
@@ -14,6 +14,7 @@ export class StudentHandler {
   private call: Call;
   private dataSource: DataSource;
   private student: Student | null = null;
+  private maxRetries: number = 3; // Maximum number of retries for ID input
 
   /**
    * Constructor for the StudentHandler
@@ -30,21 +31,47 @@ export class StudentHandler {
   /**
    * Handles the entire student identification process
    * Collects student TZ, validates it, and finds the student
-   * If student is not found, the call will be terminated
+   * If student is not found, allows retry up to maxRetries
    */
   async handleStudentIdentification(): Promise<void> {
-    const studentTz = await this.collectStudentTz();
-    await this.findStudentByTz(studentTz);
-    // If we reach here, the student was found successfully
+    let attempts = 0;
+    let studentFound = false;
+
+    while (attempts < this.maxRetries && !studentFound) {
+      const studentTz = await this.collectStudentTz(attempts > 0);
+      studentFound = await this.findStudentByTz(studentTz);
+      
+      if (!studentFound) {
+        attempts++;
+        
+        // If we've reached the maximum number of retries, end the call
+        if (attempts >= this.maxRetries) {
+          this.logger.log(`Maximum retries (${this.maxRetries}) reached for student identification`);
+          id_list_message_with_hangup(this.call, 'לא נמצא תלמיד עם מספר תעודת זהות זה במערכת לאחר מספר ניסיונות. אנא פנה למזכירות.');
+          return;
+        }
+      }
+    }
+    
+    // If we reach here and student is found, greet the student
+    if (this.student) {
+      await id_list_message(this.call, `שלום ${this.student.firstName} ${this.student.lastName}`);
+    }
   }
 
   /**
    * Collects the student's ID number (tz)
+   * @param isRetry Whether this is a retry attempt
    * @returns The student's ID number
    * @private Internal method used by handleStudentIdentification
    */
-  private async collectStudentTz(): Promise<string> {
-    const studentTz = await this.call.read([{ type: 'text', data: 'אנא הקש את מספר תעודת הזהות שלך' }], 'tap', {
+  private async collectStudentTz(isRetry: boolean = false): Promise<string> {
+    // Use different message for retry attempts
+    const message = isRetry 
+      ? 'מספר ת.ז שגוי נא הקישי שוב' 
+      : 'אנא הקישי את מספר תעודת הזהות שלך';
+    
+    const studentTz = await this.call.read([{ type: 'text', data: message }], 'tap', {
       max_digits: 9,
       min_digits: 9,
     });
@@ -54,22 +81,21 @@ export class StudentHandler {
 
   /**
    * Finds a student by their ID number
-   * Handles the not found case internally by terminating the call
    * @param tz The student's ID number
+   * @returns boolean indicating if student was found
    * @private Internal method used by handleStudentIdentification
    */
-  private async findStudentByTz(tz: string): Promise<void> {
+  private async findStudentByTz(tz: string): Promise<boolean> {
     this.student = await this.dataSource.getRepository(Student).findOne({
       where: { tz }
     });
 
     if (this.student) {
       this.logger.log(`Found student: ${this.student.firstName} ${this.student.lastName}`);
+      return true;
     } else {
       this.logger.log(`No student found with ID number: ${tz}`);
-      // Handle not found scenario internally
-      // This will automatically terminate the function
-      id_list_message_with_hangup(this.call, 'לא נמצא תלמיד עם מספר תעודת זהות זה במערכת. אנא פנה למזכירות.');
+      return false;
     }
   }
 
