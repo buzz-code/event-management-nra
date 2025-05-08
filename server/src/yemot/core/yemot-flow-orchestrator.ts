@@ -169,29 +169,27 @@ export class YemotFlowOrchestrator {
       await giftHandler.handleMultiSelection();
       const selectedGifts = giftHandler.getSelectedGifts();
 
-      // Confirm voucher selection
-      if (selectedGifts.length > 0) {
-        const giftNames = selectedGifts.map(gift => gift.name).join(', ');
-        const confirmed = await this.confirmSelection(`השוברים שבחרת: ${giftNames}`);
-
-        if (!confirmed) {
-          // User wants to change selection, run voucher selection again
-          return await this.executeVoucherSelectionFlow();
-        }
-      }
+      // The confirmation is now handled directly within the GiftSelectionHandler
+      // No need for additional confirmation here as it's more robust in the handler
 
       if (!this.student) {
         throw new Error('Student is null in executeVoucherSelectionFlow');
       }
 
-      // Save the gifts to the event
-      const eventSaver = this.handlerFactory.createEventSaverHandler(this.logger);
+      // Only save if the selection was confirmed (with the warning)
+      if (giftHandler.isSelectionConfirmed() || selectedGifts.length === 0) {
+        // Save the gifts to the event
+        const eventSaver = this.handlerFactory.createEventSaverHandler(this.logger);
 
-      // We would need to get the event first, but for simplicity using null here
-      // In a real implementation, we would fetch the event first
-      await eventSaver.saveEvent(this.student, null, null, null, selectedGifts);
+        // We would need to get the event first, but for simplicity using null here
+        // In a real implementation, we would fetch the event first
+        await eventSaver.saveEvent(this.student, null, null, null, selectedGifts);
 
-      this.finishCall('בחירת השובר נשמרה בהצלחה במערכת');
+        this.finishCall('בחירת השובר נשמרה בהצלחה במערכת');
+      } else {
+        this.logger.warn('Voucher selection was not confirmed by user');
+        this.finishCall('בחירת השוברים לא אושרה, אנא נסי שוב מאוחר יותר.');
+      }
 
     } catch (error) {
       this.logger.error(`Error in voucher selection flow: ${error.message}`);

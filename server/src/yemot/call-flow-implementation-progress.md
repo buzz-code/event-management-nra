@@ -30,10 +30,10 @@ Last Updated: May 8, 2025
 - [x] Develop logic for recording which path was completed
 - [x] Update database schema if needed to track completion status (schema already supported this)
 
-### Task 6: Update Confirmation Steps & Process ❌
-- [ ] Add confirmation dialog after voucher selection
-- [ ] Implement confirmation prompts with option to modify selections
-- [ ] Add warning that voucher selections cannot be changed after confirmation
+### Task 6: Update Confirmation Steps & Process ✅
+- [x] Add confirmation dialog after voucher selection
+- [x] Implement confirmation prompts with option to modify selections
+- [x] Add warning that voucher selections cannot be changed after confirmation
 
 ### Task 7: Implement Terminology Changes Throughout System ❌
 - [ ] Update "Level Types" to "Path/Track" (מסלול) in all menus and messages
