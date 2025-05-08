@@ -17,13 +17,13 @@ Last Updated: May 8, 2025
 - [x] Change error message for invalid ID to allow retry instead of ending call
 - [x] Update validation logic to prevent call termination on identification errors
 
-### Task 3: Implement Event Existence Handling Changes ❌
-- [ ] Disable ability to edit existing events
-- [ ] Add notification with phone number (0533152632) to call for modifications
-- [ ] Update event existence check logic
+### Task 3: Implement Event Existence Handling Changes ✅
+- [x] Disable ability to edit existing events
+- [x] Add notification with phone number (0533152632) to call for modifications
+- [x] Update event existence check logic
 
-### Task 4: Handle End-of-Year ❌
-- [ ] If the student has selected a date that is more that 6 month in the past, assume the event is in the next year
+### Task 4: Handle End-of-Year ✅
+- [x] If the student has selected a date that is more that 6 month in the past, assume the event is in the next year
 
 ### Task 5: Implement Post-Event Update Functionality ❌
 - [ ] Create new flow for updating path completion status after celebrations

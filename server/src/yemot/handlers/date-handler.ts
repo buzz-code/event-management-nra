@@ -23,6 +23,7 @@ export class DateHandler extends BaseYemotHandler {
   private fullHebrewDate: string | null = null;
   private gregorianDate: Date | null = null;
   private currentJewishYear: number;
+  private nextJewishYear: number;
 
   /**
    * Constructor for the DateHandler
@@ -32,9 +33,10 @@ export class DateHandler extends BaseYemotHandler {
   constructor(logger: Logger, call: Call) {
     super(logger, call);
 
-    // Initialize with the current Jewish year
+    // Initialize with the current Jewish year and next year
     const today = toJewishDate(new Date());
     this.currentJewishYear = today.year;
+    this.nextJewishYear = today.year + 1;
   }
 
   /**
@@ -169,11 +171,30 @@ export class DateHandler extends BaseYemotHandler {
       throw new Error('Cannot convert to Gregorian: day or month is missing');
     }
     
-    return toGregorianDate({
+    // First convert using the current year
+    const dateWithCurrentYear = toGregorianDate({
       year: this.currentJewishYear,
       monthName: getJewishMonthByIndex(this.selectedMonth, this.currentJewishYear),
       day: this.selectedDay,
     });
+
+    // Check if the converted date is more than 6 months in the past
+    const now = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
+
+    if (dateWithCurrentYear < sixMonthsAgo) {
+      this.logger.log(`Selected date is more than 6 months in the past. Using next Jewish year (${this.nextJewishYear}) instead.`);
+      
+      // Convert again using the next year
+      return toGregorianDate({
+        year: this.nextJewishYear,
+        monthName: getJewishMonthByIndex(this.selectedMonth, this.nextJewishYear),
+        day: this.selectedDay,
+      });
+    }
+    
+    return dateWithCurrentYear;
   }
 
   /**
