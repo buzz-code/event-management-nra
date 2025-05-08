@@ -9,6 +9,8 @@ import { BaseSelectionHandler, SelectableEntity } from "./base-selection-handler
  */
 export class SelectionHandler<T extends SelectableEntity> extends BaseSelectionHandler<T> {
   protected selectedItem: T | null = null;
+  protected autoSelectSingleItem: boolean = false;
+  protected isAutoSelected: boolean = false;
   
   /**
    * Constructor for the SelectionHandler
@@ -17,15 +19,18 @@ export class SelectionHandler<T extends SelectableEntity> extends BaseSelectionH
    * @param dataSource The initialized data source
    * @param entityName The name of the entity type (for logging and messages)
    * @param entityRepository The repository to use for fetching entities
+   * @param autoSelectSingleItem Whether to automatically select if there's only one item
    */
   constructor(
     logger: Logger,
     call: Call,
     dataSource: DataSource,
     entityName: string,
-    entityRepository: Repository<T>
+    entityRepository: Repository<T>,
+    autoSelectSingleItem: boolean = false
   ) {
     super(logger, call, dataSource, entityName, entityRepository);
+    this.autoSelectSingleItem = autoSelectSingleItem;
   }
 
   /**
@@ -69,6 +74,16 @@ export class SelectionHandler<T extends SelectableEntity> extends BaseSelectionH
   }
 
   /**
+   * Announces that an item was automatically selected (when there was only one option)
+   * Can be overridden by subclasses to customize the message
+   */
+  protected async announceAutoSelectionResult(): Promise<void> {
+    if (this.selectedItem) {
+      await this.playMessage(`מצאנו ${this.entityName} אחד זמין: ${this.selectedItem.name}`);
+    }
+  }
+
+  /**
    * Handles selection with an existing item for editing flows
    * @param existingItem The existing item that may be reused
    */
@@ -102,5 +117,79 @@ export class SelectionHandler<T extends SelectableEntity> extends BaseSelectionH
    */
   getSelectedItem(): T | null {
     return this.selectedItem;
+  }
+
+  /**
+   * Checks if the item was auto-selected
+   * @returns Whether the item was auto-selected
+   */
+  wasAutoSelected(): boolean {
+    return this.isAutoSelected;
+  }
+
+  /**
+   * Overrides the base handleSelection method to add auto-selection support
+   * This template method defines the overall process flow
+   */
+  async handleSelection(): Promise<void> {
+    this.logStart('handleSelection');
+
+    // First fetch the items
+    await this.fetchItems();
+
+    if (this.items.length === 0) {
+      await this.hangupWithMessage(`אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`);
+      this.logComplete('handleSelection', { status: 'no-items' });
+      return;
+    }
+
+    // Auto-select if there's only one item and the option is enabled
+    if (this.autoSelectSingleItem && this.items.length === 1) {
+      this.selectedItem = this.items[0];
+      this.isAutoSelected = true;
+      this.logger.log(`Auto-selected the only available ${this.entityName}: ${this.selectedItem.name} (ID: ${this.selectedItem.id})`);
+      
+      // Announce the auto-selection
+      await this.announceAutoSelectionResult();
+      
+      this.logComplete('handleSelection', { status: 'auto-selected' });
+      return;
+    }
+
+    // Continue with the regular selection process for multiple items
+    let selectionComplete = false;
+    let attempts = 0;
+
+    while (!selectionComplete && attempts < this.maxRetries) {
+      try {
+        selectionComplete = await this.executeSelectionPrompt();
+
+        if (selectionComplete) {
+          // Success! Announce the selection
+          await this.announceSelectionResult();
+        } else {
+          // Selection wasn't successful, increment attempts
+          attempts++;
+          if (attempts < this.maxRetries) {
+            await this.playMessage('בחירה לא תקינה, אנא נסה שנית');
+          }
+        }
+      } catch (error) {
+        this.logger.error(`Error in selection: ${error.message}`);
+        attempts++;
+        if (attempts < this.maxRetries) {
+          await this.playMessage('אירעה שגיאה, אנא נסה שנית');
+        }
+      }
+    }
+
+    if (!selectionComplete) {
+      this.logger.error(`Maximum ${this.entityName} selection attempts reached`);
+      await this.hangupWithMessage('מספר נסיונות הבחירה הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.');
+      this.logComplete('handleSelection', { status: 'max-attempts-reached' });
+      return;
+    }
+
+    this.logComplete('handleSelection', { status: 'manual-selected' });
   }
 }

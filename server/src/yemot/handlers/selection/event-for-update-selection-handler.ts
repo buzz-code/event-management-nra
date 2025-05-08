@@ -20,7 +20,8 @@ export class EventForUpdateSelectionHandler extends SelectionHandler<SelectableE
   ) {
     // The repository here is a bit of a placeholder as fetchItems is fully overridden.
     // However, SelectionHandler constructor expects it. We pass Event repository.
-    super(logger, call, dataSource, "אירוע לעדכון", dataSource.getRepository(Event) as any);
+    // Enable auto-selection for the event update handler
+    super(logger, call, dataSource, "אירוע לעדכון", dataSource.getRepository(Event) as any, true);
   }
 
   /**
@@ -69,5 +70,15 @@ export class EventForUpdateSelectionHandler extends SelectionHandler<SelectableE
       this.logger.log(`Found ${this.items.length} eligible events for student ${this.student.tz}`);
     }
     this.logComplete('fetchItems (EventForUpdate)');
+  }
+  
+  /**
+   * Overrides the announceAutoSelectionResult method to provide a custom message
+   * for auto-selected events
+   */
+  protected async announceAutoSelectionResult(): Promise<void> {
+    if (this.selectedItem) {
+      await this.playMessage(`מצאנו אירוע אחד זמין לעדכון: ${this.selectedItem.name}`);
+    }
   }
 }
