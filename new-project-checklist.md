@@ -211,7 +211,14 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
 
 ### 14. Yemot Integration (if needed)
 - [ ] Ask if Yemot telephony integration is required
-- [ ] If yes, configure settings in server/src/yemot-handler.ts
+- [ ] If yes, configure settings in server/src/yemot/yemot-handler.ts
+- [ ] Design a custom call flow based on project requirements
+- [ ] Implement handler classes for each step of the telephony interaction
+- [ ] Structure the call flow in the main execute() function
+- [ ] Configure voice prompts and response processing
+- [ ] Implement data persistence logic for captured information
+- [ ] Test the call flow using yemot simulator on the frontend
+- [ ] Set up post-call processors for any additional actions after call completion
 
 ## Documentation
 

@@ -167,6 +167,16 @@ The system implements a structured call flow that:
 4. Provides confirmation messages
 5. Processes the collected information for event management
 
+### Yemot Handler Flow
+The call handler follows a sequential process:
+1. **Student Identification**: Identifies the caller as a registered student
+2. **Event Type Selection**: Guides the user to select an event type
+3. **Date Selection**: Collects date information for the event
+4. **Duplicate Check**: Verifies if an identical event already exists
+5. **Level Type Selection**: Captures the level/category of the event
+6. **Gift Selection**: Allows selection of up to three gifts associated with the event
+7. **Data Persistence**: Creates or updates the event record in the database
+
 ### Call Processing
 The `yemotProcessor` function handles post-call tasks such as:
 - Data validation and storage
