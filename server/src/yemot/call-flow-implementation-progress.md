@@ -4,16 +4,16 @@
 
 Last Updated: May 8, 2025
 
-### Task 1: Implement Main Menu Structure ❌
-- [ ] Create new main menu with 4 options:
+### Task 1: Implement Main Menu Structure ✅
+- [x] Create new main menu with 4 options:
   - Option 1: Report celebration
   - Option 2: Choose path/track
   - Option 3: Choose vouchers
   - Option 4: Update after celebration
-- [ ] Implement conditional access for options 2 and 3 (only for IDs with existing celebrations)
-- [ ] Establish routing logic between menu options
+- [x] Implement conditional access for options 2 and 3 (only for IDs with existing celebrations)
+- [x] Establish routing logic between menu options
 
-### Task 2: Update Student Identification Flow ❌
+### Task 2: Update Student Identification Flow 🔄 (In Progress)
 - [ ] Change error message for invalid ID to allow retry instead of ending call
 - [ ] Update validation logic to prevent call termination on identification errors
 
