@@ -20,7 +20,7 @@ import { YemotFlowOrchestrator } from "./core/yemot-flow-orchestrator";
  * The main Yemot call handler class
  * Uses our redesigned architecture with handler factory and flow orchestrator
  */
-export class YemotCallHandlerRedesigned {
+export class CallHandler {
   private logger: Logger;
   private call: Call;
   private dataSource: DataSource;
@@ -28,7 +28,7 @@ export class YemotCallHandlerRedesigned {
   private flowOrchestrator: YemotFlowOrchestrator;
 
   /**
-   * Constructor for the YemotCallHandlerRedesigned
+   * Constructor for the CallHandler class
    * @param logger Logger instance for logging call-related information
    * @param call The Yemot call object
    */
@@ -90,7 +90,7 @@ export class YemotCallHandlerRedesigned {
  * The exported Yemot call handler function
  */
 export const yemotHandlerRedesigned: YemotCallHandler = (logger) => async (call) => {
-  const handler = new YemotCallHandlerRedesigned(logger, call);
+  const handler = new CallHandler(logger, call);
   return handler.execute();
 };
 
