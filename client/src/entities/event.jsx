@@ -21,7 +21,7 @@ import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput
 import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters, notPermissionFilter } from '@shared/components/fields/PermissionFilter';
-import { isTeacher } from '@shared/utils/permissionsUtil';
+import { isTeacher } from '../utils/appPermissions';
 
 const filters = [
     ...commonAdminFilters,
