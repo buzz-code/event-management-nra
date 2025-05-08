@@ -25,10 +25,10 @@ Last Updated: May 8, 2025
 ### Task 4: Handle End-of-Year ✅
 - [x] If the student has selected a date that is more that 6 month in the past, assume the event is in the next year
 
-### Task 5: Implement Post-Event Update Functionality ❌
-- [ ] Create new flow for updating path completion status after celebrations
-- [ ] Develop logic for recording which path was completed
-- [ ] Update database schema if needed to track completion status
+### Task 5: Implement Post-Event Update Functionality ✅
+- [x] Create new flow for updating path completion status after celebrations
+- [x] Develop logic for recording which path was completed
+- [x] Update database schema if needed to track completion status (schema already supported this)
 
 ### Task 6: Update Confirmation Steps & Process ❌
 - [ ] Add confirmation dialog after voucher selection

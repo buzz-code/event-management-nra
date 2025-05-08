@@ -25,7 +25,7 @@ export class Event implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
-    cleanDateFields(this, ['eventDate']);
+    cleanDateFields(this, ['eventDate', 'completionReportDate']);
 
     let dataSource: DataSource;
     try {
@@ -45,6 +45,10 @@ export class Event implements IHasUserId {
       
       this.levelTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource, LevelType, { key: this.levelTypeId }, this.userId, this.levelTypeReferenceId, this.levelTypeId
+      );
+      
+      this.completedPathReferenceId = await findOneAndAssignReferenceId(
+        dataSource, LevelType, { key: this.completedPathKey }, this.userId, this.completedPathReferenceId, this.completedPathKey
       );
     } finally {
       dataSource?.destroy();
@@ -132,6 +136,26 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   levelTypeReferenceId: number;
 
+  @ValidateIf((event: Event) => !Boolean(event.completedPathReferenceId), { always: true })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  completedPathKey: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.completedPathKey) && Boolean(event.completedPathReferenceId), { always: true })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  completedPathReferenceId: number;
+
+  @IsOptional({ always: true })
+  @DateType
+  @IsDate({ always: true })
+  @Column({ nullable: true })
+  completionReportDate: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -153,6 +177,10 @@ export class Event implements IHasUserId {
   @ManyToOne(() => LevelType, { nullable: true })
   @JoinColumn({ name: 'levelTypeReferenceId' })
   levelType: LevelType;
+
+  @ManyToOne(() => LevelType, { nullable: true })
+  @JoinColumn({ name: 'completedPathReferenceId' })
+  completedPath: LevelType;
 
   @ManyToOne(() => User, { createForeignKeyConstraints: false })
   @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])

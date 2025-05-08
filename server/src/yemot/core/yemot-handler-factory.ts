@@ -9,6 +9,8 @@ import { GiftSelectionHandler } from "../handlers/selection/gift-handler";
 import { EventExistenceHandler } from "../handlers/event-existence-handler";
 import { DateHandler } from "../handlers/date-handler";
 import { EventSaverHandler } from "../handlers/event-saver-handler";
+import { PostEventHandler } from "../handlers/post-event-handler";
+import { EventForUpdateSelectionHandler } from "../handlers/selection/event-for-update-selection-handler";
 
 /**
  * Factory for creating Yemot handler instances
@@ -19,7 +21,7 @@ export class YemotHandlerFactory {
    * Constructor for YemotHandlerFactory
    * @param dataSource The initialized data source
    */
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
   /**
    * Creates an AuthenticationHandler instance
@@ -64,8 +66,8 @@ export class YemotHandlerFactory {
    * @param maxGifts Maximum number of gifts (optional)
    */
   createGiftHandler(
-    logger: Logger, 
-    call: Call, 
+    logger: Logger,
+    call: Call,
     maxGifts?: number
   ): GiftSelectionHandler {
     return new GiftSelectionHandler(logger, call, this.dataSource, maxGifts);
@@ -95,5 +97,24 @@ export class YemotHandlerFactory {
    */
   createEventSaverHandler(logger: Logger): EventSaverHandler {
     return new EventSaverHandler(logger, this.dataSource);
+  }
+
+  /**
+   * Creates a PostEventHandler instance
+   * @param logger Logger instance for logging
+   * @param call The Yemot call object
+   */
+  createPostEventHandler(logger: Logger, call: Call): PostEventHandler {
+    const eventSelector = new EventForUpdateSelectionHandler(
+      logger,
+      call,
+      this.dataSource
+    );
+    const levelTypeSelector = new LevelTypeSelectionHandler(
+      logger,
+      call,
+      this.dataSource
+    );
+    return new PostEventHandler(logger, call, this.dataSource, eventSelector, levelTypeSelector);
   }
 }

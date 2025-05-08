@@ -72,20 +72,20 @@ export class YemotFlowOrchestrator {
       }
 
       const existenceHandler = this.handlerFactory.createEventExistenceHandler(
-        this.logger, 
+        this.logger,
         this.call
       );
-      
+
       const isNewEvent = await existenceHandler.checkEventExists(
-        this.student, 
-        eventType, 
+        this.student,
+        eventType,
         dateInfo.gregorianDate
       );
-      
+
       // If event exists, inform user they need to call for modifications
       if (!isNewEvent) {
         await id_list_message_with_hangup(
-          this.call, 
+          this.call,
           `נמצא אירוע קיים מסוג ${eventType.name} בתאריך ${dateInfo.hebrewDate}. אין אפשרות לשנות אירוע קיים. כדי לשנות אירוע קיים יש ליצור קשר טלפוני בשעות הערב במספר 0533152632`
         );
         return;
@@ -97,7 +97,7 @@ export class YemotFlowOrchestrator {
 
       // Finish with success message
       this.finishCall('הפרטים עודכנו בהצלחה, מזל טוב');
-      
+
     } catch (error) {
       this.logger.error(`Error in report celebration flow: ${error.message}`);
       this.finishCall('אירעה שגיאה בתהליך הדיווח. אנא נסי שוב מאוחר יותר.');
@@ -114,10 +114,10 @@ export class YemotFlowOrchestrator {
     try {
       // Use level type handler for path selection
       const levelTypeHandler = this.handlerFactory.createLevelTypeHandler(
-        this.logger, 
+        this.logger,
         this.call
       );
-      
+
       await levelTypeHandler.handleSelection();
       const levelType = levelTypeHandler.getSelectedLevelType();
 
@@ -132,20 +132,20 @@ export class YemotFlowOrchestrator {
 
       // Save the level type to the event
       const eventSaver = this.handlerFactory.createEventSaverHandler(this.logger);
-      
+
       // We would need to get the event first, but for simplicity using null here
       // In a real implementation, we would fetch the event first
       await eventSaver.saveEvent(this.student, null, null, levelType);
 
       // Option to continue to voucher selection or finish
       const continueToVouchers = await this.promptContinueToVouchers();
-      
+
       if (continueToVouchers) {
         await this.executeVoucherSelectionFlow();
       } else {
         this.finishCall('בחירת המסלול נשמרה בהצלחה');
       }
-      
+
     } catch (error) {
       this.logger.error(`Error in path selection flow: ${error.message}`);
       this.finishCall('אירעה שגיאה בבחירת המסלול. אנא נסי שוב מאוחר יותר.');
@@ -162,10 +162,10 @@ export class YemotFlowOrchestrator {
     try {
       // Use gift handler for voucher selection
       const giftHandler = this.handlerFactory.createGiftHandler(
-        this.logger, 
+        this.logger,
         this.call
       );
-      
+
       await giftHandler.handleMultiSelection();
       const selectedGifts = giftHandler.getSelectedGifts();
 
@@ -186,13 +186,13 @@ export class YemotFlowOrchestrator {
 
       // Save the gifts to the event
       const eventSaver = this.handlerFactory.createEventSaverHandler(this.logger);
-      
+
       // We would need to get the event first, but for simplicity using null here
       // In a real implementation, we would fetch the event first
       await eventSaver.saveEvent(this.student, null, null, null, selectedGifts);
 
       this.finishCall('בחירת השובר נשמרה בהצלחה במערכת');
-      
+
     } catch (error) {
       this.logger.error(`Error in voucher selection flow: ${error.message}`);
       this.finishCall('אירעה שגיאה בבחירת השוברים. אנא נסי שוב מאוחר יותר.');
@@ -205,8 +205,19 @@ export class YemotFlowOrchestrator {
    */
   async executePostCelebrationUpdateFlow(): Promise<void> {
     this.logger.log('Starting post-celebration update flow');
-    // This will be implemented in a future task
-    this.finishCall('עדכון לאחר שמחה - פונקציונליות זו תיושם בקרוב');
+    const postEventHandler = this.handlerFactory.createPostEventHandler(this.logger, this.call);
+    postEventHandler.setStudent(this.student); // Set the student for the handler
+
+    const flowCompletedSuccessfully = await postEventHandler.handlePostEventUpdate();
+
+    if (flowCompletedSuccessfully) {
+      // Messages are handled within PostEventHandler
+      this.logger.log('Post-event update flow completed successfully.');
+    } else {
+      // Messages are handled within PostEventHandler, or a generic one can be played if needed
+      this.logger.log('Post-event update flow did not complete successfully or was aborted by user.');
+    }
+    // The PostEventHandler is expected to call finishCall or similar for final user messages.
   }
 
   /**
@@ -223,7 +234,7 @@ export class YemotFlowOrchestrator {
         digits_allowed: ['1', '2']
       }
     ) as string;
-    
+
     // Convert string response to number
     return parseInt(response) === 1;
   }
@@ -243,7 +254,7 @@ export class YemotFlowOrchestrator {
         digits_allowed: ['1', '2']
       }
     ) as string;
-    
+
     return response === '1';
   }
 
@@ -257,7 +268,7 @@ export class YemotFlowOrchestrator {
     try {
       // Step 1: Handle student identification
       this.student = await this.authenticateStudent();
-      
+
       if (!this.student) {
         throw new Error('Student authentication failed');
       }
@@ -266,10 +277,10 @@ export class YemotFlowOrchestrator {
       const menuHandler = this.handlerFactory.createMenuHandler(this.logger, this.call);
       menuHandler.setStudent(this.student);
       await menuHandler.checkStudentEvents();
-      
+
       // Step 3: Present main menu and get user choice
       const menuChoice = await menuHandler.presentMainMenu();
-      
+
       // Step 4: Handle the selected menu option
       switch (menuChoice) {
         case 1:
