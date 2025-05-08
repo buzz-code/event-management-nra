@@ -12,6 +12,7 @@ import { EventType } from "src/db/entities/EventType.entity";
 export class EventExistenceHandler extends BaseYemotHandler {
   private existingEvent: Event | null = null;
   private isNewEvent: boolean = true;
+  private readonly MODIFICATION_PHONE = "0533152632";
 
   /**
    * Constructor for the EventExistenceHandler
@@ -49,10 +50,15 @@ export class EventExistenceHandler extends BaseYemotHandler {
       this.isNewEvent = false;
       this.logger.log(`Found existing event ID: ${this.existingEvent.id}`);
       
-      // Inform the user they are editing an existing event
+      // Modified: Inform the user they can't edit an existing event and provide phone number
       const message = `נמצא אירוע קיים מסוג ${eventType.name} בתאריך ${this.formatDateForMessage(eventDate)}. ` +
-                      `את עומדת לערוך את פרטי האירוע הקיים.`;
+                      `לא ניתן לערוך אירוע קיים במערכת הטלפונית. ` +
+                      `אנא התקשרי למספר ${this.MODIFICATION_PHONE} לביצוע שינויים באירוע קיים.`;
       await this.playMessage(message);
+      
+      // Return false to indicate this is not a new event
+      // The flow orchestrator should handle this appropriately
+      return false;
     } else {
       this.isNewEvent = true;
       this.logger.log('No existing event found, will create a new one');
@@ -60,14 +66,9 @@ export class EventExistenceHandler extends BaseYemotHandler {
       // Inform the user they are creating a new event
       const message = `יצירת אירוע חדש מסוג ${eventType.name} בתאריך ${this.formatDateForMessage(eventDate)}.`;
       await this.playMessage(message);
+      
+      return true;
     }
-    
-    this.logComplete('checkEventExists', { 
-      isNewEvent: this.isNewEvent,
-      existingEventId: this.existingEvent?.id 
-    });
-    
-    return this.isNewEvent;
   }
 
   /**
