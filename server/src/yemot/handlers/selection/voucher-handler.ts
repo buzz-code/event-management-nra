@@ -1,3 +1,4 @@
+// filepath: /root/code-server/config/workspace/event-management-nra/server/src/yemot/handlers/selection/voucher-handler.ts
 import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
@@ -6,25 +7,25 @@ import { Gift } from "src/db/entities/Gift.entity";
 import { EventGift } from "src/db/entities/EventGift.entity";
 
 /**
- * Specialized handler for selecting multiple gifts/vouchers
+ * Specialized handler for selecting multiple vouchers
  * Extends the MultiSelectionHandler for multi-selection support
  */
-export class GiftSelectionHandler extends MultiSelectionHandler<Gift> {
+export class VoucherSelectionHandler extends MultiSelectionHandler<Gift> {
   // Track if the user has confirmed their selection with understanding it's final
   private selectionConfirmed: boolean = false;
   
   /**
-   * Constructor for the GiftSelectionHandler
+   * Constructor for the VoucherSelectionHandler
    * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source
-   * @param maxGifts Maximum number of gifts that can be selected (default: 3)
+   * @param maxVouchers Maximum number of vouchers that can be selected (default: 3)
    */
   constructor(
     logger: Logger,
     call: Call,
     dataSource: DataSource,
-    maxGifts: number = 3
+    maxVouchers: number = 3
   ) {
     super(
       logger,
@@ -32,29 +33,29 @@ export class GiftSelectionHandler extends MultiSelectionHandler<Gift> {
       dataSource,
       'שובר',
       dataSource.getRepository(Gift),
-      maxGifts
+      maxVouchers
     );
   }
 
   /**
-   * Extracts gift objects from event gift relations
-   * @param eventGifts The event gift relations to extract from
-   * @returns Array of gift objects
+   * Extracts voucher objects from event voucher relations
+   * @param eventGifts The event voucher relations to extract from
+   * @returns Array of voucher objects
    */
-  extractGiftsFromEventGifts(eventGifts: EventGift[]): Gift[] {
+  extractVouchersFromEventVouchers(eventGifts: EventGift[]): Gift[] {
     return eventGifts
       .filter(eg => eg.gift) // Filter out any invalid relations
       .map(eg => eg.gift!);
   }
 
   /**
-   * Handles gift selection with existing event gifts
-   * @param existingEventGifts The existing event gifts that may be reused
+   * Handles voucher selection with existing event vouchers
+   * @param existingEventGifts The existing event vouchers that may be reused
    */
-  async handleGiftSelectionWithEventGifts(existingEventGifts: EventGift[] | null): Promise<void> {
+  async handleVoucherSelectionWithEventVouchers(existingEventGifts: EventGift[] | null): Promise<void> {
     if (existingEventGifts && existingEventGifts.length > 0) {
-      const existingGifts = this.extractGiftsFromEventGifts(existingEventGifts);
-      await this.handleSelectionWithExisting(existingGifts);
+      const existingVouchers = this.extractVouchersFromEventVouchers(existingEventGifts);
+      await this.handleSelectionWithExisting(existingVouchers);
     } else {
       await this.handleMultiSelection();
     }
@@ -150,11 +151,20 @@ export class GiftSelectionHandler extends MultiSelectionHandler<Gift> {
   }
 
   /**
-   * Gets the selected gifts
-   * @returns Array of selected gift objects
+   * Gets the selected vouchers
+   * @returns Array of selected voucher objects
+   */
+  getSelectedVouchers(): Gift[] {
+    return this.getSelectedItems();
+  }
+  
+  /**
+   * For backward compatibility with older code
+   * @returns Array of selected voucher objects
+   * @deprecated Use getSelectedVouchers instead
    */
   getSelectedGifts(): Gift[] {
-    return this.getSelectedItems();
+    return this.getSelectedVouchers();
   }
   
   /**
@@ -163,5 +173,14 @@ export class GiftSelectionHandler extends MultiSelectionHandler<Gift> {
    */
   isSelectionConfirmed(): boolean {
     return this.selectionConfirmed;
+  }
+  
+  /**
+   * For backward compatibility with older code
+   * @param existingEventGifts The existing event vouchers that may be reused
+   * @deprecated Use handleVoucherSelectionWithEventVouchers instead
+   */
+  async handleGiftSelectionWithEventGifts(existingEventGifts: EventGift[] | null): Promise<void> {
+    await this.handleVoucherSelectionWithEventVouchers(existingEventGifts);
   }
 }

@@ -4,8 +4,8 @@ import { DataSource } from "typeorm";
 import { AuthenticationHandler } from "../handlers/authentication-handler";
 import { MenuHandler } from "../handlers/menu-handler";
 import { EventTypeSelectionHandler } from "../handlers/selection/event-type-handler";
-import { LevelTypeSelectionHandler } from "../handlers/selection/level-type-handler";
-import { GiftSelectionHandler } from "../handlers/selection/gift-handler";
+import { PathSelectionHandler } from "../handlers/selection/path-handler";
+import { VoucherSelectionHandler } from "../handlers/selection/voucher-handler";
 import { EventExistenceHandler } from "../handlers/event-existence-handler";
 import { DateHandler } from "../handlers/date-handler";
 import { EventSaverHandler } from "../handlers/event-saver-handler";
@@ -51,26 +51,26 @@ export class YemotHandlerFactory {
   }
 
   /**
-   * Creates a LevelTypeSelectionHandler instance
+   * Creates a PathSelectionHandler instance
    * @param logger Logger instance for logging
    * @param call The Yemot call object
    */
-  createLevelTypeHandler(logger: Logger, call: Call): LevelTypeSelectionHandler {
-    return new LevelTypeSelectionHandler(logger, call, this.dataSource);
+  createPathHandler(logger: Logger, call: Call): PathSelectionHandler {
+    return new PathSelectionHandler(logger, call, this.dataSource);
   }
 
   /**
-   * Creates a GiftSelectionHandler instance
+   * Creates a VoucherSelectionHandler instance
    * @param logger Logger instance for logging
    * @param call The Yemot call object
-   * @param maxGifts Maximum number of gifts (optional)
+   * @param maxVouchers Maximum number of vouchers (optional)
    */
-  createGiftHandler(
+  createVoucherHandler(
     logger: Logger,
     call: Call,
-    maxGifts?: number
-  ): GiftSelectionHandler {
-    return new GiftSelectionHandler(logger, call, this.dataSource, maxGifts);
+    maxVouchers?: number
+  ): VoucherSelectionHandler {
+    return new VoucherSelectionHandler(logger, call, this.dataSource, maxVouchers);
   }
 
   /**
@@ -110,11 +110,36 @@ export class YemotHandlerFactory {
       call,
       this.dataSource
     );
-    const levelTypeSelector = new LevelTypeSelectionHandler(
+    const pathSelector = new PathSelectionHandler(
       logger,
       call,
       this.dataSource
     );
-    return new PostEventHandler(logger, call, this.dataSource, eventSelector, levelTypeSelector);
+    return new PostEventHandler(logger, call, this.dataSource, eventSelector, pathSelector);
+  }
+  
+  /**
+   * Legacy method for backward compatibility - creates a PathSelectionHandler
+   * @param logger Logger instance for logging
+   * @param call The Yemot call object
+   * @deprecated Use createPathHandler instead
+   */
+  createLevelTypeHandler(logger: Logger, call: Call): PathSelectionHandler {
+    return this.createPathHandler(logger, call);
+  }
+  
+  /**
+   * Legacy method for backward compatibility - creates a VoucherSelectionHandler
+   * @param logger Logger instance for logging
+   * @param call The Yemot call object
+   * @param maxVouchers Maximum number of vouchers (optional)
+   * @deprecated Use createVoucherHandler instead
+   */
+  createGiftHandler(
+    logger: Logger,
+    call: Call,
+    maxVouchers?: number
+  ): VoucherSelectionHandler {
+    return this.createVoucherHandler(logger, call, maxVouchers);
   }
 }

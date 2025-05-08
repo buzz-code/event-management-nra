@@ -5,8 +5,8 @@ import { BaseYemotHandler } from "../core/base-yemot-handler";
 import { Student } from "src/db/entities/Student.entity";
 import { Event } from "src/db/entities/Event.entity";
 import { LevelType } from "src/db/entities/LevelType.entity";
-import { EventForUpdateSelectionHandler } from "./selection/event-for-update-selection-handler"; // Added
-import { LevelTypeSelectionHandler } from "./selection/level-type-handler";
+import { EventForUpdateSelectionHandler } from "./selection/event-for-update-selection-handler";
+import { PathSelectionHandler } from "./selection/path-handler";
 
 /**
  * Handler for updating post-event completion status
@@ -14,17 +14,24 @@ import { LevelTypeSelectionHandler } from "./selection/level-type-handler";
  */
 export class PostEventHandler extends BaseYemotHandler {
   private student: Student | null = null;
-  // private events: Event[] = []; // No longer needed, EventForUpdateSelectionHandler will manage its list
   private selectedEvent: Event | null = null;
-  private completedPathId: number | null = null; // This stores the ID of the selected LevelType
+  private completedPathId: number | null = null; // This stores the ID of the selected path
 
   /**
    * Constructor for the PostEventHandler
    * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source
+   * @param eventSelector Handler for selecting events to update
+   * @param pathSelector Handler for selecting the completed path
    */
-  constructor(logger: Logger, call: Call, dataSource: DataSource, private eventSelector: EventForUpdateSelectionHandler, private levelTypeSelector: LevelTypeSelectionHandler) {
+  constructor(
+    logger: Logger, 
+    call: Call, 
+    dataSource: DataSource, 
+    private eventSelector: EventForUpdateSelectionHandler, 
+    private pathSelector: PathSelectionHandler
+  ) {
     super(logger, call, dataSource);
   }
 
@@ -87,28 +94,24 @@ export class PostEventHandler extends BaseYemotHandler {
     }
   }
 
-  // Removed loadStudentEvents method - functionality moved to EventForUpdateSelectionHandler.fetchItems
-  // Removed selectEventToUpdate method - functionality replaced by EventForUpdateSelectionHandler
-  // Removed formatEventDescription method - formatting logic moved to EventForUpdateSelectionHandler
-
   /**
    * Lets the user select which path they completed
    */
   private async selectCompletedPath(): Promise<void> {
     this.logStart('selectCompletedPath');
 
-    await this.levelTypeSelector.handleSelection(); // This method handles fetching, prompting, and retries.
-    const selectedPath = this.levelTypeSelector.getSelectedItem();
+    await this.pathSelector.handleSelection(); // This method handles fetching, prompting, and retries.
+    const selectedPath = this.pathSelector.getSelectedPath();
 
     if (selectedPath) {
-      this.completedPathId = selectedPath.id; // Store the ID of the selected LevelType
+      this.completedPathId = selectedPath.id; // Store the ID of the selected path
       this.logger.log(`User selected path: ${selectedPath.name} (ID: ${this.completedPathId}, Key: ${selectedPath.key})`);
-      // The SelectionHandler already plays a confirmation message like "בחרת במסלול: [שם המסלול]"
+      // The PathSelectionHandler already plays a confirmation message like "בחרת במסלול: [שם המסלול]"
       // as per its announceSelectionResult method.
     } else {
       this.logger.log('No path selected by the user or selection process failed.');
-      // SelectionHandler handles messages for no items or max retries and hangs up if needed.
-      // If getSelectedItem() is null, it means the selection wasn't successful.
+      // PathSelectionHandler handles messages for no items or max retries and hangs up if needed.
+      // If getSelectedPath() is null, it means the selection wasn't successful.
       // The main flow in handlePostEventUpdate will check this.completedPathId and react accordingly.
     }
 
@@ -130,19 +133,19 @@ export class PostEventHandler extends BaseYemotHandler {
       throw new Error(`Event with ID ${this.selectedEvent.id} not found for update.`);
     }
 
-    // Find the LevelType entity for completedPathKey
-    const completedLevelType = await this.dataSource.getRepository(LevelType).findOneBy({ id: this.completedPathId });
-    if (!completedLevelType) {
-      throw new Error(`LevelType with ID ${this.completedPathId} not found.`);
+    // Find the path entity (LevelType) for completedPathId
+    const completedPath = await this.dataSource.getRepository(LevelType).findOneBy({ id: this.completedPathId });
+    if (!completedPath) {
+      throw new Error(`Path with ID ${this.completedPathId} not found.`);
     }
 
-    eventToUpdate.completedPathKey = completedLevelType.key; // Set the key of the selected LevelType
-    eventToUpdate.completedPathReferenceId = this.completedPathId; // Set the ID of the selected LevelType
+    eventToUpdate.completedPathKey = completedPath.key; // Set the key of the selected path
+    eventToUpdate.completedPathReferenceId = this.completedPathId; // Set the ID of the selected path
     eventToUpdate.completionReportDate = new Date();
 
     await this.dataSource.getRepository(Event).save(eventToUpdate);
 
-    this.logger.log(`Updated event ID ${this.selectedEvent.id} with completed path ID ${this.completedPathId} (Key: ${completedLevelType.key})`);
+    this.logger.log(`Updated event ID ${this.selectedEvent.id} with completed path ID ${this.completedPathId} (Key: ${completedPath.key})`);
     this.logComplete('updateEventCompletionStatus');
   }
 }

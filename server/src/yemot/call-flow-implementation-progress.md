@@ -35,10 +35,10 @@ Last Updated: May 8, 2025
 - [x] Implement confirmation prompts with option to modify selections
 - [x] Add warning that voucher selections cannot be changed after confirmation
 
-### Task 7: Implement Terminology Changes Throughout System ❌
-- [ ] Update "Level Types" to "Path/Track" (מסלול) in all menus and messages
-- [ ] Update "Gifts" to "Vouchers" (שוברים) in all menus and messages
-- [ ] Review and update all related prompts for consistency
+### Task 7: Implement Terminology Changes Throughout System ✅
+- [x] Update "Level Types" to "Path/Track" (מסלול) in all menus and messages
+- [x] Update "Gifts" to "Vouchers" (שוברים) in all menus and messages
+- [x] Review and update all related prompts for consistency
 
 ### Task 8: Update Call Ending Behavior ❌
 - [ ] Implement context-specific success messages based on completed action

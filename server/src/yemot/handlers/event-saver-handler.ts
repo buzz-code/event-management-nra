@@ -31,8 +31,8 @@ export class EventSaverHandler {
    * @param student The student associated with the event
    * @param eventType The event type
    * @param eventDate The date of the event
-   * @param levelType Optional level type (path/track)
-   * @param gifts Optional array of selected gifts
+   * @param path Optional path/track (uses LevelType entity)
+   * @param vouchers Optional array of selected vouchers (uses Gift entity)
    * @param existingEvent Optional existing event to update
    * @returns The saved event
    */
@@ -40,11 +40,11 @@ export class EventSaverHandler {
     student: Student,
     eventType: EventType,
     eventDate: Date,
-    levelType?: LevelType | null,
-    gifts?: Gift[] | null,
+    path?: LevelType | null,
+    vouchers?: Gift[] | null,
     existingEvent?: Event | null
   ): Promise<Event> {
-    this.logger.log(`Saving event data for student ${student.id}, type ${eventType.id}, date ${eventDate}`);
+    this.logger.log(`Saving event data for student ${student.id}, type ${eventType?.id || 'N/A'}, date ${eventDate || 'N/A'}`);
     
     // Start a transaction
     const queryRunner = this.dataSource.createQueryRunner();
@@ -57,12 +57,19 @@ export class EventSaverHandler {
       
       // Update event properties
       event.studentReferenceId = student.id;
-      event.eventTypeReferenceId = eventType.id;
-      event.eventDate = eventDate;
       
-      // Update level type if provided
-      if (levelType) {
-        event.levelTypeReferenceId = levelType.id;
+      // Only update these if provided (they may be null in partial updates)
+      if (eventType) {
+        event.eventTypeReferenceId = eventType.id;
+      }
+      
+      if (eventDate) {
+        event.eventDate = eventDate;
+      }
+      
+      // Update path if provided
+      if (path) {
+        event.levelTypeReferenceId = path.id;
       }
       
       // If this is a new event, save it to get an ID
@@ -74,24 +81,24 @@ export class EventSaverHandler {
         this.savedEvent = await queryRunner.manager.save(event);
         this.logger.log(`Updated event with ID: ${this.savedEvent.id}`);
         
-        // If gifts are provided, remove existing gifts to replace with new ones
-        if (gifts && gifts.length > 0) {
+        // If vouchers are provided, remove existing vouchers to replace with new ones
+        if (vouchers && vouchers.length > 0) {
           await queryRunner.manager.delete(EventGift, { eventReferenceId: this.savedEvent.id });
-          this.logger.log(`Removed existing gifts for event ${this.savedEvent.id}`);
+          this.logger.log(`Removed existing vouchers for event ${this.savedEvent.id}`);
         }
       }
       
-      // Add gifts if provided
-      if (gifts && gifts.length > 0 && this.savedEvent) {
-        const eventGifts = gifts.map(gift => {
+      // Add vouchers if provided
+      if (vouchers && vouchers.length > 0 && this.savedEvent) {
+        const eventVouchers = vouchers.map(voucher => {
           const eventGift = new EventGift();
           eventGift.eventReferenceId = this.savedEvent!.id;
-          eventGift.giftReferenceId = gift.id;
+          eventGift.giftReferenceId = voucher.id;
           return eventGift;
         });
         
-        await queryRunner.manager.save(EventGift, eventGifts);
-        this.logger.log(`Added ${eventGifts.length} gifts to event ${this.savedEvent.id}`);
+        await queryRunner.manager.save(EventGift, eventVouchers);
+        this.logger.log(`Added ${eventVouchers.length} vouchers to event ${this.savedEvent.id}`);
       }
       
       // Commit the transaction

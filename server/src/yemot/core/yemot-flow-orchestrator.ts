@@ -112,30 +112,30 @@ export class YemotFlowOrchestrator {
     this.logger.log('Starting path selection flow');
 
     try {
-      // Use level type handler for path selection
-      const levelTypeHandler = this.handlerFactory.createLevelTypeHandler(
+      // Use path handler for path selection
+      const pathHandler = this.handlerFactory.createPathHandler(
         this.logger,
         this.call
       );
 
-      await levelTypeHandler.handleSelection();
-      const levelType = levelTypeHandler.getSelectedLevelType();
+      await pathHandler.handleSelection();
+      const selectedPath = pathHandler.getSelectedPath();
 
       // Confirm path selection
-      if (!levelType) {
-        throw new Error('No level type selected');
+      if (!selectedPath) {
+        throw new Error('No path selected');
       }
 
       if (!this.student) {
         throw new Error('Student is null in executePathSelectionFlow');
       }
 
-      // Save the level type to the event
+      // Save the path to the event
       const eventSaver = this.handlerFactory.createEventSaverHandler(this.logger);
 
       // We would need to get the event first, but for simplicity using null here
       // In a real implementation, we would fetch the event first
-      await eventSaver.saveEvent(this.student, null, null, levelType);
+      await eventSaver.saveEvent(this.student, null, null, selectedPath);
 
       // Option to continue to voucher selection or finish
       const continueToVouchers = await this.promptContinueToVouchers();
@@ -154,22 +154,22 @@ export class YemotFlowOrchestrator {
 
   /**
    * Executes the voucher selection flow
-   * Allows selecting vouchers/gifts for an existing event
+   * Allows selecting vouchers for an existing event
    */
   async executeVoucherSelectionFlow(): Promise<void> {
     this.logger.log('Starting voucher selection flow');
 
     try {
-      // Use gift handler for voucher selection
-      const giftHandler = this.handlerFactory.createGiftHandler(
+      // Use voucher handler for voucher selection
+      const voucherHandler = this.handlerFactory.createVoucherHandler(
         this.logger,
         this.call
       );
 
-      await giftHandler.handleMultiSelection();
-      const selectedGifts = giftHandler.getSelectedGifts();
+      await voucherHandler.handleMultiSelection();
+      const selectedVouchers = voucherHandler.getSelectedVouchers();
 
-      // The confirmation is now handled directly within the GiftSelectionHandler
+      // The confirmation is now handled directly within the VoucherSelectionHandler
       // No need for additional confirmation here as it's more robust in the handler
 
       if (!this.student) {
@@ -177,13 +177,13 @@ export class YemotFlowOrchestrator {
       }
 
       // Only save if the selection was confirmed (with the warning)
-      if (giftHandler.isSelectionConfirmed() || selectedGifts.length === 0) {
-        // Save the gifts to the event
+      if (voucherHandler.isSelectionConfirmed() || selectedVouchers.length === 0) {
+        // Save the vouchers to the event
         const eventSaver = this.handlerFactory.createEventSaverHandler(this.logger);
 
         // We would need to get the event first, but for simplicity using null here
         // In a real implementation, we would fetch the event first
-        await eventSaver.saveEvent(this.student, null, null, null, selectedGifts);
+        await eventSaver.saveEvent(this.student, null, null, null, selectedVouchers);
 
         this.finishCall('בחירת השובר נשמרה בהצלחה במערכת');
       } else {
