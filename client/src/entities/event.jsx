@@ -31,6 +31,7 @@ const filters = [
     <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" />,
     <DateInput source="eventDate:$gte" />,
     <DateInput source="eventDate:$lte" />,
+    <TextInput source="eventHebrewMonth:$cont" alwaysOn />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -46,6 +47,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="name" />
             <TextField source="description" />
             <DateField source="eventDate" />
+            <TextField source="eventHebrewDate" />
+            <TextField source="eventHebrewMonth" />
             <BooleanField source="completed" />
             <NumberField source="grade" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}

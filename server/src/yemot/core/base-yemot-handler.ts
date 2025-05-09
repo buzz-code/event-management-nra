@@ -100,8 +100,8 @@ export abstract class BaseYemotHandler {
    */
   protected async withRetry<T>(
     operation: () => Promise<T>,
-    errorMessage: string,
     retryMessage: string,
+    errorMessage: string,
     maxAttempts: number = this.maxRetries
   ): Promise<T> {
     let attempts = 0;
@@ -124,7 +124,7 @@ export abstract class BaseYemotHandler {
     }
     
     this.logger.error(`Operation failed after ${maxAttempts} attempts: ${lastError?.message}`);
-    throw new Error(errorMessage);
+    await this.hangupWithMessage(errorMessage);
   }
 
   /**
@@ -146,5 +146,14 @@ export abstract class BaseYemotHandler {
     } else {
       this.logger.log(`Completed ${this.constructor.name}.${operation}`);
     }
+  }
+
+  /**
+   * Logs an error that occurred during a handler operation
+   * @param operation Name of the operation
+   * @param error The error that occurred
+   */
+  protected logError(operation: string, error: Error): void {
+    this.logger.error(`Error in ${this.constructor.name}.${operation}: ${error.message}`, error.stack);
   }
 }

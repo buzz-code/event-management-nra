@@ -19,6 +19,7 @@ const filters = [
     <TextInput source="motherContact:$cont" />,
     <TextInput source="fatherName:$cont" />,
     <TextInput source="fatherContact:$cont" />,
+    <TextInput source="motherPreviousName:$cont" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -36,6 +37,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="motherContact" />
             <TextField source="fatherName" />
             <TextField source="fatherContact" />
+            <TextField source="motherPreviousName" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -56,6 +58,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="motherContact" validate={[maxLength(255)]} />
         <TextInput source="fatherName" validate={[maxLength(255)]} />
         <TextInput source="fatherContact" validate={[maxLength(255)]} />
+        <TextInput source="motherPreviousName" validate={[maxLength(255)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>

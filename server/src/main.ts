@@ -7,7 +7,7 @@ import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { setupYemotRouter } from '@shared/utils/yemot/yemot-router';
-import { yemotHandler, yemotProcessor } from './yemot/yemot-handler';
+import { yemotHandlerV2, yemotProcessorV2 } from './yemot/yemot-handler-v2';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -36,7 +36,7 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.use(cookieParser());
 
-  const yemotRouter = setupYemotRouter(yemotHandler, yemotProcessor);
+  const yemotRouter = setupYemotRouter(yemotHandlerV2, yemotProcessorV2);
   app.use('/yemot/handle-call', yemotRouter);
 
   await app.listen(3000);

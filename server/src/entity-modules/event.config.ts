@@ -40,6 +40,8 @@ function getConfig(): BaseEntityModuleOptions {
                     { value: 'name', label: 'כותרת' },
                     { value: 'description', label: 'תיאור' },
                     { value: 'eventDate', label: 'תאריך אירוע' },
+                    { value: 'eventHebrewDate', label: 'תאריך עברי' },
+                    { value: 'eventHebrewMonth', label: 'חודש עברי' },
                     { value: 'completed', label: 'הושלם' },
                     { value: 'grade', label: 'ציון' },
                     { value: 'eventType.name', label: 'סוג אירוע' },

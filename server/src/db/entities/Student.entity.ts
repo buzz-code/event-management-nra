@@ -114,6 +114,12 @@ export class Student implements IHasUserId {
   @Column({ length: 255, nullable: true })
   fatherContact: string;
 
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  motherPreviousName: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

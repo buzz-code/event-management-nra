@@ -13,6 +13,7 @@ import { IHasUserId } from '@shared/base-entity/interface';
 import { User } from './User.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
+import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
 
 @Entity('events')
 @Index('events_user_id_idx', ['userId'], {})
@@ -21,6 +22,7 @@ import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
 @Index('events_student_id_idx', ['studentReferenceId'], {})
 @Index('events_level_type_id_idx', ['levelTypeReferenceId'], {})
 @Index('events_event_date_idx', ['eventDate'], {})
+@Index('events_event_hebrew_month_idx', ['eventHebrewMonth'], {})
 export class Event implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -34,22 +36,27 @@ export class Event implements IHasUserId {
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource, EventType, { key: this.eventTypeId }, null, this.eventTypeReferenceId, this.eventTypeId
       );
-      
+
       this.teacherReferenceId = await findOneAndAssignReferenceId(
         dataSource, Teacher, { tz: this.teacherTz }, this.userId, this.teacherReferenceId, this.teacherTz
       );
-      
+
       this.studentReferenceId = await findOneAndAssignReferenceId(
         dataSource, Student, { tz: this.studentTz }, this.userId, this.studentReferenceId, this.studentTz
       );
-      
+
       this.levelTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource, LevelType, { key: this.levelTypeId }, this.userId, this.levelTypeReferenceId, this.levelTypeId
       );
-      
+
       this.completedPathReferenceId = await findOneAndAssignReferenceId(
         dataSource, LevelType, { key: this.completedPathKey }, this.userId, this.completedPathReferenceId, this.completedPathKey
       );
+
+      if (this.eventDate) {
+        this.eventHebrewDate = formatHebrewDate(this.eventDate);
+        this.eventHebrewMonth = this.eventHebrewDate.split(' ')[1];
+      }
     } finally {
       dataSource?.destroy();
     }
@@ -80,6 +87,18 @@ export class Event implements IHasUserId {
   @IsDate({ always: true })
   @Column()
   eventDate: Date;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  eventHebrewDate: string;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  eventHebrewMonth: string;
 
   @IsOptional({ always: true })
   @Column({ default: false })

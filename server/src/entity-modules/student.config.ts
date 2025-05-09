@@ -32,6 +32,7 @@ function getConfig(): BaseEntityModuleOptions {
                     { value: 'motherContact', label: 'טלפון האם' },
                     { value: 'fatherName', label: 'שם האב' },
                     { value: 'fatherContact', label: 'טלפון האב' },
+                    { value: 'motherPreviousName', label: 'שם משפחה קודם של האם' },
                     { value: 'class.name', label: 'שם כיתה' }
                 ];
             }

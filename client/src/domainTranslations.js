@@ -25,6 +25,9 @@ export default {
                 eventDate: 'תאריך האירוע',
                 'eventDate:$gte': 'תאריך האירוע מ-',
                 'eventDate:$lte': 'תאריך האירוע עד-',
+                eventHebrewDate: 'תאריך עברי',
+                eventHebrewMonth: 'חודש עברי',
+                'eventHebrewMonth:$cont': 'חודש עברי',
                 completed: 'הושלם?',
                 grade: 'ציון',
             }
@@ -98,6 +101,8 @@ export default {
                 'fatherName:$cont': 'חיפוש בשם האב',
                 fatherContact: 'יצירת קשר עם האב',
                 'fatherContact:$cont': 'חיפוש ביצירת קשר עם האב',
+                motherPreviousName: 'שם משפחה קודם של האם',
+                'motherPreviousName:$cont': 'חיפוש בשם משפחה קודם של האם',
             }
         },
         teacher: {
