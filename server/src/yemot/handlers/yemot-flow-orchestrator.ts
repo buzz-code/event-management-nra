@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
-import { YemotHandlerFactoryV2 } from "./yemot-handler-factory-v2";
+import { YemotHandlerFactory } from "./yemot-handler-factory";
 import { Student } from "src/db/entities/Student.entity";
 import { CallUtils } from "../utils/call-utils";
 import { MESSAGE_CONSTANTS } from "../constants/message-constants";
@@ -12,17 +12,17 @@ import { BaseYemotHandler } from "../core/base-yemot-handler";
  * Orchestrates the call flows using our consolidated handlers
  * This is an updated version of the flow orchestrator that works with our refactored handlers
  */
-export class YemotFlowOrchestratorV2 extends BaseYemotHandler {
-  private handlerFactory: YemotHandlerFactoryV2;
+export class YemotFlowOrchestrator extends BaseYemotHandler {
+  private handlerFactory: YemotHandlerFactory;
   private student: Student | null = null;
 
   /**
-   * Constructor for YemotFlowOrchestratorV2
+   * Constructor for YemotFlowOrchestrator
    * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param handlerFactory Factory for creating handler instances
    */
-  constructor(logger: Logger, call: Call, handlerFactory: YemotHandlerFactoryV2) {
+  constructor(logger: Logger, call: Call, handlerFactory: YemotHandlerFactory) {
     super(logger, call);
     this.handlerFactory = handlerFactory;
   }
@@ -316,8 +316,8 @@ export class YemotFlowOrchestratorV2 extends BaseYemotHandler {
     this.logStart('executePostCelebrationUpdateFlow');
 
     try {
-      // Use the new PostEventUpdateHandlerV2
-      const postEventUpdateHandler = this.handlerFactory.createPostEventUpdateHandlerV2(this.logger, this.call);
+      // Use the new PostEventUpdateHandler
+      const postEventUpdateHandler = this.handlerFactory.createPostEventUpdateHandler(this.logger, this.call);
 
       if (!this.student) {
         this.logger.error('Student is null, cannot proceed with post-celebration update.');

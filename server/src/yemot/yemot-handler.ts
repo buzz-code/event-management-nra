@@ -13,17 +13,19 @@ import { EventNote } from "src/db/entities/EventNote.entity";
 import { EventGift } from "src/db/entities/EventGift.entity";
 import { Gift } from "src/db/entities/Gift.entity";
 import { Class } from "src/db/entities/Class.entity";
-import { YemotHandlerFactory } from "./core/yemot-handler-factory";
-import { YemotFlowOrchestrator } from "./core/yemot-flow-orchestrator";
+
+// Import refactored components
+import { YemotHandlerFactory } from "./handlers/yemot-handler-factory";
+import { YemotFlowOrchestrator } from "./handlers/yemot-flow-orchestrator";
 
 /**
  * The main Yemot call handler class
- * Uses our redesigned architecture with handler factory and flow orchestrator
  */
 export class CallHandler {
   private logger: Logger;
   private call: Call;
   private dataSource: DataSource;
+  
   private handlerFactory: YemotHandlerFactory;
   private flowOrchestrator: YemotFlowOrchestrator;
 
@@ -58,10 +60,10 @@ export class CallHandler {
     
     this.logger.log('Data source initialized successfully');
     
-    // Create the handler factory
-    this.handlerFactory = new YemotHandlerFactory(this.dataSource);
+    // Create the handler factory and flow orchestrator
+    this.logger.log('Using refactored components');
     
-    // Create the flow orchestrator with the factory
+    this.handlerFactory = new YemotHandlerFactory(this.dataSource);
     this.flowOrchestrator = new YemotFlowOrchestrator(
       this.logger, 
       this.call, 
@@ -89,7 +91,7 @@ export class CallHandler {
 /**
  * The exported Yemot call handler function
  */
-export const yemotHandlerRedesigned: YemotCallHandler = (logger) => async (call) => {
+export const yemotHandler: YemotCallHandler = (logger) => async (call) => {
   const handler = new CallHandler(logger, call);
   return handler.execute();
 };
@@ -97,7 +99,7 @@ export const yemotHandlerRedesigned: YemotCallHandler = (logger) => async (call)
 /**
  * The exported Yemot call processor function
  */
-export const yemotProcessorRedesigned: YemotCallProcessor = async (call, logger) => {
+export const yemotProcessor: YemotCallProcessor = async (call, logger) => {
   logger.log(`Processing call ${call.callId} from ${call.phone}`);
   // Here you can add any additional processing logic you need
 };

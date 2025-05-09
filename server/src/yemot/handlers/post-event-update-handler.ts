@@ -14,10 +14,10 @@ import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 import { EventForUpdateSelector, SelectableEventItem } from "./event-for-update-selector"; // Import the new selector
 
 /**
- * Handler for updating post-event completion status (V2)
+ * Handler for updating post-event completion status
  * Allows students to report which path they have completed after their celebration.
  */
-export class PostEventUpdateHandlerV2 extends BaseYemotHandler {
+export class PostEventUpdateHandler extends BaseYemotHandler {
   private student: Student | null = null;
   private eventPersistenceHandler: EventPersistenceHandler;
 
@@ -39,7 +39,7 @@ export class PostEventUpdateHandlerV2 extends BaseYemotHandler {
 
     try {
       if (!this.student) {
-        this.logger.error('Student not set for PostEventUpdateHandlerV2');
+        this.logger.error('Student not set for PostEventUpdateHandler');
         await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.GENERAL.ERROR, this.logger);
         return false;
       }
@@ -56,12 +56,12 @@ export class PostEventUpdateHandlerV2 extends BaseYemotHandler {
     const selectedEventItem = await eventSelector.handleSingleSelection();
 
     if (!selectedEventItem) {
-      this.logger.log('No event selected for update by user or selection failed (V2).');
+      this.logger.log('No event selected for update by user or selection failed.');
       // SelectionHelper would have played appropriate messages and hung up if necessary.
       return false;
     }
     const eventToUpdate = selectedEventItem.originalEvent;
-    this.logger.log(`Proceeding with selected event: ${eventToUpdate.name} (ID: ${eventToUpdate.id}) (V2)`);
+    this.logger.log(`Proceeding with selected event: ${eventToUpdate.name} (ID: ${eventToUpdate.id})`);
 
     // 2. Select Completed Path
     // PathSelectionHandler is a SelectionHelper<LevelType>
@@ -69,8 +69,8 @@ export class PostEventUpdateHandlerV2 extends BaseYemotHandler {
     const selectedPath = await pathSelector.handleSingleSelection();
 
     if (!selectedPath) {
-      this.logger.log('No path selected by the user or selection process failed (V2).');
-      // PathSelectionHandlerV2 (via SelectionHelper) would handle messages.
+      this.logger.log('No path selected by the user or selection process failed.');
+      // PathSelectionHandler (via SelectionHelper) would handle messages.
       await CallUtils.playMessage(this.call, MESSAGE_CONSTANTS.PATH.NO_PATH_SELECTED, this.logger);
       return false;
     }

@@ -9,18 +9,18 @@ import { Student } from "src/db/entities/Student.entity";
 import { PathSelectionHandler } from "./path-selection-handler";
 import { VoucherSelectionHandler } from "./voucher-selection-handler";
 import { EventPersistenceHandler } from "./event-persistence-handler";
-import { PostEventUpdateHandlerV2 } from "./post-event-update-handler";
+import { PostEventUpdateHandler } from "./post-event-update-handler";
 import { DateSelectionHelper } from "./date-selection-helper";
 import { EventForUpdateSelector } from "./event-for-update-selector";
 import { ConfigurableEventSelector } from "./configurable-event-selector"; // Changed import
 
 /**
- * Factory for creating Yemot handler instances - Version 2
+ * Factory for creating Yemot handler instances
  * Uses the new consolidated handlers from our refactoring
  */
-export class YemotHandlerFactoryV2 {
+export class YemotHandlerFactory {
   /**
-   * Constructor for YemotHandlerFactoryV2
+   * Constructor for YemotHandlerFactory
    * @param dataSource The initialized data source
    */
   constructor(private dataSource: DataSource) { }
@@ -89,12 +89,12 @@ export class YemotHandlerFactoryV2 {
   }
 
   /**
-   * Creates a PostEventUpdateHandlerV2 instance
+   * Creates a PostEventUpdateHandler instance
    * @param logger Logger instance for logging
    * @param call The Yemot call object
    */
-  createPostEventUpdateHandlerV2(logger: Logger, call: Call): PostEventUpdateHandlerV2 {
-    return new PostEventUpdateHandlerV2(logger, call, this.dataSource);
+  createPostEventUpdateHandler(logger: Logger, call: Call): PostEventUpdateHandler {
+    return new PostEventUpdateHandler(logger, call, this.dataSource);
   }
 
   /**

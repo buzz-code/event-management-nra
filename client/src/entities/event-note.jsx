@@ -37,7 +37,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     </>
 }
 
-const Representation = CommonRepresentation;
+const Representation = 'noteText';
 
 const importer = {
     fields: ['eventReferenceId', 'noteText'],
