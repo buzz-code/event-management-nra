@@ -12,7 +12,7 @@ import { SYSTEM_CONSTANTS } from "../constants/system-constants";
 export interface SelectableEntity {
   id: number;
   name: string;
-  key?: number;
+  key: number;
 }
 
 /**
@@ -313,16 +313,13 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
   protected async executeSelectionPrompt(): Promise<boolean> {
     this.logStart('executeSelectionPrompt');
     
-    // Create menu with item keys
-    const items = this.items.map((item, index) => {
-      if (item.key === undefined) {
-        item.key = index + 1;
-      }
-      return item;
-    });
-    
-    const maxDigits = Math.max(...items.map(item => item.key!.toString().length));
-    const allowedKeys = items.map(item => item.key!.toString());
+    // Items are expected to have keys from fetchItems.
+    // If a subclass overrides fetchItems and doesn't assign keys,
+    // this would be an issue. For now, we assume keys are present.
+    const items = this.items;
+
+    const maxDigits = Math.max(...items.map(item => item.key.toString().length));
+    const allowedKeys = items.map(item => item.key.toString());
 
     const prompt = this.createSelectionPrompt();
 
@@ -414,9 +411,10 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
       });
       
       // Assign keys to items (starting from 1)
-      this.items.forEach((item, index) => {
-        item.key = index + 1;
-      });
+      // Removed dynamic key assignment. Items are expected to have keys from the database.
+      // this.items.forEach((item, index) => {
+      //   item.key = index + 1;
+      // });
       
       this.logger.log(`Fetched ${this.items.length} ${this.entityName} options`);
       this.logComplete('fetchItems', { count: this.items.length });

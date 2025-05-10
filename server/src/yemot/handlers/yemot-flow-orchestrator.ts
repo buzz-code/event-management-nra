@@ -129,11 +129,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
       this.logger.log(`Event ${registrationResult.event?.id} registered successfully through handler.`);
       // The EventRegistrationHandler.createEvent() method already plays SAVE_SUCCESS.
-      // If we hang up here, it might be too soon if there are follow-up actions planned for the orchestrator.
-      // For now, let's assume the handler's message is sufficient and the orchestrator just returns.
-      // If a hangup is desired here, it should be a generic "thank you" or flow completion message.
-      // For now, let's remove the explicit hangup here as the sub-handler manages it.
-
+      // Orchestrator is responsible for final success message and hangup.
       await CallUtils.hangupWithMessage(
         this.call,
         MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS,
@@ -164,6 +160,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         return;
       }
 
+      // 1. Select an event for path assignment (auto-select if only one event)
       const eventSelector = this.handlerFactory.createEventForPathAssignmentSelector(
         this.logger,
         this.call,
@@ -174,17 +171,18 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       if (!selectedEventItem) {
         this.logger.warn('No event selected for path selection');
         // The selector itself should handle user messages and hangup if needed.
+        // Orchestrator is responsible for final error message and hangup if selector doesn't.
         await CallUtils.hangupWithMessage(
           this.call,
-          MESSAGE_CONSTANTS.EVENT.REPORT_ERROR,
-          this.logger // Added missing logger argument
+          MESSAGE_CONSTANTS.PATH.SELECTION_ERROR, // Use a more specific error message
+          this.logger
         );
-        return; // Correctly placed return
+        return;
       }
       const eventForPath = selectedEventItem.originalEvent;
       this.logger.log(`Selected event for path selection: ${eventForPath.name} (ID: ${eventForPath.id})`);
 
-      // Use path handler for path selection
+      // 2. Use path handler for path selection (no auto-select for paths)
       const pathHandler = this.handlerFactory.createPathHandler(
         this.logger,
         this.call
@@ -195,14 +193,20 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
       // Confirm path selection
       if (!selectedPath) {
-        throw new Error('No path selected');
+        this.logger.warn('No path selected by user.');
+        await CallUtils.hangupWithMessage(
+          this.call,
+          MESSAGE_CONSTANTS.PATH.NO_PATH_SELECTED, // Use a more specific error message
+          this.logger
+        );
+        return;
       }
 
       if (!this.student) {
-        throw new Error('Student is null in executePathSelectionFlow');
+        throw new Error('Student is null in executePathSelectionFlow'); // Should not happen if we passed student earlier
       }
 
-      // Save the path to the event using the event persistence handler
+      // 3. Save the path to the event using the event persistence handler
       const eventPersistence = this.handlerFactory.createEventPersistenceHandler(this.logger);
       // Correctly pass eventForPath as existingEvent, and null for vouchers
       await eventPersistence.saveEvent(this.student, null, null, selectedPath, null, eventForPath);
@@ -226,6 +230,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
     } catch (error) {
       this.logError('executePathSelectionFlow', error as Error);
+      // Generic error message for unexpected errors
       await CallUtils.hangupWithMessage(
         this.call,
         MESSAGE_CONSTANTS.PATH.SELECTION_ERROR,
@@ -248,7 +253,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         return;
       }
 
-      // 1. Select an event for voucher assignment
+      // 1. Select an event for voucher assignment (auto-select if only one event)
       const eventSelector = this.handlerFactory.createEventForVoucherAssignmentSelector(
         this.logger,
         this.call,
@@ -259,12 +264,18 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       if (!selectedEventItem) {
         this.logger.warn('No event selected for voucher assignment. Ending voucher flow.');
         // Selector should handle messages.
+        // Orchestrator is responsible for final error message and hangup if selector doesn't.
+        await CallUtils.hangupWithMessage(
+          this.call,
+          MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR, // Use a more specific error message
+          this.logger
+        );
         return;
       }
       const eventForVouchers = selectedEventItem.originalEvent;
       this.logger.log(`Selected event for voucher assignment: ${eventForVouchers.name} (ID: ${eventForVouchers.id})`);
 
-      // 2. Use voucher handler for voucher selection
+      // 2. Use voucher handler for voucher selection (no auto-select for vouchers)
       const voucherHandler = this.handlerFactory.createVoucherHandler(
         this.logger,
         this.call
@@ -274,16 +285,17 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       const selectedVouchers = voucherHandler.getSelectedVouchers();
 
       if (!this.student) {
-        throw new Error('Student is null in executeVoucherSelectionFlow');
+        throw new Error('Student is null in executeVoucherSelectionFlow'); // Should not happen
       }
 
-      // Only save if the selection was confirmed
+      // 3. Only save if the selection was confirmed by the handler
       if (voucherHandler.isSelectionConfirmed() || selectedVouchers.length === 0) {
         // Save the vouchers to the event using the event persistence handler
         const eventPersistence = this.handlerFactory.createEventPersistenceHandler(this.logger);
         // Correctly pass eventForVouchers as existingEvent and selectedVouchers for vouchers
         await eventPersistence.saveEvent(this.student, null, null, null, selectedVouchers, eventForVouchers);
 
+        // 4. Orchestrator plays final success message and hangs up
         await CallUtils.hangupWithMessage(
           this.call,
           MESSAGE_CONSTANTS.VOUCHER.SELECTION_SUCCESS,
@@ -291,6 +303,8 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         );
       } else {
         this.logger.warn('Voucher selection was not confirmed by user');
+        // Handler should have played the "retry selection" message.
+        // Orchestrator plays the final "not confirmed" message and hangs up.
         await CallUtils.hangupWithMessage(
           this.call,
           MESSAGE_CONSTANTS.VOUCHER.SELECTION_NOT_CONFIRMED,
@@ -300,6 +314,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
     } catch (error) {
       this.logError('executeVoucherSelectionFlow', error as Error);
+      // Generic error message for unexpected errors
       await CallUtils.hangupWithMessage(
         this.call,
         MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR,
@@ -331,14 +346,18 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       if (flowCompletedSuccessfully) {
         this.logger.log('Post-event update flow completed successfully.');
         // The handler itself plays success/error messages and can hang up.
-        // No explicit hangup here unless a specific final message is needed for this flow.
+        // Orchestrator plays the final success message and hangs up.
+        await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS, this.logger);
       } else {
         this.logger.log('Post-event update flow did not complete successfully or was aborted by user.');
         // Handler should have played appropriate messages.
+        // Orchestrator plays the final error message and hangs up if the handler didn't.
+        await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR, this.logger);
       }
 
     } catch (error) {
       this.logError('executePostCelebrationUpdateFlow', error as Error);
+      // Generic error message for unexpected errors
       await CallUtils.hangupWithMessage(
         this.call,
         MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR,

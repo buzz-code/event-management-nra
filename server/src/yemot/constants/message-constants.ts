@@ -1,3 +1,5 @@
+import { SYSTEM_CONSTANTS } from './system-constants';
+
 /**
  * Message constants for the Yemot IVR system
  * Centralizes text messages that were previously scattered throughout the codebase
@@ -134,6 +136,3 @@ export const MESSAGE_CONSTANTS = {
     UPDATE_ERROR: 'אירעה שגיאה בעדכון הפרטים. אנא נסי שנית מאוחר יותר.',
   },
 };
-
-// Import system constants to use values like support phone number
-import { SYSTEM_CONSTANTS } from './system-constants';

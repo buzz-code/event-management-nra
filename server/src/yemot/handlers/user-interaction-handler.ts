@@ -207,10 +207,11 @@ export class UserInteractionHandler extends BaseYemotHandler {
         // and (for simplicity) it doesn't have vouchers yet or policy allows re-selection.
         // For now, let's say if a path is selected and it's not post-event completed, voucher selection is possible.
         // A more robust check might involve looking at event.eventGifts.length
-        if (event.levelTypeReferenceId !== null && event.completedPathReferenceId === null) {
+        if (event.levelTypeReferenceId !== null) {
           // To be more precise for "needs vouchers":
-          // if (event.levelTypeReferenceId !== null && event.completedPathReferenceId === null && (!event.eventGifts || event.eventGifts.length === 0)) {
-          this.hasEventsForVoucherSelection = true;
+          if (!event.eventGifts || event.eventGifts.length === 0) {
+            this.hasEventsForVoucherSelection = true;
+          }
         }
       }
 
@@ -265,14 +266,20 @@ export class UserInteractionHandler extends BaseYemotHandler {
           let menuPrompt = MESSAGE_CONSTANTS.MENU.MAIN_MENU_BASE;
           const allowedOptions = [
             MenuOption.EVENT_REPORTING,
-            MenuOption.PATH_SELECTION, // Assuming these are always available for now
-            MenuOption.VOUCHER_SELECTION, // Assuming these are always available for now
             // MenuOption.EXIT // Exit is usually handled by hangup or a generic "press 9 to exit"
           ];
 
           menuPrompt += `\nלדיווח על אירוע הקישי ${MenuOption.EVENT_REPORTING}`;
-          menuPrompt += `\nלבחירת מסלול ראשונית הקישי ${MenuOption.PATH_SELECTION}`;
-          menuPrompt += `\nלבחירת שוברים ראשונית הקישי ${MenuOption.VOUCHER_SELECTION}`;
+
+          if (this.hasEventsForPathSelection) {
+            menuPrompt += `\nלבחירת מסלול ראשונית הקישי ${MenuOption.PATH_SELECTION}`;
+            allowedOptions.push(MenuOption.PATH_SELECTION);
+          }
+
+          if (this.hasEventsForVoucherSelection) {
+            menuPrompt += `\nלבחירת שוברים ראשונית הקישי ${MenuOption.VOUCHER_SELECTION}`;
+            allowedOptions.push(MenuOption.VOUCHER_SELECTION);
+          }
 
           if (this.hasEventsForUpdate) {
             menuPrompt += `\nלעדכון פרטי מסלול לאחר אירוע הקישי ${MenuOption.POST_EVENT_UPDATE}`;

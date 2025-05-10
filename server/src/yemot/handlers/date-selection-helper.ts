@@ -75,7 +75,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
           
           return true;
         },
-        MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT,
+        '',
         MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED
       );
       

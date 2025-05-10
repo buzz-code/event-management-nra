@@ -22,7 +22,7 @@ export class PathSelectionHandler extends SelectionHelper<LevelType> {
       dataSource,
       'מסלול',
       dataSource.getRepository(LevelType),
-      false, // Don't auto-select
+      false, // autoSelectSingleItem: Auto-selection is NOT required for Path selection (only for Event entities). User must explicitly select.
       1 // Single selection
     );
   }

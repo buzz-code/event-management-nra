@@ -101,6 +101,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
   /**
    * Selects the event type
+   * Refined error handling to return after hangup instead of throwing.
    */
   private async selectEventType(): Promise<void> {
     this.logStart('selectEventType');
@@ -115,9 +116,9 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       
       if (this.eventTypes.length === 0) {
         this.logger.warn('No event types found in the database.');
-        // It might be better to inform the user and hang up rather than throwing an error that leads to a generic error message.
+        // Inform the user and hang up, then return to stop further execution in this flow.
         await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.GENERAL.ERROR, this.logger); // Or a more specific message
-        throw new Error('No event types available for selection.'); // This error will be caught by handleEventRegistration
+        return; // Return after hanging up
       }
       
       const eventTypeOptions = this.eventTypes.map((et, index) => 
@@ -165,7 +166,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       this.logComplete('selectEventType', { eventTypeId: this.selectedEventType.id });
     } catch (error) {
       this.logError('selectEventType', error as Error);
-      throw error;
+      throw error; // Still throw for unexpected errors
     }
   }
 
