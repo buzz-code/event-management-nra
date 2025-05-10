@@ -1,6 +1,9 @@
 import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
+import { Event as DBEvent } from "src/db/entities/Event.entity";
+
+import { EventEligibilityType } from "../utils/event-eligibility.util";
 
 // Import our new consolidated handlers
 import { UserInteractionHandler } from "./user-interaction-handler";
@@ -115,8 +118,8 @@ export class YemotHandlerFactory {
    * @param student Authenticated student
    * @returns An EventForPathAssignmentSelector instance
    */
-  createEventForPathAssignmentSelector(logger: Logger, call: Call, student: Student): ConfigurableEventSelector {
-    return new ConfigurableEventSelector(logger, call, this.dataSource, student);
+  createEventForPathAssignmentSelector(logger: Logger, call: Call, student: Student, events: DBEvent[]): ConfigurableEventSelector {
+    return new ConfigurableEventSelector(logger, call, this.dataSource, student, events, EventEligibilityType.PATH, true);
   }
 
   /**
@@ -124,9 +127,22 @@ export class YemotHandlerFactory {
    * @param logger Logger instance
    * @param call Yemot call object
    * @param student Authenticated student
+   * @param events Student's events
    * @returns An EventForVoucherAssignmentSelector instance
    */
-  createEventForVoucherAssignmentSelector(logger: Logger, call: Call, student: Student): ConfigurableEventSelector {
-    return new ConfigurableEventSelector(logger, call, this.dataSource, student);
+  createEventForVoucherAssignmentSelector(logger: Logger, call: Call, student: Student, events: DBEvent[]): ConfigurableEventSelector {
+    return new ConfigurableEventSelector(logger, call, this.dataSource, student, events, EventEligibilityType.VOUCHER, true);
+  }
+
+  /**
+   * Creates an EventForPostUpdateSelector instance
+   * @param logger Logger instance
+   * @param call Yemot call object
+   * @param student Authenticated student
+   * @param events Student's events
+   * @returns An EventForPostUpdateSelector instance
+   */
+  createEventForPostUpdateSelector(logger: Logger, call: Call, student: Student, events: DBEvent[]): ConfigurableEventSelector {
+    return new ConfigurableEventSelector(logger, call, this.dataSource, student, events, EventEligibilityType.POST_UPDATE, true);
   }
 }

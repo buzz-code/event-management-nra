@@ -3,7 +3,8 @@ import { Call } from "yemot-router2";
 import { DataSource, IsNull } from "typeorm";
 import { BaseYemotHandler } from "../core/base-yemot-handler";
 import { Student } from "src/db/entities/Student.entity";
-import { Event } from "src/db/entities/Event.entity";
+import { Event as DBEvent } from "src/db/entities/Event.entity";
+import { EventEligibilityUtil } from "../utils/event-eligibility.util";
 import { CallUtils } from "../utils/call-utils";
 import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 import { SYSTEM_CONSTANTS } from "../constants/system-constants";
@@ -25,6 +26,7 @@ export enum MenuOption {
  */
 export class UserInteractionHandler extends BaseYemotHandler {
   private authenticatedStudent: Student | null = null;
+  private studentEvents: DBEvent[] = [];
   private selectedMenuOption: MenuOption | null = null;
   private hasEventsForUpdate: boolean = false;
   private hasEventsForPathSelection: boolean = false;
@@ -105,9 +107,27 @@ export class UserInteractionHandler extends BaseYemotHandler {
             }
           );
 
+          // First, fetch just the student
           const student = await this.dataSource.getRepository(Student).findOne({
-            where: { tz },
+            where: { tz }
           });
+
+          if (student) {
+            // Then, fetch their events with all needed relations
+            this.studentEvents = await this.dataSource.getRepository(DBEvent)
+              .find({
+                where: { studentReferenceId: student.id },
+                relations: [
+                  'eventType',
+                  'eventGifts',
+                  'eventGifts.gift',
+                  'levelType'
+                ]
+              });
+
+            // Store the student
+            this.authenticatedStudent = student;
+          }
 
           if (!student) {
             this.logger.warn(`Student with ID ${tz} not found`);
@@ -168,62 +188,40 @@ export class UserInteractionHandler extends BaseYemotHandler {
       return;
     }
 
-    try {
-      const eventRepository = this.dataSource.getRepository(Event);
-      // Fetch events that are not yet fully completed via post-event update,
-      // and load relations needed for logic.
-      const events = await eventRepository.find({
-        where: {
-          studentReferenceId: this.authenticatedStudent.id,
-          // completedPathReferenceId: IsNull(), // Consider if this filter is too restrictive for path/voucher
-        },
-        relations: ['eventGifts', 'levelType'], // levelType for path, eventGifts for vouchers
-      });
+    // Use the events we fetched separately
+    const events = this.studentEvents;
 
-      if (events.length === 0) {
-        this.logger.log(`No events found for student ${this.authenticatedStudent.id} to check for menu options.`);
-        this.logComplete('checkStudentEvents', { eventsChecked: 0, hasEventsForUpdate: false, hasEventsForPathSelection: false, hasEventsForVoucherSelection: false });
-        return;
-      }
-
-      this.logger.log(`Found ${events.length} events for student ${this.authenticatedStudent.id} to check for menu options.`);
-
-      for (const event of events) {
-        // Check for Post-Event Update eligibility
-        if (event.completedPathReferenceId === null && event.eventDate < new Date()) {
-          // Event is not yet marked as completed with a path and the event date is in the past
-          this.hasEventsForUpdate = true;
-        }
-
-        // Check for Path Selection eligibility
-        // An event is eligible if it doesn't have a path selected yet.
-        // We also consider only events that are not yet fully completed by post-event update.
-        if (event.levelTypeReferenceId === null && event.completedPathReferenceId === null) {
-          this.hasEventsForPathSelection = true;
-        }
-
-        // Check for Voucher Selection eligibility
-        // An event is eligible if a path is selected, it's not fully completed by post-event update,
-        // and (for simplicity) it doesn't have vouchers yet or policy allows re-selection.
-        // For now, let's say if a path is selected and it's not post-event completed, voucher selection is possible.
-        // A more robust check might involve looking at event.eventGifts.length
-        if (event.levelTypeReferenceId !== null) {
-          // To be more precise for "needs vouchers":
-          if (!event.eventGifts || event.eventGifts.length === 0) {
-            this.hasEventsForVoucherSelection = true;
-          }
-        }
-      }
-
-      this.logger.log(`Student ${this.authenticatedStudent.id} eligibility: Update=${this.hasEventsForUpdate}, Path=${this.hasEventsForPathSelection}, Voucher=${this.hasEventsForVoucherSelection}`);
-
-    } catch (error) {
-      this.logError('checkStudentEvents', error as Error);
-      // Default to false on error for all flags
-      this.hasEventsForUpdate = false;
-      this.hasEventsForPathSelection = false;
-      this.hasEventsForVoucherSelection = false;
+    if (events.length === 0) {
+      this.logger.log(`No events found for student ${this.authenticatedStudent.id} to check for menu options.`);
+      this.logComplete('checkStudentEvents', { eventsChecked: 0, hasEventsForUpdate: false, hasEventsForPathSelection: false, hasEventsForVoucherSelection: false });
+      return;
     }
+
+    this.logger.log(`Found ${events.length} events for student ${this.authenticatedStudent.id} to check for menu options.`);
+
+    for (const event of events) {
+      // Check for Post-Event Update eligibility
+      if (event.completedPathReferenceId === null && event.eventDate < new Date()) {
+        // Event is not yet marked as completed with a path and the event date is in the past
+        this.hasEventsForUpdate = true;
+      }
+
+      // Check eligibility using shared utility functions
+      if (EventEligibilityUtil.isEligibleForPathSelection(event)) {
+        this.hasEventsForPathSelection = true;
+      }
+
+      if (EventEligibilityUtil.isEligibleForVoucherSelection(event)) {
+        this.hasEventsForVoucherSelection = true;
+      }
+
+      if (EventEligibilityUtil.isEligibleForPostEventUpdate(event)) {
+        this.hasEventsForUpdate = true;
+      }
+    }
+
+    this.logger.log(`Student ${this.authenticatedStudent.id} eligibility: Update=${this.hasEventsForUpdate}, Path=${this.hasEventsForPathSelection}, Voucher=${this.hasEventsForVoucherSelection}`);
+
     this.logComplete('checkStudentEvents', {
       hasEventsForUpdate: this.hasEventsForUpdate,
       hasEventsForPathSelection: this.hasEventsForPathSelection,
@@ -372,5 +370,13 @@ export class UserInteractionHandler extends BaseYemotHandler {
    */
   getSelectedMenuOption(): MenuOption | null {
     return this.selectedMenuOption;
+  }
+
+  /**
+   * Gets the student's events that were loaded during authentication
+   * @returns Array of student's events
+   */
+  getStudentEvents(): DBEvent[] {
+    return this.studentEvents;
   }
 }

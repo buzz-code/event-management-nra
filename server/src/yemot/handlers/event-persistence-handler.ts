@@ -1,6 +1,6 @@
 import { Logger } from "@nestjs/common";
 import { DataSource } from "typeorm";
-import { Event } from "src/db/entities/Event.entity";
+import { Event as DBEvent } from "src/db/entities/Event.entity";
 import { Student } from "src/db/entities/Student.entity";
 import { EventType } from "src/db/entities/EventType.entity";
 import { LevelType } from "src/db/entities/LevelType.entity";
@@ -16,7 +16,7 @@ import { BaseYemotHandler } from "../core/base-yemot-handler";
 export class EventPersistenceHandler {
   private logger: Logger;
   private dataSource: DataSource;
-  private savedEvent: Event | null = null;
+  private savedEvent: DBEvent | null = null;
 
   /**
    * Constructor for the EventPersistenceHandler
@@ -69,13 +69,13 @@ export class EventPersistenceHandler {
    * @returns The saved event
    */
   async saveEvent(
-    student: Student,
-    eventType?: EventType | null,
-    eventDate?: Date | null,
-    path?: LevelType | null,
-    vouchers?: Gift[] | null,
-    existingEvent?: Event | null
-  ): Promise<Event> {
+   student: Student,
+   eventType?: EventType | null,
+   eventDate?: Date | null,
+   path?: LevelType | null,
+   vouchers?: Gift[] | null,
+   existingEvent?: DBEvent | null
+ ): Promise<DBEvent> {
     this.logStart('saveEvent');
     
     if (eventType) this.logger.log(`Event type: ${eventType.id} - ${eventType.name}`);
@@ -86,7 +86,7 @@ export class EventPersistenceHandler {
     await queryRunner.startTransaction();
     
     try {
-      const event = existingEvent || new Event();
+      const event = existingEvent || new DBEvent();
       
       event.studentReferenceId = student.id;
       
@@ -104,10 +104,10 @@ export class EventPersistenceHandler {
       }
       
       if (!existingEvent) {
-        this.savedEvent = await queryRunner.manager.save(event);
+        this.savedEvent = await queryRunner.manager.save(DBEvent, event);
         this.logger.log(`Created new event with ID: ${this.savedEvent.id}`);
       } else {
-        this.savedEvent = await queryRunner.manager.save(event);
+        this.savedEvent = await queryRunner.manager.save(DBEvent, event);
         this.logger.log(`Updated event with ID: ${this.savedEvent.id}`);
         
         if (vouchers && vouchers.length > 0) {
@@ -132,6 +132,25 @@ export class EventPersistenceHandler {
       await queryRunner.commitTransaction();
       this.logger.log(`Event ${this.savedEvent.id} saved successfully`);
       
+      // Fetch the updated event with all relations
+      // Load fresh copy of the saved event with all relations
+      const updatedEvent = await queryRunner.manager.getRepository(DBEvent).findOne({
+        where: {
+          id: this.savedEvent!.id
+        },
+        relations: [
+          'eventType',
+          'levelType',
+          'eventGifts',
+          'eventGifts.gift'
+        ]
+      });
+
+      if (!updatedEvent) {
+        throw new Error(`Could not fetch updated event with ID ${this.savedEvent.id}`);
+      }
+
+      this.savedEvent = updatedEvent;
       this.logComplete('saveEvent', { eventId: this.savedEvent.id });
       return this.savedEvent;
     } catch (error) {
@@ -149,7 +168,7 @@ export class EventPersistenceHandler {
    * @param note The note text
    * @returns The saved event note
    */
-  async addEventNote(event: Event, note: string): Promise<EventNote> {
+  async addEventNote(event: DBEvent, note: string): Promise<EventNote> {
     this.logStart('addEventNote');
     
     const eventNote = new EventNote();
@@ -172,13 +191,30 @@ export class EventPersistenceHandler {
    * @param completed Whether the event was completed
    * @returns The updated event
    */
-  async updateEventCompletion(event: Event, completed: boolean): Promise<Event> {
+  async updateEventCompletion(event: DBEvent, completed: boolean): Promise<DBEvent> {
     this.logStart('updateEventCompletion');
     
     event.completed = completed;
     
     try {
-      const updatedEvent = await this.dataSource.getRepository(Event).save(event);
+      // Save the update
+      await this.dataSource.getRepository(DBEvent).save(event);
+      
+      // Load fresh copy with relations
+      const updatedEvent = await this.dataSource.getRepository(DBEvent).findOne({
+        where: { id: event.id },
+        relations: [
+          'eventType',
+          'levelType',
+          'eventGifts',
+          'eventGifts.gift'
+        ]
+      });
+
+      if (!updatedEvent) {
+        throw new Error(`Could not fetch updated event with ID ${event.id}`);
+      }
+
       this.logComplete('updateEventCompletion', { eventId: event.id, completed });
       return updatedEvent;
     } catch (error) {
@@ -193,11 +229,11 @@ export class EventPersistenceHandler {
    * @param includeCompleted Whether to include completed events
    * @returns Array of events
    */
-  async findStudentEvents(student: Student, includeCompleted?: boolean): Promise<Event[]> {
+  async findStudentEvents(student: Student, includeCompleted?: boolean): Promise<DBEvent[]> {
     this.logStart('findStudentEvents');
     
     try {
-      let queryBuilder = this.dataSource.getRepository(Event)
+      let queryBuilder = this.dataSource.getRepository(DBEvent)
         .createQueryBuilder('event')
         .leftJoinAndSelect('event.eventType', 'eventType')
         .leftJoinAndSelect('event.levelType', 'levelType')
@@ -225,11 +261,11 @@ export class EventPersistenceHandler {
    * @param eventId The ID of the event to find
    * @returns The event with all relations or null if not found
    */
-  async findEventById(eventId: number): Promise<Event | null> {
+  async findEventById(eventId: number): Promise<DBEvent | null> {
     this.logStart('findEventById');
     
     try {
-      const event = await this.dataSource.getRepository(Event).findOne({
+      const event = await this.dataSource.getRepository(DBEvent).findOne({
         where: { id: eventId },
         relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift', 'student']
       });
@@ -248,7 +284,7 @@ export class EventPersistenceHandler {
    * @param completedPath The path (LevelType) that was completed.
    * @returns The updated event.
    */
-  async recordEventCompletion(eventToUpdate: Event, completedPath: LevelType): Promise<Event> {
+  async recordEventCompletion(eventToUpdate: DBEvent, completedPath: LevelType): Promise<DBEvent> {
     this.logStart('recordEventCompletion');
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -256,7 +292,7 @@ export class EventPersistenceHandler {
     await queryRunner.startTransaction();
 
     try {
-      const event = await queryRunner.manager.findOneBy(Event, { id: eventToUpdate.id });
+      const event = await queryRunner.manager.findOneBy(DBEvent, { id: eventToUpdate.id });
       if (!event) {
         throw new Error(`Event with ID ${eventToUpdate.id} not found for completion update.`);
       }
@@ -266,7 +302,7 @@ export class EventPersistenceHandler {
       event.completionReportDate = new Date();
       // event.completed = true; // Consider if this should also be set here explicitly
 
-      this.savedEvent = await queryRunner.manager.save(Event, event);
+      this.savedEvent = await queryRunner.manager.save(DBEvent, event);
       await queryRunner.commitTransaction();
       
       this.logComplete('recordEventCompletion', {
@@ -288,7 +324,7 @@ export class EventPersistenceHandler {
    * Gets the saved event from the last operation
    * @returns The saved event
    */
-  getSavedEvent(): Event | null {
+  getSavedEvent(): DBEvent | null {
     return this.savedEvent;
   }
 }

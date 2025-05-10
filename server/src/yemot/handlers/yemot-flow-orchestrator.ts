@@ -3,6 +3,7 @@ import { Call } from "yemot-router2";
 import { id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
 import { YemotHandlerFactory } from "./yemot-handler-factory";
 import { Student } from "src/db/entities/Student.entity";
+import { Event as DBEvent } from "src/db/entities/Event.entity";
 import { CallUtils } from "../utils/call-utils";
 import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 import { MenuOption } from "./user-interaction-handler";
@@ -15,6 +16,7 @@ import { BaseYemotHandler } from "../core/base-yemot-handler";
 export class YemotFlowOrchestrator extends BaseYemotHandler {
   private handlerFactory: YemotHandlerFactory;
   private student: Student | null = null;
+  private studentEvents: DBEvent[] = [];
 
   /**
    * Constructor for YemotFlowOrchestrator
@@ -43,6 +45,12 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       );
 
       const interactionResult = await userInteractionHandler.handleUserInteraction();
+      
+      if (interactionResult) {
+        this.student = interactionResult.student;
+        // Get the student's events using the proper method
+        this.studentEvents = userInteractionHandler.getStudentEvents();
+      }
 
       if (!interactionResult) {
         this.logger.warn('User interaction failed (authentication or menu selection), ending call flow.');
@@ -164,7 +172,8 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       const eventSelector = this.handlerFactory.createEventForPathAssignmentSelector(
         this.logger,
         this.call,
-        this.student
+        this.student,
+        this.studentEvents
       );
       
       const selectedEventItem = await eventSelector.handleSingleSelection();
@@ -209,7 +218,13 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       // 3. Save the path to the event using the event persistence handler
       const eventPersistence = this.handlerFactory.createEventPersistenceHandler(this.logger);
       // Correctly pass eventForPath as existingEvent, and null for vouchers
-      await eventPersistence.saveEvent(this.student, null, null, selectedPath, null, eventForPath);
+      const updatedEvent = await eventPersistence.saveEvent(this.student, null, null, selectedPath, null, eventForPath);
+
+      // Update the event in our local array with the new data
+      const eventIndex = this.studentEvents.findIndex(e => e.id === updatedEvent.id);
+      if (eventIndex !== -1) {
+        this.studentEvents[eventIndex] = updatedEvent;
+      }
 
       // Option to continue to voucher selection or finish
       const continueToVouchers = await CallUtils.getConfirmation(
@@ -219,7 +234,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       );
 
       if (continueToVouchers) {
-        await this.executeVoucherSelectionFlow();
+        await this.executeVoucherSelectionFlow(updatedEvent);
       } else {
         await CallUtils.hangupWithMessage(
           this.call,
@@ -242,8 +257,9 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
   /**
    * Executes the voucher selection flow
    * Allows selecting vouchers for an existing event
+   * @param selectedEvent Optional: An event that was already selected in a previous step (e.g., path selection)
    */
-  async executeVoucherSelectionFlow(): Promise<void> {
+  async executeVoucherSelectionFlow(selectedEvent: DBEvent | null = null): Promise<void> {
     this.logStart('executeVoucherSelectionFlow');
 
     try {
@@ -253,27 +269,36 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         return;
       }
 
-      // 1. Select an event for voucher assignment (auto-select if only one event)
-      const eventSelector = this.handlerFactory.createEventForVoucherAssignmentSelector(
-        this.logger,
-        this.call,
-        this.student
-      );
-      const selectedEventItem = await eventSelector.handleSingleSelection();
+      let eventForVouchers: DBEvent;
 
-      if (!selectedEventItem) {
-        this.logger.warn('No event selected for voucher assignment. Ending voucher flow.');
-        // Selector should handle messages.
-        // Orchestrator is responsible for final error message and hangup if selector doesn't.
-        await CallUtils.hangupWithMessage(
+      if (selectedEvent) {
+        // Use the event passed from a previous step
+        eventForVouchers = selectedEvent;
+        this.logger.log(`Using pre-selected event for voucher assignment: ${eventForVouchers.name} (ID: ${eventForVouchers.id})`);
+      } else {
+        // 1. Select an event for voucher assignment (auto-select if only one event)
+        const eventSelector = this.handlerFactory.createEventForVoucherAssignmentSelector(
+          this.logger,
           this.call,
-          MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR, // Use a more specific error message
-          this.logger
+          this.student,
+          this.studentEvents
         );
-        return;
+        const selectedEventItem = await eventSelector.handleSingleSelection();
+
+        if (!selectedEventItem) {
+          this.logger.warn('No event selected for voucher assignment. Ending voucher flow.');
+          // Selector should handle messages.
+          // Orchestrator is responsible for final error message and hangup if selector doesn't.
+          await CallUtils.hangupWithMessage(
+            this.call,
+            MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR, // Use a more specific error message
+            this.logger
+          );
+          return;
+        }
+        eventForVouchers = selectedEventItem.originalEvent;
+        this.logger.log(`Selected event for voucher assignment: ${eventForVouchers.name} (ID: ${eventForVouchers.id})`);
       }
-      const eventForVouchers = selectedEventItem.originalEvent;
-      this.logger.log(`Selected event for voucher assignment: ${eventForVouchers.name} (ID: ${eventForVouchers.id})`);
 
       // 2. Use voucher handler for voucher selection (no auto-select for vouchers)
       const voucherHandler = this.handlerFactory.createVoucherHandler(
@@ -293,7 +318,13 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         // Save the vouchers to the event using the event persistence handler
         const eventPersistence = this.handlerFactory.createEventPersistenceHandler(this.logger);
         // Correctly pass eventForVouchers as existingEvent and selectedVouchers for vouchers
-        await eventPersistence.saveEvent(this.student, null, null, null, selectedVouchers, eventForVouchers);
+        const updatedEvent = await eventPersistence.saveEvent(this.student, null, null, null, selectedVouchers, eventForVouchers);
+
+        // Update the event in our local array with the new data
+        const eventIndex = this.studentEvents.findIndex(e => e.id === updatedEvent.id);
+        if (eventIndex !== -1) {
+          this.studentEvents[eventIndex] = updatedEvent;
+        }
 
         // 4. Orchestrator plays final success message and hangs up
         await CallUtils.hangupWithMessage(

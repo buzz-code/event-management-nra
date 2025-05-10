@@ -25,8 +25,9 @@ import { isTeacher } from '../utils/appPermissions';
 
 const filters = [
     ...commonAdminFilters,
-    notPermissionFilter(isTeacher, <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" />),
     <TextInput source="name:$cont" alwaysOn />,
+    notPermissionFilter(isTeacher, <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" />),
+    <CommonReferenceInputFilter source="studentReferenceId" reference="student" />,
     <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" />,
     <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" />,
     <DateInput source="eventDate:$gte" />,

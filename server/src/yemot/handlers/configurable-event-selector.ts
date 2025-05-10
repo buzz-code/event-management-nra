@@ -2,50 +2,70 @@ import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
 import { Student } from "src/db/entities/Student.entity";
-import { Event } from "src/db/entities/Event.entity";
+import { Event as DBEvent } from "src/db/entities/Event.entity";
 import { SelectionHelper, SelectableEntity } from "./selection-helper";
+import { EventEligibilityUtil, EventEligibilityType } from "../utils/event-eligibility.util";
 import { CallUtils } from "../utils/call-utils";
 import { FormatUtils } from "../utils/format-utils";
 
 export interface SelectableEventItem extends SelectableEntity {
-  originalEvent: Event;
+  originalEvent: DBEvent;
 }
 
-// This class is now a generic event selector based on student and completion status.
+// Event selector that uses shared eligibility functions
 export class ConfigurableEventSelector extends SelectionHelper<SelectableEventItem> {
-  private student: Student;
+  protected student: Student;
+  private studentEvents: DBEvent[];
+  private eligibilityCheck: (event: DBEvent) => boolean;
 
   constructor(
     logger: Logger,
     call: Call,
     dataSource: DataSource,
     student: Student,
+    events: DBEvent[],
+    eligibilityType: EventEligibilityType = EventEligibilityType.NONE,
     autoSelectSingleItem: boolean = true,
   ) {
     super(logger, call, dataSource, 'אירוע', undefined, autoSelectSingleItem);
-    
+
     this.student = student;
+    this.studentEvents = events;
+
+    // Set the eligibility check based on type
+    switch (eligibilityType) {
+      case EventEligibilityType.PATH:
+        this.eligibilityCheck = EventEligibilityUtil.isEligibleForPathSelection;
+        break;
+      case EventEligibilityType.VOUCHER:
+        this.eligibilityCheck = EventEligibilityUtil.isEligibleForVoucherSelection;
+        break;
+      case EventEligibilityType.POST_UPDATE:
+        this.eligibilityCheck = EventEligibilityUtil.isEligibleForPostEventUpdate;
+        break;
+      case EventEligibilityType.NONE:
+      default:
+        this.eligibilityCheck = () => true; // No filtering by default
+    }
   }
 
   protected async fetchItems(): Promise<void> {
     this.logStart(`fetchItems (ConfigurableEventSelector)`);
-    const eventRepository = this.dataSource.getRepository(Event);
 
-    // Generic query for events based on student and completion status
-    const eligibleEvents = await eventRepository.find({
-      where: {
-        studentReferenceId: this.student.id,
-        completed: false,
-      },
-      relations: ['eventType'],
-      order: { eventDate: 'DESC' },
-    });
+    // Use the events passed in from UserInteractionHandler
+    const allStudentEvents = this.studentEvents;
+
+    // Apply shared filtering and sorting logic
+    const eligibleEvents = EventEligibilityUtil.filterEligibleEvents(
+      allStudentEvents,
+      this.eligibilityCheck
+    );
 
     if (eligibleEvents.length === 0) {
-      this.logger.log(`No eligible events found for student \${this.student.id}`);
+      this.logger.log(`No eligible events found for student ${this.student.id}`);
       this.items = [];
     } else {
-      this.items = eligibleEvents.map((event, index) => {
+      this.items = eligibleEvents.map((event: DBEvent, index) => {
         const eventName = FormatUtils.formatEventNameForSelection(event);
         return {
           id: event.id,
@@ -54,7 +74,7 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
           originalEvent: event,
         };
       });
-      this.logger.log(`Found \${this.items.length} eligible events for student \${this.student.id}`);
+      this.logger.log(`Found ${this.items.length} eligible events for student ${this.student.id}`);
     }
     this.logComplete(`fetchItems (ConfigurableEventSelector)`);
   }
@@ -62,12 +82,12 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
   protected async announceAutoSelectionResult(): Promise<void> {
     const selectedItem = this.getSelectedItem();
     if (selectedItem) {
-      // Uses this.messagePrefix ('אירוע') for a general term.
-      await CallUtils.playMessage(this.call, `מצאנו \${this.messagePrefix} אחד זמין לבחירה: \${selectedItem.name}`, this.logger);
+      // Uses this.entityName ('אירוע') for a general term.
+      await CallUtils.playMessage(this.call, `מצאנו ${this.entityName} אחד זמין לבחירה: ${selectedItem.name}`, this.logger);
     }
   }
 
-  public getSelectedOriginalEvent(): Event | null {
+  public getSelectedOriginalEvent(): DBEvent | null {
     const selectedItem = this.getSelectedItem();
     return selectedItem ? selectedItem.originalEvent : null;
   }

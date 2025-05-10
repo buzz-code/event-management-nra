@@ -404,10 +404,10 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
       return;
     }
     
-    // Basic implementation - fetch all items ordered by name
+    // Basic implementation - fetch all items ordered by key
     try {
       this.items = await this.entityRepository.find({
-        order: { name: 'ASC' } as FindOptionsOrder<T>, // Type assertion for order
+        order: { key: 'ASC' } as FindOptionsOrder<T>, // Type assertion for order
       });
       
       // Assign keys to items (starting from 1)
