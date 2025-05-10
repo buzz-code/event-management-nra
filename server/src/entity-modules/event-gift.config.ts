@@ -8,7 +8,7 @@ function getConfig(): BaseEntityModuleOptions {
         query: {
             join: {
                 event: { eager: false },
-                gift: { eager: false }
+                gift: { eager: true }
             }
         },
         exporter: {

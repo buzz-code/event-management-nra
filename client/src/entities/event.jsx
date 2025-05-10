@@ -12,7 +12,9 @@ import {
     NumberInput,
     NumberField,
     BooleanField,
-    BooleanInput
+    BooleanInput,
+    SingleFieldList,
+    ChipField
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
@@ -25,7 +27,7 @@ import { isTeacher } from '../utils/appPermissions';
 
 const filters = [
     ...commonAdminFilters,
-    <TextInput source="name:$cont" alwaysOn />,
+    // <TextInput source="name:$cont" alwaysOn />,
     notPermissionFilter(isTeacher, <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" />),
     <CommonReferenceInputFilter source="studentReferenceId" reference="student" />,
     <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" />,
@@ -45,11 +47,21 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeId" optionalTarget="key" />
             <MultiReferenceField source="levelTypeReferenceId" reference="level_type" optionalSource="levelTypeId" optionalTarget="key" />
             <MultiReferenceField source="teacherReferenceId" reference="teacher" optionalSource="teacherTz" optionalTarget="tz" />
-            <TextField source="name" />
-            <TextField source="description" />
+            {/* <TextField source="name" />
+            <TextField source="description" /> */}
             <DateField source="eventDate" />
             <TextField source="eventHebrewDate" />
             <TextField source="eventHebrewMonth" />
+            <ReferenceManyField label="הערות" reference="event_note" target="eventReferenceId">
+                <SingleFieldList>
+                    <ChipField source="noteText" />
+                </SingleFieldList>
+            </ReferenceManyField>
+            <ReferenceManyField label="מתנות" reference="event_gift" target="eventReferenceId">
+                <SingleFieldList>
+                    <ChipField source="gift.name" />
+                </SingleFieldList>
+            </ReferenceManyField>
             <BooleanField source="completed" />
             <NumberField source="grade" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
