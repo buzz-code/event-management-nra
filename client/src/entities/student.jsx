@@ -11,8 +11,7 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 const filters = [
     ...commonAdminFilters,
     <TextInput source="tz" />,
-    <TextInput source="firstName:$cont" alwaysOn />,
-    <TextInput source="lastName:$cont" />,
+    <TextInput source="name:$cont" alwaysOn />,
     <CommonReferenceInputFilter source="classReferenceId" reference="class" />,
     <TextInput source="address:$cont" />,
     <TextInput source="motherName:$cont" />,
@@ -29,8 +28,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="tz" />
-            <TextField source="firstName" />
-            <TextField source="lastName" />
+            <TextField source="name" />
             <MultiReferenceField source="classReferenceId" reference="class" optionalSource="classKey" optionalTarget="key" />
             <TextField source="address" />
             <TextField source="motherName" />
@@ -50,8 +48,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="tz" validate={[maxLength(9)]} />
-        <TextInput source="firstName" validate={[required(), maxLength(255)]} />
-        <TextInput source="lastName" validate={[required(), maxLength(255)]} />
+        <TextInput source="name" validate={[required(), maxLength(510)]} />
         <CommonReferenceInput source="classReferenceId" reference="class" />
         <TextInput source="address" validate={[maxLength(1000)]} multiline />
         <TextInput source="motherName" validate={[maxLength(255)]} />
@@ -67,7 +64,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'firstName', 'lastName', 'classKey', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName'],
+    fields: ['tz', 'name', 'classKey', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName'],
 }
 
 const entity = {

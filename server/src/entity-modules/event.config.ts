@@ -45,10 +45,8 @@ function getConfig(): BaseEntityModuleOptions {
                     { value: 'completed', label: 'הושלם' },
                     { value: 'grade', label: 'ציון' },
                     { value: 'eventType.name', label: 'סוג אירוע' },
-                    { value: 'teacher.firstName', label: 'שם מורה פרטי' },
-                    { value: 'teacher.lastName', label: 'שם מורה משפחה' },
-                    { value: 'student.firstName', label: 'שם תלמיד פרטי' },
-                    { value: 'student.lastName', label: 'שם תלמיד משפחה' },
+                    { value: 'teacher.name', label: 'שם מורה' },
+                    { value: 'student.name', label: 'שם תלמיד' },
                     { value: 'levelType.name', label: 'סוג רמה' }
                 ];
             }

@@ -20,7 +20,6 @@ import { findOneAndAssignReferenceId, getDataSource } from "@shared/utils/entity
 @Entity("students")
 @Index("students_user_id_idx", ["userId"], {})
 @Index("students_class_id_idx", ["classReferenceId"], {})
-@Index("students_full_name_idx", ["firstName", "lastName"], {})
 @Index("students_name_idx", ["name"], {})
 @Index("students_tz_idx", ["tz"], {})
 export class Student implements IHasUserId {
@@ -34,8 +33,6 @@ export class Student implements IHasUserId {
       this.classReferenceId = await findOneAndAssignReferenceId(
         dataSource, Class, { key: this.classKey }, this.userId, this.classReferenceId, this.classKey
       );
-      
-      this.name = `${this.firstName || ''} ${this.lastName || ''}`.trim();
     } finally {
       dataSource?.destroy();
     }
@@ -67,21 +64,8 @@ export class Student implements IHasUserId {
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255 })
-  firstName: string;
-
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255 })
-  lastName: string;
-
-  @IsOptional({ always: true })
-  @StringType
   @MaxLength(510, { always: true })
-  @Column({ length: 510, nullable: true })
+  @Column({ length: 510 })
   name: string;
 
   @IsOptional({ always: true })

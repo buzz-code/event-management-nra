@@ -236,7 +236,7 @@ export class AddTestData1746606524234 implements MigrationInterface {
             const teacher = manager.create(Teacher, {
                 userId: managerUser.id,
                 ownUserId: teacherUsers[i].id,
-                name: data.firstName,
+                name: `${data.firstName} ${data.lastName}`,
                 tz: data.tz,
                 createdAt: this.TIMESTAMP,
                 updatedAt: this.TIMESTAMP
@@ -249,20 +249,18 @@ export class AddTestData1746606524234 implements MigrationInterface {
 
     private async createStudents(manager: EntityManager, user: User, classes: Class[]): Promise<Student[]> {
         const studentData = [
-            { firstName: 'רחל', lastName: 'אדלר', tz: '111222333', classId: 0 },
-            { firstName: 'חיה', lastName: 'גרינבלט', tz: '222333444', classId: 1 },
-            { firstName: 'נועה', lastName: 'הירש', tz: '333444555', classId: 2 },
-            { firstName: 'שושנה', lastName: 'כץ', tz: '444555666', classId: 3 },
-            { firstName: 'לאה', lastName: 'שטרן', tz: '555666777', classId: 4 }
+            { name: 'רחל אדלר', tz: '111222333', classId: 0 },
+            { name: 'חיה גרינבלט', tz: '222333444', classId: 1 },
+            { name: 'נועה הירש', tz: '333444555', classId: 2 },
+            { name: 'שושנה כץ', tz: '444555666', classId: 3 },
+            { name: 'לאה שטרן', tz: '555666777', classId: 4 }
         ];
 
         const students = [];
         for (const data of studentData) {
             const student = manager.create(Student, {
                 userId: user.id,
-                firstName: data.firstName,
-                lastName: data.lastName,
-                name: `${data.firstName} ${data.lastName}`,
+                name: data.name,
                 tz: data.tz,
                 classReferenceId: classes[data.classId].id,
                 address: 'כתובת לדוגמה',
