@@ -10,10 +10,11 @@ function getConfig(): BaseEntityModuleOptions {
                 return [
                     { value: 'key', label: 'מפתח' },
                     { value: 'name', label: 'שם' },
-                    { value: 'description', label: 'תיאור' }
+                    { value: 'description', label: 'תיאור' },
+                    { value: 'year', label: 'שנה' }
                 ];
             }
-        },
+        }
     }
 }
 

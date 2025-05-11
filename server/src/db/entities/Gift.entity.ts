@@ -1,14 +1,20 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
-import { EventGift } from './EventGift.entity';
-import { IsOptional } from 'class-validator';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { IsOptional, IsNumber } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('gifts')
 @Index("gifts_user_id_idx", ["userId"], {})
 export class Gift implements IHasUserId {
+  @BeforeInsert()
+  @BeforeUpdate()
+  fillFields() {
+    fillDefaultYearValue(this);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -35,8 +41,11 @@ export class Gift implements IHasUserId {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  // @OneToMany(() => EventGift, eventGift => eventGift.gift)
-  // eventGifts: EventGift[];
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  year: number;
 
   @CreateDateColumn()
   createdAt: Date;

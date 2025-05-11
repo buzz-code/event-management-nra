@@ -14,28 +14,36 @@ import {
     BooleanField,
     BooleanInput,
     SingleFieldList,
-    ChipField
+    ChipField,
+    SelectField
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
-import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
+import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } from '@shared/components/fields/CommonReferenceInputFilter';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters, notPermissionFilter } from '@shared/components/fields/PermissionFilter';
 import { isTeacher } from '../utils/appPermissions';
+import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
+import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 
 const filters = [
     ...commonAdminFilters,
     // <TextInput source="name:$cont" alwaysOn />,
-    notPermissionFilter(isTeacher, <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" />),
-    <CommonReferenceInputFilter source="studentReferenceId" reference="student" />,
-    <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" />,
-    <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" />,
+    notPermissionFilter(isTeacher, <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />),
+    <CommonReferenceInputFilter source="studentReferenceId" reference="student" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" dynamicFilter={filterByUserIdAndYear} />,
+    <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" dynamicFilter={filterByUserIdAndYear} />,
     <DateInput source="eventDate:$gte" />,
     <DateInput source="eventDate:$lte" />,
     <TextInput source="eventHebrewMonth:$cont" alwaysOn />,
+    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
 ];
+
+const filterDefaultValues = {
+    ...defaultYearFilter,
+};
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
@@ -62,6 +70,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                     <ChipField source="gift.name" />
                 </SingleFieldList>
             </ReferenceManyField>
+            <SelectField source="year" choices={yearChoices} />
             <BooleanField source="completed" />
             <NumberField source="grade" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
@@ -74,15 +83,16 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <CommonReferenceInput source="studentReferenceId" reference="student" validate={required()} />
-        <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} />
-        <CommonReferenceInput source="levelTypeReferenceId" reference="level_type" />
-        <CommonReferenceInput source="teacherReferenceId" reference="teacher" />
+        <CommonReferenceInput source="studentReferenceId" reference="student" validate={required()} dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} dynamicFilter={filterByUserIdAndYear} />
+        <CommonReferenceInput source="levelTypeReferenceId" reference="level_type" dynamicFilter={filterByUserIdAndYear} />
+        <CommonReferenceInput source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />
         <TextInput source="name" validate={[maxLength(255)]} />
         <TextInput source="description" validate={[maxLength(1000)]} />
         <DateTimeInput source="eventDate" validate={[required()]} />
         <BooleanInput source="completed" validate={[required()]} />
         <NumberInput source="grade" validate={[required()]} />
+        <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
@@ -107,7 +117,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['studentTz', 'eventTypeId', 'levelTypeId', 'teacherTz', 'name', 'description', 'eventDate', 'completed', 'grade'],
+    fields: ['studentTz', 'eventTypeId', 'levelTypeId', 'teacherTz', 'name', 'description', 'eventDate', 'completed', 'grade', 'year'],
 }
 
 const entity = {
@@ -115,6 +125,7 @@ const entity = {
     Inputs,
     Representation,
     filters,
+    filterDefaultValues,
     importer,
 };
 

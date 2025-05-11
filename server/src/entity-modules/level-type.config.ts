@@ -25,7 +25,8 @@ function getConfig(): BaseEntityModuleOptions {
                 return [
                     { value: 'key', label: 'מפתח' },
                     { value: 'name', label: 'שם הסוג רמה' },
-                    { value: 'description', label: 'תיאור' }
+                    { value: 'description', label: 'תיאור' },
+                    { value: 'year', label: 'שנה' }
                 ];
             }
         },

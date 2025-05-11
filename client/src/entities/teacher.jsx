@@ -5,6 +5,7 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { useUnique } from '@shared/utils/useUnique';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
+import { filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 
 const filters = [
     ...commonAdminFilters,
@@ -32,7 +33,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        {isAdmin && <CommonReferenceInput source="ownUserId" reference="user" />}
+        {isAdmin && <CommonReferenceInput source="ownUserId" reference="user" dynamicFilter={filterByUserId} />}
         <TextInput source="tz" validate={[maxLength(9)]} />
         <TextInput source="name" validate={[required(), maxLength(255)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}

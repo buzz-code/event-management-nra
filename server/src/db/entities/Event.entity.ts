@@ -14,6 +14,7 @@ import { User } from './User.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
 import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('events')
 @Index('events_user_id_idx', ['userId'], {})
@@ -27,6 +28,7 @@ export class Event implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
+    fillDefaultYearValue(this);
     cleanDateFields(this, ['eventDate', 'completionReportDate']);
 
     let dataSource: DataSource;
@@ -34,7 +36,7 @@ export class Event implements IHasUserId {
       dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
-        dataSource, EventType, { key: this.eventTypeId }, null, this.eventTypeReferenceId, this.eventTypeId
+        dataSource, EventType, { key: this.eventTypeId, year: this.year }, null, this.eventTypeReferenceId, this.eventTypeId
       );
 
       this.teacherReferenceId = await findOneAndAssignReferenceId(
@@ -46,11 +48,11 @@ export class Event implements IHasUserId {
       );
 
       this.levelTypeReferenceId = await findOneAndAssignReferenceId(
-        dataSource, LevelType, { key: this.levelTypeId }, this.userId, this.levelTypeReferenceId, this.levelTypeId
+        dataSource, LevelType, { key: this.levelTypeId, year: this.year }, this.userId, this.levelTypeReferenceId, this.levelTypeId
       );
 
       this.completedPathReferenceId = await findOneAndAssignReferenceId(
-        dataSource, LevelType, { key: this.completedPathKey }, this.userId, this.completedPathReferenceId, this.completedPathKey
+        dataSource, LevelType, { key: this.completedPathKey, year: this.year }, this.userId, this.completedPathReferenceId, this.completedPathKey
       );
 
       if (this.eventDate) {
@@ -174,6 +176,12 @@ export class Event implements IHasUserId {
   @IsDate({ always: true })
   @Column({ nullable: true })
   completionReportDate: Date;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  year: number;
 
   @CreateDateColumn()
   createdAt: Date;

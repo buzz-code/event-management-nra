@@ -1,14 +1,20 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
-import { Event } from './Event.entity';
-import { IsOptional } from 'class-validator';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { IsOptional, IsNumber } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('event_types')
 @Index("event_types_user_id_idx", ["userId"], {})
 export class EventType implements IHasUserId {
+  @BeforeInsert()
+  @BeforeUpdate()
+  fillFields() {
+    fillDefaultYearValue(this);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -34,6 +40,12 @@ export class EventType implements IHasUserId {
   @MaxLength(1000, { always: true })
   @Column({ type: 'text', nullable: true })
   description: string;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  year: number;
 
   @CreateDateColumn()
   createdAt: Date;

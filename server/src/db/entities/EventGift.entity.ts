@@ -8,6 +8,7 @@ import { NumberType } from '@shared/utils/entity/class-transformer';
 import { getDataSource, findOneAndAssignReferenceId } from '@shared/utils/entity/foreignKey.util';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { User } from '@shared/entities/User.entity';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('event_gifts')
 @Unique(['eventReferenceId', 'giftReferenceId'])
@@ -18,12 +19,14 @@ export class EventGift implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
+    fillDefaultYearValue(this);
+
     let dataSource: DataSource;
     try {
       dataSource = await getDataSource([Gift]);
 
       this.giftReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Gift, { key: this.giftKey }, this.userId, this.giftReferenceId, this.giftKey
+        dataSource, Gift, { key: this.giftKey, year: this.year }, this.userId, this.giftReferenceId, this.giftKey
       );
     } finally {
       dataSource?.destroy();
@@ -50,6 +53,12 @@ export class EventGift implements IHasUserId {
   @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftKey) && Boolean(eventGift.giftReferenceId), { always: true })
   @Column({ nullable: false })
   giftReferenceId: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  year: number;
 
   @CreateDateColumn()
   createdAt: Date;

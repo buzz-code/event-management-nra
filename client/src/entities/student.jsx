@@ -4,7 +4,7 @@ import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { useUnique } from '@shared/utils/useUnique';
-import { CommonReferenceInputFilter } from '@shared/components/fields/CommonReferenceInputFilter';
+import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 
@@ -12,7 +12,7 @@ const filters = [
     ...commonAdminFilters,
     <TextInput source="tz" />,
     <TextInput source="name:$cont" alwaysOn />,
-    <CommonReferenceInputFilter source="classReferenceId" reference="class" />,
+    <CommonReferenceInputFilter source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />,
     <TextInput source="address:$cont" />,
     <TextInput source="motherName:$cont" />,
     <TextInput source="motherContact:$cont" />,
@@ -49,7 +49,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="tz" validate={[maxLength(9)]} />
         <TextInput source="name" validate={[required(), maxLength(510)]} />
-        <CommonReferenceInput source="classReferenceId" reference="class" />
+        <CommonReferenceInput source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />
         <TextInput source="address" validate={[maxLength(1000)]} multiline />
         <TextInput source="motherName" validate={[maxLength(255)]} />
         <TextInput source="motherContact" validate={[maxLength(255)]} />

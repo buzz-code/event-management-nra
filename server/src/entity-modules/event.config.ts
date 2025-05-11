@@ -47,10 +47,11 @@ function getConfig(): BaseEntityModuleOptions {
                     { value: 'eventType.name', label: 'סוג אירוע' },
                     { value: 'teacher.name', label: 'שם מורה' },
                     { value: 'student.name', label: 'שם תלמיד' },
-                    { value: 'levelType.name', label: 'סוג רמה' }
+                    { value: 'levelType.name', label: 'סוג רמה' },
+                    { value: 'year', label: 'שנה' }
                 ];
             }
-        }
+        },
     }
 }
 

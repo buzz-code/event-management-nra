@@ -14,9 +14,9 @@ function getConfig(): BaseEntityModuleOptions {
         exporter: {
             getExportHeaders(): IHeader[] {
                 return [
-                    { value: 'noteText', label: 'טקסט הערה' },
-                    { value: 'event.name', label: 'כותרת אירוע' },
-                    { value: 'author.username', label: 'מחבר' }
+                    { value: 'event.name', label: 'אירוע' },
+                    { value: 'noteText', label: 'הערה' },
+                    { value: 'year', label: 'שנה' }
                 ];
             }
         }
