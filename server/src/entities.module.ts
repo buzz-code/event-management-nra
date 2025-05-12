@@ -19,6 +19,7 @@ import classConfig from './entity-modules/class.config';
 import studentConfig from './entity-modules/student.config';
 import teacherConfig from './entity-modules/teacher.config';
 import levelTypeConfig from "./entity-modules/level-type.config";
+import studentClassConfig from "./entity-modules/student-class.config";
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -40,6 +41,7 @@ import { Image } from "@shared/entities/Image.entity";
         BaseEntityModule.register(studentConfig),
         BaseEntityModule.register(teacherConfig),
         BaseEntityModule.register(levelTypeConfig),
+        BaseEntityModule.register(studentClassConfig),
         
         // Common entities and utilities
         BaseEntityModule.register(textConfig),

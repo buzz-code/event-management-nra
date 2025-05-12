@@ -80,6 +80,16 @@ export default {
                 'gradeLevel:$cont': 'חיפוש בשכבה',
             }
         },
+        student_class: {
+            name: 'שיוך תלמיד לכיתה |||| שיוכי תלמידים לכיתות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentReferenceId: 'תלמיד',
+                studentTz: 'תלמיד',
+                classReferenceId: 'כיתה',
+                classKey: 'כיתה',
+            }
+        },
         student: {
             name: 'תלמידה |||| תלמידות',
             fields: {
