@@ -15,28 +15,28 @@ export function getDefaultDashboardItems() {
           resource: 'event',
           icon: 'List',
           title: 'אירועים מתוכננים',
-          yearFilterType: 'none',
+          yearFilterType: 'year',
           filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] }
       },
       {
-          resource: 'student',
+          resource: 'student_by_year',
           icon: 'Person',
           title: 'משתתפים',
-          yearFilterType: 'none',
+          yearFilterType: 'year',
           filter: {}
       },
       {
           resource: 'event_gift',
           icon: 'List',
           title: 'מתנות באירועים',
-          yearFilterType: 'none',
+          yearFilterType: 'year',
           filter: {}
       },
       {
           resource: 'event_note',
           icon: 'List',
           title: 'הערות לאירועים',
-          yearFilterType: 'none',
+          yearFilterType: 'year',
           filter: {}
       }
   ];

@@ -90,13 +90,22 @@ export default {
                 classKey: 'כיתה',
             }
         },
+        student_by_year: {
+            name: 'תלמידה לפי שנה |||| תלמידות לפי שנים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentTz: 'ת.ז. תלמיד',
+                studentName: 'שם תלמיד',
+                year: 'שנה',
+                classNames: 'שמות כיתות',
+                classReferenceIds: 'מזהי כיתות',
+            }
+        },
         student: {
             name: 'תלמידה |||| תלמידות',
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
-                classReferenceId: 'כיתה',
-                classKey: 'מפתח כיתה',
                 address: 'כתובת',
                 'address:$cont': 'חיפוש בכתובת',
                 motherName: 'שם האם',

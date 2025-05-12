@@ -30,6 +30,7 @@ import eventGift from "src/entities/event-gift";
 import classEntity from "src/entities/class";
 import levelType from "src/entities/level-type";
 import studentClass from './entities/student-class';
+import studentByYear from './entities/student-by-year'; // Added import
 
 // Keep required shared entities
 import student from "src/entities/student";
@@ -102,7 +103,8 @@ const App = () => (
             
             {/* Keep Student and Teacher from original system */}
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-            <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
+            <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+            <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
 
             {/* Common settings and utilities */}

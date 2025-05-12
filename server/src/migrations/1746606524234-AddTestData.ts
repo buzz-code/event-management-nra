@@ -262,7 +262,6 @@ export class AddTestData1746606524234 implements MigrationInterface {
                 userId: user.id,
                 name: data.name,
                 tz: data.tz,
-                classReferenceId: classes[data.classId].id,
                 address: 'כתובת לדוגמה',
                 motherName: 'שם האם',
                 motherContact: '050-1111111',

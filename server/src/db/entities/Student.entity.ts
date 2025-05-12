@@ -9,33 +9,20 @@ import {
   BeforeUpdate,
   DataSource
 } from "typeorm";
-import { Class } from "./Class.entity";
 import { IsOptional, ValidateIf } from "class-validator";
 import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, MaxLength, IsNumber } from "@shared/utils/validation/class-validator-he";
-import { StringType, NumberType } from "@shared/utils/entity/class-transformer";
+import { IsNotEmpty, MaxLength } from "@shared/utils/validation/class-validator-he";
+import { StringType } from "@shared/utils/entity/class-transformer";
 import { IHasUserId } from "@shared/base-entity/interface";
-import { findOneAndAssignReferenceId, getDataSource } from "@shared/utils/entity/foreignKey.util";
 
 @Entity("students")
 @Index("students_user_id_idx", ["userId"], {})
-@Index("students_class_id_idx", ["classReferenceId"], {})
 @Index("students_name_idx", ["name"], {})
 @Index("students_tz_idx", ["tz"], {})
 export class Student implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
-    let dataSource: DataSource;
-    try {
-      dataSource = await getDataSource([Class]);
-
-      this.classReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Class, { key: this.classKey }, this.userId, this.classReferenceId, this.classKey
-      );
-    } finally {
-      dataSource?.destroy();
-    }
   }
 
   @PrimaryGeneratedColumn()
@@ -49,17 +36,6 @@ export class Student implements IHasUserId {
   @MaxLength(9, { always: true })
   @Column({ length: 9, nullable: true })
   tz: string;
-
-  @ValidateIf((student: Student) => !Boolean(student.classReferenceId), { always: true })
-  @IsOptional({ always: true })
-  @NumberType
-  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
-  @Column({ nullable: true, name: "class_id" })
-  classKey: number;
-
-  @ValidateIf((student: Student) => !Boolean(student.classKey) && Boolean(student.classReferenceId), { always: true })
-  @Column({ nullable: true })
-  classReferenceId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
@@ -109,11 +85,4 @@ export class Student implements IHasUserId {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  // @ManyToOne(() => Class, cls => cls.students, { nullable: true })
-  // @JoinColumn({ name: "classReferenceId" })
-  // class: Class;
-
-  // @OneToMany(() => Event, event => event.student)
-  // events: Event[];
 }
