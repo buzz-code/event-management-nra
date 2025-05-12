@@ -9,6 +9,7 @@ import { adminUserFilter } from '@shared/components/fields/PermissionFilter';
 import { yearChoices, defaultYearFilter } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { CommonReferenceInputFilter, filterByUserId } from "@shared/components/fields/CommonReferenceInputFilter";
+import { MultiReferenceArrayField } from "@shared/components/fields/CommonReferenceField";
 
 const filters = [
   adminUserFilter,

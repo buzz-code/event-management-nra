@@ -7,6 +7,7 @@ import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
+import { getCurrentUser } from '@shared/utils/validation/current-user.util';
 
 @Entity('event_notes')
 @Index('event_notes_event_id_idx', ['eventReferenceId'], {})
@@ -17,6 +18,13 @@ export class EventNote implements IHasUserId {
   @BeforeUpdate()
   fillFields() {
     fillDefaultYearValue(this);
+
+    if (!this.authorReferenceId) {
+      const user = getCurrentUser();
+      if (user.id !== -1) {
+        this.authorReferenceId = user.id;
+      }
+    }
   }
 
   @PrimaryGeneratedColumn()
@@ -25,12 +33,13 @@ export class EventNote implements IHasUserId {
   @Column("int", { name: "user_id" })
   userId: number;
 
-  @IsNotEmpty({ always: true })
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
   @Column({ nullable: false })
   eventReferenceId: number;
 
-  @IsNotEmpty({ always: true })
+  @IsOptional({ always: true })
   @NumberType
   @Column({ nullable: true })
   authorReferenceId: number;

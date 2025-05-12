@@ -39,9 +39,9 @@ export class StudentByYear {
   @Column()
   year: number;
 
-  @Column('simple-array')
+  @Column('simple-array', { name: "class_names" })
   classNames: string[];
 
-  @Column('simple-array')
+  @Column('simple-array', { name: "class_reference_ids" })
   classReferenceIds: number[];
 }

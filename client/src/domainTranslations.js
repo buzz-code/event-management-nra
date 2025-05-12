@@ -96,6 +96,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 studentTz: 'ת.ז. תלמיד',
                 studentName: 'שם תלמיד',
+                'studentName:$cont': 'שם תלמיד',
                 year: 'שנה',
                 classNames: 'שמות כיתות',
                 classReferenceIds: 'מזהי כיתות',
