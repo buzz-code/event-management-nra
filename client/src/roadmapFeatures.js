@@ -1,6 +1,6 @@
 export default [
-    { html: 'הצגת נתונים לכל הטבלאות', status: 'בתהליך', statusColor: 'warning' },
-    { html: 'הוספת תהליך טלפוני לתלמידה', status: 'בתהליך', statusColor: 'warning' },
+    { html: 'הצגת נתונים לכל הטבלאות', status: 'בוצע', statusColor: 'success' },
+    { html: 'הוספת תהליך טלפוני לתלמידה', status: 'בוצע', statusColor: 'success' },
     { html: 'דוחות', status: 'לא בוצע', statusColor: 'error' },
     { html: 'הורדת והעלאת קבצי אקסל', status: 'לא בוצע', statusColor: 'error' },
 
