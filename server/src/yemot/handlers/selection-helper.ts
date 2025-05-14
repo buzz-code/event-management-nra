@@ -368,7 +368,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    let options = this.items.map(item => `להקשת ${item.key} עבור ${item.name}`).join(' ');
+    let options = this.items.map(item => `להקשת ${item.key} עבור ${item.name}`).join(', ');
     return `אנא בחר ${this.entityName} על ידי הקשת המספר המתאים: ${options}`;
   }
 
