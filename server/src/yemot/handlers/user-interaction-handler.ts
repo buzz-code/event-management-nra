@@ -58,23 +58,24 @@ export class UserInteractionHandler extends BaseYemotHandler {
         return null;
       }
 
-      // Step 2: Check student events (to tailor the menu)
-      await this.checkStudentEvents();
+      // // Step 2: Check student events (to tailor the menu)
+      // await this.checkStudentEvents();
 
-      // Step 3: Present the main menu and get selection
-      const menuOption = await this.presentMainMenu();
-      if (!menuOption) {
-        this.logger.warn('No menu option was selected, ending interaction.');
-        // presentMainMenu() handles hangup messages on failure (e.g. max attempts)
-        return null;
-      }
+      // // Step 3: Present the main menu and get selection
+      // const menuOption = await this.presentMainMenu();
+      // if (!menuOption) {
+      //   this.logger.warn('No menu option was selected, ending interaction.');
+      //   // presentMainMenu() handles hangup messages on failure (e.g. max attempts)
+      //   return null;
+      // }
 
+      this.selectedMenuOption = MenuOption.EVENT_REPORTING; // Hardcoded for now
       this.logComplete('handleUserInteraction', {
         studentId: this.authenticatedStudent.id,
-        menuSelection: menuOption
+        menuSelection: this.selectedMenuOption
       });
 
-      return { student: this.authenticatedStudent, menuOption };
+      return { student: this.authenticatedStudent, menuOption: this.selectedMenuOption };
     } catch (error) {
       this.logError('handleUserInteraction', error as Error);
       await CallUtils.hangupWithMessage(
@@ -113,20 +114,20 @@ export class UserInteractionHandler extends BaseYemotHandler {
           });
 
           if (student) {
-            // Then, fetch their events with all needed relations
-            this.studentEvents = await this.dataSource.getRepository(DBEvent)
-              .find({
-                where: { studentReferenceId: student.id },
-                relations: [
-                  'eventType',
-                  'eventGifts',
-                  'eventGifts.gift',
-                  'levelType'
-                ]
-              });
-
             // Store the student
             this.authenticatedStudent = student;
+            // DO NOT fetch student events here as per the new requirement
+            // this.studentEvents = await this.dataSource.getRepository(DBEvent)
+            //   .find({
+            //     where: { studentReferenceId: student.id },
+            //     relations: [
+            //       'eventType',
+            //       'eventGifts',
+            //       'eventGifts.gift',
+            //       'levelType'
+            //     ]
+            //   });
+            this.studentEvents = []; // Empty array as per new requirement
           }
 
           if (!student) {

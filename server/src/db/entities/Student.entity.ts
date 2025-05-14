@@ -7,11 +7,12 @@ import {
   Index,
   BeforeInsert,
   BeforeUpdate,
-  DataSource
+  DataSource,
+  Unique
 } from "typeorm";
 import { IsOptional, ValidateIf } from "class-validator";
 import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, MaxLength } from "@shared/utils/validation/class-validator-he";
+import { IsNotEmpty, IsUniqueCombination, MaxLength } from "@shared/utils/validation/class-validator-he";
 import { StringType } from "@shared/utils/entity/class-transformer";
 import { IHasUserId } from "@shared/base-entity/interface";
 
@@ -19,6 +20,7 @@ import { IHasUserId } from "@shared/base-entity/interface";
 @Index("students_user_id_idx", ["userId"], {})
 @Index("students_name_idx", ["name"], {})
 @Index("students_tz_idx", ["tz"], {})
+@Unique(['userId', 'tz'])
 export class Student implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -31,10 +33,12 @@ export class Student implements IHasUserId {
   @Column("int", { name: "user_id" })
   userId: number;
 
-  @IsOptional({ always: true })
+  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
-  @MaxLength(9, { always: true })
-  @Column({ length: 9, nullable: true })
+  @MaxLength(255, { always: true })
+  @IsUniqueCombination(['userId'], [Student], { always: true })
+  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
+  @Column()
   tz: string;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })

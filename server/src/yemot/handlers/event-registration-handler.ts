@@ -9,6 +9,9 @@ import { CallUtils } from "../utils/call-utils";
 import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 import { DateSelectionHelper, DateSelectionResult } from "./date-selection-helper";
 import { FormatUtils } from "../utils/format-utils";
+import { VoucherSelectionHandler } from "./voucher-selection-handler";
+import { Gift } from "src/db/entities/Gift.entity";
+import { EventGift } from "src/db/entities/EventGift.entity";
 
 /**
  * Interface for event registration results
@@ -17,6 +20,7 @@ export interface EventRegistrationResult {
   eventType: EventType;
   date: DateSelectionResult;
   event?: Event;
+  vouchers?: Gift[];
 }
 
 /**
@@ -26,6 +30,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
   private student: Student;
   private selectedEventType: EventType | null = null;
   private selectedDate: DateSelectionResult | null = null;
+  private selectedVouchers: Gift[] = [];
   private existingEvent: Event | null = null;
   private eventTypes: EventType[] = [];
 
@@ -70,7 +75,11 @@ export class EventRegistrationHandler extends BaseYemotHandler {
         return null;
       }
       
-      // Step 4: Create the event
+      // Step 4: Select vouchers
+      await this.selectVouchers();
+      // We continue even if no vouchers are selected
+      
+      // Step 5: Create the event
       const event = await this.createEvent();
       if (!event) {
         this.logger.error('Failed to create event');
@@ -80,13 +89,15 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       this.logComplete('handleEventRegistration', { 
         eventTypeId: this.selectedEventType.id,
         dateSelected: this.selectedDate.hebrewDate, // For logging purposes
-        eventId: event.id
+        eventId: event.id,
+        voucherCount: this.selectedVouchers.length
       });
       
       return {
         eventType: this.selectedEventType,
         date: this.selectedDate,
-        event
+        event,
+        vouchers: this.selectedVouchers
       };
     } catch (error) {
       this.logError('handleEventRegistration', error as Error);
@@ -263,6 +274,8 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     
     try {
       const eventRepository = this.dataSource.getRepository(Event);
+      const eventGiftRepository = this.dataSource.getRepository(EventGift);
+      
       // Event entity does not have 'hebrewDate' or 'creationDate' (it has 'createdAt' auto-field)
       // A 'name' and 'userId' are required by the Event entity.
       const newEventData: Partial<Event> = {
@@ -274,23 +287,96 @@ export class EventRegistrationHandler extends BaseYemotHandler {
         // Other non-nullable fields from Event entity might need defaults here if not auto-set
       };
 
-      const newEvent = eventRepository.create(newEventData);
+      // Start a transaction to ensure both event and vouchers are saved together
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
       
-      const savedEvent = await eventRepository.save(newEvent);
-      this.logger.log(`New event created: ${savedEvent.id}`);
-      
-      // SAVE_SUCCESS message is played here.
-      await CallUtils.playMessage(
-        this.call, 
-        MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS, 
-        this.logger
-      );
-      
-      this.logComplete('createEvent', { eventId: savedEvent.id });
-      return savedEvent;
+      try {
+        // Create and save event within transaction
+        const newEvent = eventRepository.create(newEventData);
+        const savedEvent = await queryRunner.manager.save(newEvent);
+        this.logger.log(`New event created: ${savedEvent.id}`);
+        
+        // Associate vouchers if any were selected
+        if (this.selectedVouchers.length > 0) {
+          this.logger.log(`Associating ${this.selectedVouchers.length} vouchers with event ${savedEvent.id}`);
+          
+          for (const voucher of this.selectedVouchers) {
+            const eventGift = eventGiftRepository.create({
+              eventReferenceId: savedEvent.id,
+              giftReferenceId: voucher.id,
+              userId: this.student.userId
+            });
+            await queryRunner.manager.save(EventGift, eventGift);
+          }
+
+          this.logger.log(`Successfully associated vouchers with event ${savedEvent.id}`);
+        }
+
+        // Commit the transaction
+        await queryRunner.commitTransaction();
+        
+        // // SAVE_SUCCESS message is played here.
+        // await CallUtils.playMessage(
+        //   this.call, 
+        //   MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS, 
+        //   this.logger
+        // );
+        
+        this.logComplete('createEvent', { 
+          eventId: savedEvent.id,
+          voucherCount: this.selectedVouchers.length
+        });
+        return savedEvent;
+      } catch (error) {
+        // Rollback the transaction on error
+        await queryRunner.rollbackTransaction();
+        throw error;
+      } finally {
+        // Release the query runner
+        await queryRunner.release();
+      }
     } catch (error) {
       this.logError('createEvent', error as Error);
       // Do not play generic error here, let it bubble up to handleEventRegistration
+      throw error;
+    }
+  }
+
+  /**
+   * Selects vouchers for the event
+   */
+  private async selectVouchers(): Promise<void> {
+    this.logStart('selectVouchers');
+    
+    try {
+      // Create and use the voucher selection handler
+      const voucherHandler = new VoucherSelectionHandler(
+        this.logger,
+        this.call,
+        this.dataSource
+      );
+      
+      // Handle the voucher selection - this is multi-selection
+      await voucherHandler.handleMultiSelection();
+      this.selectedVouchers = voucherHandler.getSelectedVouchers();
+      
+      // Confirm the selection
+      const selectionConfirmed = voucherHandler.isSelectionConfirmed();
+      
+      if (!selectionConfirmed && this.selectedVouchers.length > 0) {
+        this.logger.warn('Voucher selection was not confirmed, clearing selection');
+        this.selectedVouchers = [];
+      }
+      
+      this.logComplete('selectVouchers', { 
+        selectedVouchersCount: this.selectedVouchers.length,
+        selectionConfirmed: selectionConfirmed
+      });
+    } catch (error) {
+      this.logError('selectVouchers', error as Error);
+      this.selectedVouchers = []; // Reset on error
       throw error;
     }
   }
@@ -317,5 +403,13 @@ export class EventRegistrationHandler extends BaseYemotHandler {
    */
   getExistingEvent(): Event | null {
     return this.existingEvent;
+  }
+
+  /**
+   * Gets the selected vouchers
+   * @returns Array of selected voucher objects
+   */
+  getSelectedVouchers(): Gift[] {
+    return this.selectedVouchers;
   }
 }

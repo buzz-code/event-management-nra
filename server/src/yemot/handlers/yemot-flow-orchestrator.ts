@@ -120,8 +120,12 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         this.student // Pass the authenticated student
       );
 
-      // Handle the entire event registration process
-      // The student is now passed to the constructor of EventRegistrationHandler
+      // Handle the entire event registration process including:
+      // 1. Event type selection
+      // 2. Date selection
+      // 3. Check for existing events
+      // 4. Voucher selection (new step)
+      // 5. Create event with vouchers
       const registrationResult = await eventRegistrationHandler.handleEventRegistration();
 
       if (!registrationResult) {
@@ -130,12 +134,12 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         return;
       }
 
-      // The registrationResult contains the created event, eventType, and date.
-      // The event is already saved by EventRegistrationHandler.createEvent()
-      // No need to call eventPersistence.saveEvent() here for the initial creation.
-      // If further updates were needed, we could use registrationResult.event.
-
-      this.logger.log(`Event ${registrationResult.event?.id} registered successfully through handler.`);
+      // The registrationResult contains the created event, eventType, date, and vouchers.
+      // The event is already saved by EventRegistrationHandler.createEvent() with vouchers if selected
+      
+      const voucherCount = registrationResult.vouchers?.length || 0;
+      this.logger.log(`Event ${registrationResult.event?.id} registered successfully through handler with ${voucherCount} vouchers.`);
+      
       // The EventRegistrationHandler.createEvent() method already plays SAVE_SUCCESS.
       // Orchestrator is responsible for final success message and hangup.
       await CallUtils.hangupWithMessage(

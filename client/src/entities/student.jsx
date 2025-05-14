@@ -42,10 +42,11 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
 const Inputs = ({ isCreate, isAdmin }) => {
     const unique = useUnique();
+
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="tz" validate={[maxLength(9)]} />
+        <TextInput source="tz" validate={[required(), maxLength(9), unique()]} />
         <TextInput source="name" validate={[required(), maxLength(510)]} />
         <TextInput source="address" validate={[maxLength(1000)]} multiline />
         <TextInput source="motherName" validate={[maxLength(255)]} />
