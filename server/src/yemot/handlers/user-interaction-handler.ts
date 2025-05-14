@@ -267,23 +267,23 @@ export class UserInteractionHandler extends BaseYemotHandler {
             // MenuOption.EXIT // Exit is usually handled by hangup or a generic "press 9 to exit"
           ];
 
-          menuPrompt += `\nלדיווח על אירוע הקישי ${MenuOption.EVENT_REPORTING}`;
+          menuPrompt += ` לדיווח על אירוע הקישי ${MenuOption.EVENT_REPORTING}`;
 
           if (this.hasEventsForPathSelection) {
-            menuPrompt += `\nלבחירת מסלול ראשונית הקישי ${MenuOption.PATH_SELECTION}`;
+            menuPrompt += ` לבחירת מסלול ראשונית הקישי ${MenuOption.PATH_SELECTION}`;
             allowedOptions.push(MenuOption.PATH_SELECTION);
           }
 
           if (this.hasEventsForVoucherSelection) {
-            menuPrompt += `\nלבחירת שוברים ראשונית הקישי ${MenuOption.VOUCHER_SELECTION}`;
+            menuPrompt += ` לבחירת שוברים ראשונית הקישי ${MenuOption.VOUCHER_SELECTION}`;
             allowedOptions.push(MenuOption.VOUCHER_SELECTION);
           }
 
           if (this.hasEventsForUpdate) {
-            menuPrompt += `\nלעדכון פרטי מסלול לאחר אירוע הקישי ${MenuOption.POST_EVENT_UPDATE}`;
+            menuPrompt += ` לעדכון פרטי מסלול לאחר אירוע הקישי ${MenuOption.POST_EVENT_UPDATE}`;
             allowedOptions.push(MenuOption.POST_EVENT_UPDATE);
           }
-          // menuPrompt += `\nלסיום הקישי ${MenuOption.EXIT}`; // Consider if EXIT should always be an option here
+          // menuPrompt += ` לסיום הקישי ${MenuOption.EXIT}`; // Consider if EXIT should always be an option here
 
           const menuResponse = await CallUtils.readDigits(
             this.call,
