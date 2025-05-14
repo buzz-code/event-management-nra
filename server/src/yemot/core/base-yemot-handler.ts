@@ -2,6 +2,7 @@ import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
 import { id_list_message, id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
+import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 
 /**
  * Interface for options when reading digits from the call
@@ -76,8 +77,8 @@ export abstract class BaseYemotHandler {
    */
   protected async getConfirmation(
     prompt: string,
-    yesOption: string = "לאישור הקישי 1",
-    noOption: string = "לביטול הקישי 2"
+    yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
+    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION
   ): Promise<boolean> {
     const message = `${prompt} ${yesOption}, ${noOption}`;
     const response = await this.readDigits(message, {

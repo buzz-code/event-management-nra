@@ -6,6 +6,7 @@ import { Event } from "src/db/entities/Event.entity";
 import { SelectionHelper, SelectableEntity } from "./selection-helper";
 import { CallUtils } from "../utils/call-utils";
 import { FormatUtils } from "../utils/format-utils";
+import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 
 export interface SelectableEventItem extends SelectableEntity {
   originalEvent: Event;
@@ -60,7 +61,11 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
   protected async announceAutoSelectionResult(): Promise<void> {
     const selectedItem = this.getSelectedItem();
     if (selectedItem) {
-      await CallUtils.playMessage(this.call, `מצאנו אירוע אחד זמין לעדכון: ${selectedItem.name}`, this.logger);
+      await CallUtils.playMessage(
+        this.call, 
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_UPDATE(selectedItem.name), 
+        this.logger
+      );
     }
   }
 }

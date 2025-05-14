@@ -6,6 +6,7 @@ import { Gift } from "src/db/entities/Gift.entity";
 import { EventGift } from "src/db/entities/EventGift.entity";
 import { CallUtils } from "../utils/call-utils";
 import { SYSTEM_CONSTANTS } from "../constants/system-constants";
+import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 
 /**
  * Specialized handler for selecting vouchers
@@ -61,17 +62,17 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
       this.logger.log(`Found existing vouchers: ${voucherNames}`);
       await CallUtils.playMessage(
         this.call, 
-        `השוברים הנוכחיים שלך הם: ${voucherNames}`, 
+        MESSAGE_CONSTANTS.VOUCHER.CURRENT_VOUCHERS(voucherNames), 
         this.logger
       );
       
       // Ask if they want to change
       const changeSelection = await CallUtils.getConfirmation(
         this.call,
-        "האם ברצונך לשנות את בחירת השוברים?",
+        MESSAGE_CONSTANTS.VOUCHER.CHANGE_PROMPT,
         this.logger,
-        "לשינוי הבחירה הקישי 1",
-        "להשארת הבחירה הנוכחית הקישי 2"
+        MESSAGE_CONSTANTS.VOUCHER.CHANGE_OPTION,
+        MESSAGE_CONSTANTS.VOUCHER.KEEP_OPTION
       );
       
       if (!changeSelection) {
@@ -98,7 +99,7 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
    */
   protected createSelectionPrompt(): string {
     let options = this.items.map(item => `להקשת ${item.key} עבור שובר ${item.name}`).join(' ');
-    return `אנא בחרי שובר על ידי הקשת המספר המתאים: ${options}`;
+    return MESSAGE_CONSTANTS.VOUCHER.SELECTION_PROMPT(options);
   }
 
   /**

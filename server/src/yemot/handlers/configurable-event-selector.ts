@@ -7,6 +7,7 @@ import { SelectionHelper, SelectableEntity } from "./selection-helper";
 import { EventEligibilityUtil, EventEligibilityType } from "../utils/event-eligibility.util";
 import { CallUtils } from "../utils/call-utils";
 import { FormatUtils } from "../utils/format-utils";
+import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 
 export interface SelectableEventItem extends SelectableEntity {
   originalEvent: DBEvent;
@@ -83,7 +84,11 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
     const selectedItem = this.getSelectedItem();
     if (selectedItem) {
       // Uses this.entityName ('אירוע') for a general term.
-      await CallUtils.playMessage(this.call, `מצאנו ${this.entityName} אחד זמין לבחירה: ${selectedItem.name}`, this.logger);
+      await CallUtils.playMessage(
+        this.call, 
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_SELECTION(this.entityName, selectedItem.name), 
+        this.logger
+      );
     }
   }
 

@@ -113,7 +113,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     
     const day = await CallUtils.readDigits(
       this.call,
-      'אנא הקש את היום בחודש. לדוגמה, עבור כ״ז הקש 27', 
+      MESSAGE_CONSTANTS.DATE.DAY_PROMPT, 
       this.logger,
       {
         max_digits: 2,
@@ -124,7 +124,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     const dayNumber = parseInt(day);
 
     if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 30) {
-      throw new Error('היום שהוקש אינו תקין');
+      throw new Error(MESSAGE_CONSTANTS.DATE.INVALID_DAY);
     }
 
     this.logger.log(`User entered day: ${dayNumber}`);
@@ -142,7 +142,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     const months = this.getHebrewMonthsList();
     const monthNames = months.map(({ hebrewName }, index) => `${index + 1} - ${hebrewName}`);
     
-    const monthMessage = 'אנא הקש את מספר החודש העברי, ' + monthNames.join(', ') + '.';
+    const monthMessage = MESSAGE_CONSTANTS.DATE.MONTH_PROMPT(monthNames.join(', '));
 
     const month = await CallUtils.readDigits(
       this.call,
@@ -158,7 +158,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     const selectedMonth = months[monthNumber - 1];
 
     if (!selectedMonth) {
-      throw new Error(`החודש שהוקש אינו תקין. אנא הקש מספר בין 1 ל-${months.length}.`);
+      throw new Error(MESSAGE_CONSTANTS.DATE.INVALID_MONTH(months.length));
     }
 
     this.logger.log(`User entered month: ${monthNumber}, Hebrew name: ${selectedMonth.hebrewName}, monthIndex: ${selectedMonth.index}`);
@@ -223,10 +223,10 @@ export class DateSelectionHelper extends BaseYemotHandler {
     
     return await CallUtils.getConfirmation(
       this.call,
-      `תאריך השמחה שנבחר הוא ${this.fullHebrewDate}`,
+      MESSAGE_CONSTANTS.DATE.CONFIRM_DATE(this.fullHebrewDate),
       this.logger,
-      'אם זה נכון, הקש 1',
-      'אם ברצונך לשנות, הקש 2'
+      MESSAGE_CONSTANTS.DATE.CONFIRM_YES,
+      MESSAGE_CONSTANTS.DATE.CONFIRM_NO
     );
   }
 

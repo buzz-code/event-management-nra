@@ -136,7 +136,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
         `להקשת ${et.name} הקישי ${index + 1}`
       ).join(', ');
       
-      const selectionMessage = `בחרי את סוג האירוע: ${eventTypeOptions}`;
+      const selectionMessage = MESSAGE_CONSTANTS.EVENT.TYPE_SELECTION_PROMPT(eventTypeOptions);
       
       const selection = await this.withRetry(
         async () => {
@@ -170,7 +170,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       
       await CallUtils.playMessage(
         this.call, 
-        `בחרת באירוע מסוג ${this.selectedEventType.name}`, 
+        MESSAGE_CONSTANTS.EVENT.TYPE_SELECTED(this.selectedEventType.name), 
         this.logger
       );
       

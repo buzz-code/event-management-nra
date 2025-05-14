@@ -3,6 +3,7 @@ import { Call } from "yemot-router2";
 import { DataSource } from "typeorm";
 import { SelectionHelper } from "./selection-helper";
 import { LevelType } from "src/db/entities/LevelType.entity";
+import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 
 /**
  * Specialized handler for selecting paths/tracks
@@ -41,6 +42,6 @@ export class PathSelectionHandler extends SelectionHelper<LevelType> {
    */
   protected createSelectionPrompt(): string {
     let options = this.items.map(item => `להקשת ${item.key} עבור מסלול ${item.name}`).join(', ');
-    return `אנא בחרי את המסלול על ידי הקשת המספר המתאים: ${options}`;
+    return MESSAGE_CONSTANTS.SELECTION.PATH_SELECTION_PROMPT(options);
   }
 }

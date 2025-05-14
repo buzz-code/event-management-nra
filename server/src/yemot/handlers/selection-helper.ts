@@ -70,7 +70,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     if (this.items.length === 0) {
       await CallUtils.hangupWithMessage(
         this.call,
-        `אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`,
+        MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName),
         this.logger
       );
       this.logComplete('handleSingleSelection', { status: 'no-items' });
@@ -153,7 +153,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     if (this.items.length === 0) {
       await CallUtils.hangupWithMessage(
         this.call,
-        `אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`,
+        MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName),
         this.logger
       );
       this.logComplete('handleMultiSelection', { status: 'no-items' });
@@ -205,7 +205,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
         const selectedNames = this.selectedItems.map(item => item.name).join(", ");
         await CallUtils.playMessage(
           this.call,
-          `בחרת ב: ${selectedNames}`,
+          MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames),
           this.logger
         );
       }
@@ -221,15 +221,15 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
           if (this.selectedItems.length < this.maxSelections) {
             continueSelection = await CallUtils.getConfirmation(
               this.call,
-              `בחרת ב${this.entityName}: ${this.selectedItems[this.selectedItems.length - 1].name}.`,
+              MESSAGE_CONSTANTS.SELECTION.LAST_SELECTION(this.entityName, this.selectedItems[this.selectedItems.length - 1].name),
               this.logger,
-              'לבחירה נוספת הקישי 1',
-              'לסיום הקישי 2'
+              MESSAGE_CONSTANTS.SELECTION.CONTINUE_OPTION,
+              MESSAGE_CONSTANTS.SELECTION.FINISH_OPTION
             );
           } else {
             await CallUtils.playMessage(
               this.call,
-              `הגעת למקסימום של ${this.maxSelections} אפשרויות בחירה`,
+              MESSAGE_CONSTANTS.SELECTION.MAX_SELECTIONS_REACHED(this.maxSelections),
               this.logger
             );
             continueSelection = false;
@@ -267,7 +267,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     const selectedNames = this.selectedItems.map(item => item.name).join(", ");
     await CallUtils.playMessage(
       this.call,
-      `בחרת ב: ${selectedNames}`,
+      MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames),
       this.logger
     );
 
@@ -285,8 +285,8 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
       this.call,
       '',
       this.logger,
-      'לאישור הבחירה הקישי 1',
-      'לבחירה מחדש הקישי 2'
+      MESSAGE_CONSTANTS.SELECTION.CONFIRM_OPTION,
+      MESSAGE_CONSTANTS.SELECTION.RESTART_OPTION
     );
 
     if (!this.selectionConfirmed) {
@@ -294,7 +294,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
         this.call,
         this.entityName === "שובר" || this.entityName === "שוברים" 
           ? MESSAGE_CONSTANTS.VOUCHER.RETRY_SELECTION
-          : `נחזור לבחירת ה${this.entityName} מההתחלה`,
+          : MESSAGE_CONSTANTS.SELECTION.RESTART_MESSAGE(this.entityName),
         this.logger
       );
       
@@ -338,13 +338,12 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     
     if (selectedItem !== null) {
       // For multi-selection, check if item is already selected
-      if (this.maxSelections > 1) {
-        if (this.isItemSelected(selectedItem)) {
-          await CallUtils.playMessage(
-            this.call,
-            `ה${this.entityName} ${selectedItem.name} כבר נבחר. אנא בחר אפשרות אחרת.`,
-            this.logger
-          );
+      if (this.maxSelections > 1) {      if (this.isItemSelected(selectedItem)) {
+        await CallUtils.playMessage(
+          this.call,
+          MESSAGE_CONSTANTS.SELECTION.ALREADY_SELECTED(this.entityName, selectedItem.name),
+          this.logger
+        );
           return false;
         }
         
@@ -369,7 +368,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   protected createSelectionPrompt(): string {
     let options = this.items.map(item => `להקשת ${item.key} עבור ${item.name}`).join(', ');
-    return `אנא בחר ${this.entityName} על ידי הקשת המספר המתאים: ${options}`;
+    return MESSAGE_CONSTANTS.SELECTION.PROMPT(this.entityName, options);
   }
 
   /**
@@ -451,7 +450,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     if (this.selectedItems.length === 1) {
       await CallUtils.playMessage(
         this.call,
-        `מצאנו ${this.entityName} אחד זמין: ${this.selectedItems[0].name}`,
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED(this.entityName, this.selectedItems[0].name),
         this.logger
       );
     }
@@ -466,17 +465,17 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
       this.logger.log(`Found existing ${this.entityName}: ${existingItem.name}`);
       await CallUtils.playMessage(
         this.call,
-        `ה${this.entityName} הנוכחי הוא: ${existingItem.name}`,
+        MESSAGE_CONSTANTS.SELECTION.CURRENT_ITEM(this.entityName, existingItem.name),
         this.logger
       );
       
       // Ask if they want to change it
       const changeSelection = await CallUtils.getConfirmation(
         this.call,
-        `האם ברצונך לשנות את ה${this.entityName}?`,
+        MESSAGE_CONSTANTS.SELECTION.CHANGE_PROMPT(this.entityName),
         this.logger,
-        'לשינוי הקישי 1',
-        'להשארת הבחירה הנוכחית הקישי 2'
+        MESSAGE_CONSTANTS.SELECTION.CHANGE_OPTION,
+        MESSAGE_CONSTANTS.SELECTION.KEEP_OPTION
       );
       
       if (!changeSelection) {

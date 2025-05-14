@@ -157,7 +157,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
       // Greet the student by name
       await CallUtils.playMessage(
         this.call,
-        `שלום ${student.name}, ברוכה הבאה למערכת הדיווח האוטומטית.`,
+        MESSAGE_CONSTANTS.GENERAL.WELCOME(student.name),
         this.logger
       );
 
@@ -268,23 +268,23 @@ export class UserInteractionHandler extends BaseYemotHandler {
             // MenuOption.EXIT // Exit is usually handled by hangup or a generic "press 9 to exit"
           ];
 
-          menuPrompt += ` לדיווח על אירוע הקישי ${MenuOption.EVENT_REPORTING}`;
+          menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.EVENT_REPORTING(MenuOption.EVENT_REPORTING)}`;
 
           if (this.hasEventsForPathSelection) {
-            menuPrompt += ` לבחירת מסלול ראשונית הקישי ${MenuOption.PATH_SELECTION}`;
+            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.PATH_SELECTION(MenuOption.PATH_SELECTION)}`;
             allowedOptions.push(MenuOption.PATH_SELECTION);
           }
 
           if (this.hasEventsForVoucherSelection) {
-            menuPrompt += ` לבחירת שוברים ראשונית הקישי ${MenuOption.VOUCHER_SELECTION}`;
+            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.VOUCHER_SELECTION(MenuOption.VOUCHER_SELECTION)}`;
             allowedOptions.push(MenuOption.VOUCHER_SELECTION);
           }
 
           if (this.hasEventsForUpdate) {
-            menuPrompt += ` לעדכון פרטי מסלול לאחר אירוע הקישי ${MenuOption.POST_EVENT_UPDATE}`;
+            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.POST_EVENT_UPDATE(MenuOption.POST_EVENT_UPDATE)}`;
             allowedOptions.push(MenuOption.POST_EVENT_UPDATE);
           }
-          // menuPrompt += ` לסיום הקישי ${MenuOption.EXIT}`; // Consider if EXIT should always be an option here
+          // menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.EXIT(MenuOption.EXIT)}`; // Consider if EXIT should always be an option here
 
           const menuResponse = await CallUtils.readDigits(
             this.call,
@@ -331,19 +331,19 @@ export class UserInteractionHandler extends BaseYemotHandler {
       let confirmationMessage = '';
       switch (this.selectedMenuOption) {
         case MenuOption.EVENT_REPORTING:
-          confirmationMessage = 'בחרת בדיווח על אירוע חדש';
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.EVENT_REPORTING;
           break;
         case MenuOption.PATH_SELECTION:
-          confirmationMessage = 'בחרת בבחירת מסלול';
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.PATH_SELECTION;
           break;
         case MenuOption.VOUCHER_SELECTION:
-          confirmationMessage = 'בחרת בבחירת שוברים';
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.VOUCHER_SELECTION;
           break;
         case MenuOption.POST_EVENT_UPDATE:
-          confirmationMessage = 'בחרת בעדכון לאחר אירוע';
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.POST_EVENT_UPDATE;
           break;
         case MenuOption.EXIT:
-          confirmationMessage = 'בחרת לסיים את השיחה';
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.EXIT;
           break;
       }
 

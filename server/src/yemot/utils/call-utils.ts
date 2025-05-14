@@ -2,6 +2,7 @@ import { Logger } from "@nestjs/common";
 import { Call } from "yemot-router2";
 import { id_list_message, id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
 import { SYSTEM_CONSTANTS } from "../constants/system-constants";
+import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 
 /**
  * Utility class for common call-related operations
@@ -21,8 +22,8 @@ export class CallUtils {
     call: Call,
     message: string,
     logger: Logger,
-    yesOption: string = "לאישור הקישי 1",
-    noOption: string = "לביטול הקישי 2"
+    yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
+    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION
   ): Promise<boolean> {
     logger.debug(`Getting confirmation: ${message}`);
     const promptMessage = `${message} ${yesOption}, ${noOption}`;
