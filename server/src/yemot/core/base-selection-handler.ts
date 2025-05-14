@@ -129,14 +129,14 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
    * Subclasses may override this to customize the prompt
    */
   protected createSelectionPrompt(): string {
-    let prompt = `אנא בחר את ${this.entityName} על ידי הקשת המספר המתאים:\n`;
+    let prompt = `אנא בחר את ${this.entityName} על ידי הקשת המספר המתאים: `;
 
     this.items.forEach(item => {
       prompt += `להקשת ${item.key} עבור ${item.name}`;
       if (item.description) {
         prompt += ` - ${item.description}`;
       }
-      prompt += '\n';
+      prompt += ' ';
     });
 
     return prompt;

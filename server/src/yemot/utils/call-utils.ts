@@ -25,7 +25,7 @@ export class CallUtils {
     noOption: string = "לביטול הקישי 2"
   ): Promise<boolean> {
     logger.debug(`Getting confirmation: ${message}`);
-    const promptMessage = `${message}\n${yesOption}, ${noOption}`;
+    const promptMessage = `${message} ${yesOption}, ${noOption}`;
     
     const response = await call.read(
       [{ type: 'text', data: promptMessage }],

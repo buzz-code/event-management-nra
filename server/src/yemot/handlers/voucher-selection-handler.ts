@@ -97,8 +97,8 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    let options = this.items.map(item => `להקשת ${item.key} עבור שובר ${item.name}`).join('\n');
-    return `אנא בחרי שובר על ידי הקשת המספר המתאים:\n${options}`;
+    let options = this.items.map(item => `להקשת ${item.key} עבור שובר ${item.name}`).join(' ');
+    return `אנא בחרי שובר על ידי הקשת המספר המתאים: ${options}`;
   }
 
   /**

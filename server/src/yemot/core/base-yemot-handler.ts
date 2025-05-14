@@ -79,7 +79,7 @@ export abstract class BaseYemotHandler {
     yesOption: string = "לאישור הקישי 1",
     noOption: string = "לביטול הקישי 2"
   ): Promise<boolean> {
-    const message = `${prompt}\n${yesOption}, ${noOption}`;
+    const message = `${prompt} ${yesOption}, ${noOption}`;
     const response = await this.readDigits(message, {
       max_digits: 1,
       min_digits: 1,
