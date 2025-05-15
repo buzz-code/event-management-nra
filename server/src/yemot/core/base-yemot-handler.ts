@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
 import { DataSource } from 'typeorm';
-import { id_list_message, id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
@@ -43,8 +42,7 @@ export abstract class BaseYemotHandler {
    * @returns The digits entered by the user
    */
   protected async readDigits(promptText: string, options: ReadDigitsOptions): Promise<string> {
-    this.call.logDebug(`Reading digits with prompt: ${promptText}`);
-    return await this.call.read([{ type: 'text', data: promptText }], 'tap', options);
+    return await this.call.readDigits(promptText, options);
   }
 
   /**
@@ -52,8 +50,7 @@ export abstract class BaseYemotHandler {
    * @param message The message to play
    */
   protected async playMessage(message: string): Promise<void> {
-    this.call.logDebug(`Playing message: ${message}`);
-    await id_list_message(this.call, message);
+    return await this.call.playMessage(message);
   }
 
   /**
@@ -61,8 +58,7 @@ export abstract class BaseYemotHandler {
    * @param message The message to play before hanging up
    */
   protected async hangupWithMessage(message: string): Promise<void> {
-    this.call.logDebug(`Hanging up with message: ${message}`);
-    await id_list_message_with_hangup(this.call, message);
+    return await this.call.hangupWithMessage(message);
   }
 
   /**
@@ -77,14 +73,7 @@ export abstract class BaseYemotHandler {
     yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
     noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION,
   ): Promise<boolean> {
-    const message = `${prompt} ${yesOption}, ${noOption}`;
-    const response = await this.readDigits(message, {
-      max_digits: 1,
-      min_digits: 1,
-      digits_allowed: ['1', '2'],
-    });
-
-    return response === '1';
+    return await this.call.getConfirmation(prompt, yesOption, noOption);
   }
 
   /**

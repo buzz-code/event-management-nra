@@ -5,7 +5,6 @@ import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 import { SelectionHelper, SelectableEntity } from './selection-helper';
 import { EventEligibilityUtil, EventEligibilityType } from '../utils/event-eligibility.util';
-import { CallUtils } from '../utils/call-utils';
 import { FormatUtils } from '../utils/format-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 

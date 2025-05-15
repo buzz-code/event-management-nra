@@ -11,7 +11,6 @@ import {
   toGregorianDate,
   toJewishDate,
 } from 'jewish-date';
-import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { FormatUtils } from '../utils/format-utils';
 

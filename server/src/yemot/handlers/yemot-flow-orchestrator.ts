@@ -4,7 +4,6 @@ import { id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { YemotHandlerFactory } from './yemot-handler-factory';
 import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
-import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { MenuOption } from './user-interaction-handler';
 import { BaseYemotHandler } from '../core/base-yemot-handler';

@@ -1,8 +1,8 @@
 import { DataSource, EntityTarget, Repository } from 'typeorm';
 import { Call, TapOptions } from 'yemot-router2';
 import { Logger } from '@nestjs/common';
+import { id_list_message, id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
-import { CallUtils } from './call-utils';
 
 declare module 'yemot-router2' {
   interface Call {
@@ -21,16 +21,18 @@ declare module 'yemot-router2' {
 
 /**
  * Factory function that creates an ExtendedCall which implements the Call interface
- * and forwards all methods to the original Call while adding custom functionality
+ * and adds custom functionality directly (no forwarding to CallUtils)
  */
 export function createExtendedCall(call: Call, logger: Logger, dataSource: DataSource): Call {
   // Create a new object that copies all properties and methods from the original call
   const extendedCall = Object.create(Object.getPrototypeOf(call), Object.getOwnPropertyDescriptors(call)) as Call;
 
+  // Database Repository access
   extendedCall.getRepository = function <T>(entityClass: EntityTarget<T>): Repository<T> {
     return dataSource.getRepository(entityClass);
   };
 
+  // Enhanced Logging capabilities
   extendedCall.logInfo = function (message: string): void {
     logger.log(`[Call ${extendedCall.callId}] ${message}`);
   };
@@ -44,21 +46,41 @@ export function createExtendedCall(call: Call, logger: Logger, dataSource: DataS
     logger.error(`[Call ${extendedCall.callId}] ${message}`, stack);
   };
 
-  extendedCall.getConfirmation = function (
+  // Call interaction methods (implemented directly, no forwarding to CallUtils)
+  extendedCall.getConfirmation = async function (
     message: string,
     yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
     noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION,
   ): Promise<boolean> {
-    return CallUtils.getConfirmation(extendedCall, message, logger, yesOption, noOption);
+    extendedCall.logDebug(`Getting confirmation: ${message}`);
+    const promptMessage = `${message} ${yesOption}, ${noOption}`;
+
+    const response = await extendedCall.read([{ type: 'text', data: promptMessage }], 'tap', {
+      max_digits: 1,
+      min_digits: 1,
+      digits_allowed: ['1', '2'],
+    }) as string;
+
+    const confirmed = response === '1';
+    extendedCall.logDebug(`Confirmation response: ${confirmed ? 'Yes' : 'No'}`);
+    return confirmed;
   };
-  extendedCall.readDigits = function (promptText: string, options: TapOptions): Promise<string> {
-    return CallUtils.readDigits(extendedCall, promptText, logger, options);
+  
+  extendedCall.readDigits = async function (promptText: string, options: TapOptions): Promise<string> {
+    extendedCall.logDebug(`Reading digits with prompt: ${promptText}`);
+    const result = await extendedCall.read([{ type: 'text', data: promptText }], 'tap', options) as string;
+    extendedCall.logDebug(`Digits entered: ${result}`);
+    return result;
   };
-  extendedCall.playMessage = function (message: string): Promise<void> {
-    return CallUtils.playMessage(extendedCall, message, logger);
+  
+  extendedCall.playMessage = async function (message: string): Promise<void> {
+    extendedCall.logDebug(`Playing message: ${message}`);
+    await id_list_message(extendedCall, message);
   };
-  extendedCall.hangupWithMessage = function (message: string): Promise<void> {
-    return CallUtils.hangupWithMessage(extendedCall, message, logger);
+  
+  extendedCall.hangupWithMessage = async function (message: string): Promise<void> {
+    extendedCall.logDebug(`Hanging up with message: ${message}`);
+    await id_list_message_with_hangup(extendedCall, message);
   };
 
   return extendedCall;

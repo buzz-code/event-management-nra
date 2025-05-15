@@ -2,7 +2,6 @@ import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
 import { DataSource, FindOptionsOrder, FindOptionsWhere, FindOptionsWhereProperty, Repository } from 'typeorm';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
-import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { SYSTEM_CONSTANTS } from '../constants/system-constants';
 

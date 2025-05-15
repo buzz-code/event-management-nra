@@ -4,7 +4,6 @@ import { DataSource } from 'typeorm';
 import { SelectionHelper } from './selection-helper';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { EventGift } from 'src/db/entities/EventGift.entity';
-import { CallUtils } from '../utils/call-utils';
 import { SYSTEM_CONSTANTS } from '../constants/system-constants';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 

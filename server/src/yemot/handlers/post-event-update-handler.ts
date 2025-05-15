@@ -9,7 +9,6 @@ import { Event as DBEvent } from 'src/db/entities/Event.entity'; // Added import
 // SelectionHelper is used by EventForUpdateSelector
 import { EventPersistenceHandler } from './event-persistence-handler';
 import { PathSelectionHandler } from './path-selection-handler';
-import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 // FormatUtils is used by EventForUpdateSelector
 // Remove import for EventForUpdateSelector

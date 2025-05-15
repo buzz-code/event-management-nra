@@ -5,7 +5,6 @@ import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { Event } from 'src/db/entities/Event.entity';
-import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { DateSelectionHelper, DateSelectionResult } from './date-selection-helper';
 import { FormatUtils } from '../utils/format-utils';
