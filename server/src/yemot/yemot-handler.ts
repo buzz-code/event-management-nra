@@ -1,22 +1,26 @@
-import { Logger } from "@nestjs/common";
-import { YemotCallHandler, YemotCallProcessor } from "@shared/utils/yemot/yemot-router";
-import { Call } from "yemot-router2";
-import { DataSource } from "typeorm";
-import { getDataSource } from "@shared/utils/entity/foreignKey.util";
-import { Student } from "src/db/entities/Student.entity";
-import { EventType } from "src/db/entities/EventType.entity";
-import { Event } from "src/db/entities/Event.entity";
-import { Teacher } from "src/db/entities/Teacher.entity";
-import { User } from "src/db/entities/User.entity";
-import { LevelType } from "src/db/entities/LevelType.entity";
-import { EventNote } from "src/db/entities/EventNote.entity";
-import { EventGift } from "src/db/entities/EventGift.entity";
-import { Gift } from "src/db/entities/Gift.entity";
-import { Class } from "src/db/entities/Class.entity";
+import { Logger } from '@nestjs/common';
+import {
+  YemotCallHandler,
+  YemotCallProcessor,
+} from '@shared/utils/yemot/yemot-router';
+import { Call } from 'yemot-router2';
+import { DataSource } from 'typeorm';
+import { getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { Student } from 'src/db/entities/Student.entity';
+import { EventType } from 'src/db/entities/EventType.entity';
+import { Event } from 'src/db/entities/Event.entity';
+import { Teacher } from 'src/db/entities/Teacher.entity';
+import { User } from 'src/db/entities/User.entity';
+import { LevelType } from 'src/db/entities/LevelType.entity';
+import { EventNote } from 'src/db/entities/EventNote.entity';
+import { EventGift } from 'src/db/entities/EventGift.entity';
+import { Gift } from 'src/db/entities/Gift.entity';
+import { Class } from 'src/db/entities/Class.entity';
 
 // Import refactored components
-import { YemotHandlerFactory } from "./handlers/yemot-handler-factory";
-import { YemotFlowOrchestrator } from "./handlers/yemot-flow-orchestrator";
+import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
+import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
+import { createExtendedCall } from './utils/extended-call';
 
 /**
  * The main Yemot call handler class
@@ -25,7 +29,7 @@ export class CallHandler {
   private logger: Logger;
   private call: Call;
   private dataSource: DataSource;
-  
+
   private handlerFactory: YemotHandlerFactory;
   private flowOrchestrator: YemotFlowOrchestrator;
 
@@ -46,28 +50,32 @@ export class CallHandler {
   async initializeDataSource(): Promise<void> {
     // Get a data source with all required entities
     this.dataSource = await getDataSource([
-      Student, 
-      EventType, 
-      Event, 
-      Teacher, 
-      User, 
-      LevelType, 
-      EventNote, 
-      EventGift, 
-      Gift, 
-      Class
+      Student,
+      EventType,
+      Event,
+      Teacher,
+      User,
+      LevelType,
+      EventNote,
+      EventGift,
+      Gift,
+      Class,
     ]);
-    
+
     this.logger.log('Data source initialized successfully');
-    
+
     // Create the handler factory and flow orchestrator
     this.logger.log('Using refactored components');
-    
-    this.handlerFactory = new YemotHandlerFactory(this.dataSource);
+
+    this.handlerFactory = new YemotHandlerFactory(this.dataSource, this.call);
+    const extendedCall = createExtendedCall(
+      this.call,
+      this.logger,
+      this.dataSource,
+    );
     this.flowOrchestrator = new YemotFlowOrchestrator(
-      this.logger, 
-      this.call, 
-      this.handlerFactory
+      extendedCall,
+      this.handlerFactory,
     );
   }
 
@@ -77,10 +85,9 @@ export class CallHandler {
   async execute(): Promise<void> {
     try {
       await this.initializeDataSource();
-      
+
       // Execute the main flow using the orchestrator
       await this.flowOrchestrator.execute();
-      
     } catch (error) {
       this.logger.error(`Error executing call flow: ${error.message}`);
       // Any unhandled exceptions - flow orchestrator should handle most errors

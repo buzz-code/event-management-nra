@@ -1,7 +1,7 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource, FindOptionsOrder, Repository } from "typeorm";
-import { BaseYemotHandler } from "./base-yemot-handler";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource, FindOptionsOrder, Repository } from 'typeorm';
+import { BaseYemotHandler } from './base-yemot-handler';
 
 /**
  * Interface for selectable entities that have key, name and optional description
@@ -17,27 +17,27 @@ export interface SelectableEntity {
  * Abstract base handler for selection operations (both single and multiple)
  * Contains shared functionality for fetching items, validation, and basic selection flow
  */
-export abstract class BaseSelectionHandler<T extends SelectableEntity> extends BaseYemotHandler {
+export abstract class BaseSelectionHandler<
+  T extends SelectableEntity,
+> extends BaseYemotHandler {
   protected items: T[] = [];
   protected repository: Repository<T>;
   protected entityName: string;
 
   /**
    * Constructor for the BaseSelectionHandler
-   * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source
    * @param entityName The name of the entity type (for logging and messages)
    * @param entityRepository The repository to use for fetching entities
    */
   constructor(
-    logger: Logger,
     call: Call,
     dataSource: DataSource,
     entityName: string,
-    entityRepository: Repository<T>
+    entityRepository: Repository<T>,
   ) {
-    super(logger, call, dataSource);
+    super(call, dataSource);
     this.entityName = entityName;
     this.repository = entityRepository;
   }
@@ -45,19 +45,23 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
   /**
    * Fetches all items from the repository
    */
-  protected async fetchItems(orderBy: keyof T = 'key' as keyof T): Promise<void> {
+  protected async fetchItems(
+    orderBy: keyof T = 'key' as keyof T,
+  ): Promise<void> {
     this.logStart('fetchItems');
 
     this.items = await this.repository.find({
       order: {
-        [orderBy]: 'ASC'
-      } as FindOptionsOrder<T>
+        [orderBy]: 'ASC',
+      } as FindOptionsOrder<T>,
     });
 
     if (this.items.length === 0) {
-      this.logger.warn(`No ${this.entityName} options found in the database`);
+      this.call.logWarn(`No ${this.entityName} options found in the database`);
     } else {
-      this.logger.log(`Found ${this.items.length} ${this.entityName} options`);
+      this.call.logInfo(
+        `Found ${this.items.length} ${this.entityName} options`,
+      );
     }
 
     this.logComplete('fetchItems');
@@ -74,7 +78,9 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await this.hangupWithMessage(`אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`);
+      await this.hangupWithMessage(
+        `אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`,
+      );
       return;
     }
 
@@ -96,7 +102,7 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
           }
         }
       } catch (error) {
-        this.logger.error(`Error in selection: ${error.message}`);
+        this.call.logError(`Error in selection: ${error.message}`, error.stack);
         attempts++;
         if (attempts < this.maxRetries) {
           await this.playMessage('אירעה שגיאה, אנא נסה שנית');
@@ -105,8 +111,12 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
     }
 
     if (!selectionComplete) {
-      this.logger.error(`Maximum ${this.entityName} selection attempts reached`);
-      await this.hangupWithMessage('מספר נסיונות הבחירה הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.');
+      this.call.logError(
+        `Maximum ${this.entityName} selection attempts reached`,
+      );
+      await this.hangupWithMessage(
+        'מספר נסיונות הבחירה הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.',
+      );
       return;
     }
 
@@ -131,7 +141,7 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
   protected createSelectionPrompt(): string {
     let prompt = `אנא בחר את ${this.entityName} על ידי הקשת המספר המתאים: `;
 
-    this.items.forEach(item => {
+    this.items.forEach((item) => {
       prompt += `להקשת ${item.key} עבור ${item.name}`;
       if (item.description) {
         prompt += ` - ${item.description}`;
@@ -154,6 +164,6 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
    * @returns The found item or null if not found
    */
   protected findItemByKey(key: number): T | null {
-    return this.items.find(item => item.key === key) || null;
+    return this.items.find((item) => item.key === key) || null;
   }
 }

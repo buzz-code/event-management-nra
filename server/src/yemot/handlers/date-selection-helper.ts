@@ -1,11 +1,19 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource } from "typeorm";
-import { BaseYemotHandler } from "../core/base-yemot-handler";
-import { getIndexByJewishMonth, getJewishMonthByIndex, getJewishMonthInHebrew, getJewishMonthsInOrder, JewishMonthType, toGregorianDate, toJewishDate } from "jewish-date";
-import { CallUtils } from "../utils/call-utils";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
-import { FormatUtils } from "../utils/format-utils";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource } from 'typeorm';
+import { BaseYemotHandler } from '../core/base-yemot-handler';
+import {
+  getIndexByJewishMonth,
+  getJewishMonthByIndex,
+  getJewishMonthInHebrew,
+  getJewishMonthsInOrder,
+  JewishMonthType,
+  toGregorianDate,
+  toJewishDate,
+} from 'jewish-date';
+import { CallUtils } from '../utils/call-utils';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
+import { FormatUtils } from '../utils/format-utils';
 
 /**
  * Interface for date selection results
@@ -31,12 +39,11 @@ export class DateSelectionHelper extends BaseYemotHandler {
 
   /**
    * Constructor for the DateSelectionHelper
-   * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source
    */
-  constructor(logger: Logger, call: Call, dataSource: DataSource) {
-    super(logger, call, dataSource);
+  constructor(call: Call, dataSource: DataSource) {
+    super(call, dataSource);
 
     // Initialize with the current Jewish year and next year
     const today = toJewishDate(new Date());
@@ -50,56 +57,54 @@ export class DateSelectionHelper extends BaseYemotHandler {
    */
   async handleDateSelection(): Promise<DateSelectionResult | null> {
     this.logStart('handleDateSelection');
-    
+
     let dateConfirmed = false;
-    
+
     try {
       const success = await this.withRetry(
         async () => {
           // Collect day and month information
           this.selectedDay = await this.collectDay();
           this.selectedMonth = await this.collectMonth();
-          
+
           // Convert to Gregorian
           this.gregorianDate = this.convertToGregorian();
-          
+
           // Format the date in Hebrew
-          this.fullHebrewDate = FormatUtils.formatHebrewDate(this.gregorianDate);
-          
+          this.fullHebrewDate = FormatUtils.formatHebrewDate(
+            this.gregorianDate,
+          );
+
           // Confirm the date with the user
           dateConfirmed = await this.confirmDate();
-          
+
           if (!dateConfirmed) {
             throw new Error('Date not confirmed');
           }
-          
+
           return true;
         },
         '',
-        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED
+        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
       );
-      
+
       if (!success || !this.gregorianDate) {
-        this.logger.error('Date selection failed: No valid date was selected');
+        this.call.logError('Date selection failed: No valid date was selected');
         return null;
       }
-      
+
       const result: DateSelectionResult = {
         day: this.selectedDay!,
         month: this.selectedMonth!,
         hebrewDate: this.fullHebrewDate!,
-        gregorianDate: this.gregorianDate
+        gregorianDate: this.gregorianDate,
       };
-      
+
       this.logComplete('handleDateSelection', { date: this.fullHebrewDate });
       return result;
     } catch (error) {
       this.logError('handleDateSelection', error as Error);
-      await CallUtils.hangupWithMessage(
-        this.call,
-        MESSAGE_CONSTANTS.GENERAL.ERROR,
-        this.logger
-      );
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
       return null;
     }
   }
@@ -110,16 +115,11 @@ export class DateSelectionHelper extends BaseYemotHandler {
    */
   private async collectDay(): Promise<number> {
     this.logStart('collectDay');
-    
-    const day = await CallUtils.readDigits(
-      this.call,
-      MESSAGE_CONSTANTS.DATE.DAY_PROMPT, 
-      this.logger,
-      {
-        max_digits: 2,
-        min_digits: 1,
-      }
-    );
+
+    const day = await this.call.readDigits(MESSAGE_CONSTANTS.DATE.DAY_PROMPT, {
+      max_digits: 2,
+      min_digits: 1,
+    });
 
     const dayNumber = parseInt(day);
 
@@ -127,7 +127,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
       throw new Error(MESSAGE_CONSTANTS.DATE.INVALID_DAY);
     }
 
-    this.logger.log(`User entered day: ${dayNumber}`);
+    this.call.logInfo(`User entered day: ${dayNumber}`);
     this.logComplete('collectDay', { day: dayNumber });
     return dayNumber;
   }
@@ -138,21 +138,20 @@ export class DateSelectionHelper extends BaseYemotHandler {
    */
   private async collectMonth(): Promise<number> {
     this.logStart('collectMonth');
-    
-    const months = this.getHebrewMonthsList();
-    const monthNames = months.map(({ hebrewName }, index) => `${index + 1} - ${hebrewName}`);
-    
-    const monthMessage = MESSAGE_CONSTANTS.DATE.MONTH_PROMPT(monthNames.join(', '));
 
-    const month = await CallUtils.readDigits(
-      this.call,
-      monthMessage,
-      this.logger,
-      {
-        max_digits: 2,
-        min_digits: 1,
-      }
+    const months = this.getHebrewMonthsList();
+    const monthNames = months.map(
+      ({ hebrewName }, index) => `${index + 1} - ${hebrewName}`,
     );
+
+    const monthMessage = MESSAGE_CONSTANTS.DATE.MONTH_PROMPT(
+      monthNames.join(', '),
+    );
+
+    const month = await this.call.readDigits(monthMessage, {
+      max_digits: 2,
+      min_digits: 1,
+    });
 
     const monthNumber = parseInt(month);
     const selectedMonth = months[monthNumber - 1];
@@ -161,7 +160,9 @@ export class DateSelectionHelper extends BaseYemotHandler {
       throw new Error(MESSAGE_CONSTANTS.DATE.INVALID_MONTH(months.length));
     }
 
-    this.logger.log(`User entered month: ${monthNumber}, Hebrew name: ${selectedMonth.hebrewName}, monthIndex: ${selectedMonth.index}`);
+    this.call.logInfo(
+      `User entered month: ${monthNumber}, Hebrew name: ${selectedMonth.hebrewName}, monthIndex: ${selectedMonth.index}`,
+    );
     this.logComplete('collectMonth', { month: selectedMonth.index });
     return selectedMonth.index;
   }
@@ -169,12 +170,20 @@ export class DateSelectionHelper extends BaseYemotHandler {
   /**
    * Gets a list of Hebrew months with their indices and names
    */
-  private getHebrewMonthsList(): Array<{ month: JewishMonthType; index: number; hebrewName: string }> {
+  private getHebrewMonthsList(): Array<{
+    month: JewishMonthType;
+    index: number;
+    hebrewName: string;
+  }> {
     return getJewishMonthsInOrder(this.currentJewishYear)
-      .map(month => month as JewishMonthType)
-      .map(month => ({ month, index: getIndexByJewishMonth(month) }))
+      .map((month) => month as JewishMonthType)
+      .map((month) => ({ month, index: getIndexByJewishMonth(month) }))
       .filter(({ index }) => index !== 0)
-      .map(({ month, index }) => ({ month, index, hebrewName: getJewishMonthInHebrew(month) }));
+      .map(({ month, index }) => ({
+        month,
+        index,
+        hebrewName: getJewishMonthInHebrew(month),
+      }));
   }
 
   /**
@@ -185,11 +194,14 @@ export class DateSelectionHelper extends BaseYemotHandler {
     if (!this.selectedDay || !this.selectedMonth) {
       throw new Error('Cannot convert to Gregorian: day or month is missing');
     }
-    
+
     // First convert using the current year
     const dateWithCurrentYear = toGregorianDate({
       year: this.currentJewishYear,
-      monthName: getJewishMonthByIndex(this.selectedMonth, this.currentJewishYear),
+      monthName: getJewishMonthByIndex(
+        this.selectedMonth,
+        this.currentJewishYear,
+      ),
       day: this.selectedDay,
     });
 
@@ -199,16 +211,21 @@ export class DateSelectionHelper extends BaseYemotHandler {
     sixMonthsAgo.setMonth(now.getMonth() - 6);
 
     if (dateWithCurrentYear < sixMonthsAgo) {
-      this.logger.log(`Selected date is more than 6 months in the past. Using next Jewish year (${this.nextJewishYear}) instead.`);
-      
+      this.call.logInfo(
+        `Selected date is more than 6 months in the past. Using next Jewish year (${this.nextJewishYear}) instead.`,
+      );
+
       // Convert again using the next year
       return toGregorianDate({
         year: this.nextJewishYear,
-        monthName: getJewishMonthByIndex(this.selectedMonth, this.nextJewishYear),
+        monthName: getJewishMonthByIndex(
+          this.selectedMonth,
+          this.nextJewishYear,
+        ),
         day: this.selectedDay,
       });
     }
-    
+
     return dateWithCurrentYear;
   }
 
@@ -220,13 +237,11 @@ export class DateSelectionHelper extends BaseYemotHandler {
     if (!this.fullHebrewDate) {
       throw new Error('Hebrew date is missing');
     }
-    
-    return await CallUtils.getConfirmation(
-      this.call,
+
+    return await this.call.getConfirmation(
       MESSAGE_CONSTANTS.DATE.CONFIRM_DATE(this.fullHebrewDate),
-      this.logger,
       MESSAGE_CONSTANTS.DATE.CONFIRM_YES,
-      MESSAGE_CONSTANTS.DATE.CONFIRM_NO
+      MESSAGE_CONSTANTS.DATE.CONFIRM_NO,
     );
   }
 
@@ -235,10 +250,15 @@ export class DateSelectionHelper extends BaseYemotHandler {
    * @returns Object containing the selected date details
    */
   getSelectedDate(): DateSelectionResult | null {
-    if (!this.selectedDay || !this.selectedMonth || !this.fullHebrewDate || !this.gregorianDate) {
+    if (
+      !this.selectedDay ||
+      !this.selectedMonth ||
+      !this.fullHebrewDate ||
+      !this.gregorianDate
+    ) {
       return null;
     }
-    
+
     return {
       day: this.selectedDay,
       month: this.selectedMonth,

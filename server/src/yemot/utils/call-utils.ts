@@ -1,8 +1,11 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { id_list_message, id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
-import { SYSTEM_CONSTANTS } from "../constants/system-constants";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
+import { Logger } from '@nestjs/common';
+import { Call, TapOptions } from 'yemot-router2';
+import {
+  id_list_message,
+  id_list_message_with_hangup,
+} from '@shared/utils/yemot/yemot-router';
+import { SYSTEM_CONSTANTS } from '../constants/system-constants';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
  * Utility class for common call-related operations
@@ -23,24 +26,24 @@ export class CallUtils {
     message: string,
     logger: Logger,
     yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
-    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION
+    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION,
   ): Promise<boolean> {
     logger.debug(`Getting confirmation: ${message}`);
     const promptMessage = `${message} ${yesOption}, ${noOption}`;
-    
-    const response = await call.read(
+
+    const response = (await call.read(
       [{ type: 'text', data: promptMessage }],
       'tap',
       {
         max_digits: 1,
         min_digits: 1,
-        digits_allowed: ['1', '2']
-      }
-    ) as string;
-    
+        digits_allowed: ['1', '2'],
+      },
+    )) as string;
+
     const confirmed = response === '1';
     logger.debug(`Confirmation response: ${confirmed ? 'Yes' : 'No'}`);
-    
+
     return confirmed;
   }
 
@@ -56,20 +59,16 @@ export class CallUtils {
     call: Call,
     promptText: string,
     logger: Logger,
-    options: {
-      max_digits: number,
-      min_digits?: number,
-      digits_allowed?: string[]
-    }
+    options: TapOptions,
   ): Promise<string> {
     logger.debug(`Reading digits with prompt: ${promptText}`);
-    
-    const result = await call.read(
+
+    const result = (await call.read(
       [{ type: 'text', data: promptText }],
       'tap',
-      options
-    ) as string;
-    
+      options,
+    )) as string;
+
     logger.debug(`Digits entered: ${result}`);
     return result;
   }
@@ -80,7 +79,11 @@ export class CallUtils {
    * @param message The message to play
    * @param logger Logger for logging the interaction
    */
-  static async playMessage(call: Call, message: string, logger: Logger): Promise<void> {
+  static async playMessage(
+    call: Call,
+    message: string,
+    logger: Logger,
+  ): Promise<void> {
     logger.debug(`Playing message: ${message}`);
     await id_list_message(call, message);
   }
@@ -91,7 +94,11 @@ export class CallUtils {
    * @param message The message to play before hanging up
    * @param logger Logger for logging the interaction
    */
-  static async hangupWithMessage(call: Call, message: string, logger: Logger): Promise<void> {
+  static async hangupWithMessage(
+    call: Call,
+    message: string,
+    logger: Logger,
+  ): Promise<void> {
     logger.debug(`Hanging up with message: ${message}`);
     await id_list_message_with_hangup(call, message);
   }

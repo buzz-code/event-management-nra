@@ -1,17 +1,20 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource, IsNull } from "typeorm";
-import { BaseYemotHandler } from "../core/base-yemot-handler";
-import { Student } from "src/db/entities/Student.entity";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource, IsNull } from 'typeorm';
+import { BaseYemotHandler } from '../core/base-yemot-handler';
+import { Student } from 'src/db/entities/Student.entity';
 // Event is now imported via EventForUpdateSelector
 // import { LevelType } from "src/db/entities/LevelType.entity"; // Not directly used here anymore for event selection
 // SelectionHelper is used by EventForUpdateSelector
-import { EventPersistenceHandler } from "./event-persistence-handler";
-import { PathSelectionHandler } from "./path-selection-handler";
-import { CallUtils } from "../utils/call-utils";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
+import { EventPersistenceHandler } from './event-persistence-handler';
+import { PathSelectionHandler } from './path-selection-handler';
+import { CallUtils } from '../utils/call-utils';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 // FormatUtils is used by EventForUpdateSelector
-import { EventForUpdateSelector, SelectableEventItem } from "./event-for-update-selector"; // Import the new selector
+import {
+  EventForUpdateSelector,
+  SelectableEventItem,
+} from './event-for-update-selector'; // Import the new selector
 
 /**
  * Handler for updating post-event completion status
@@ -21,13 +24,12 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
   private student: Student | null = null;
   private eventPersistenceHandler: EventPersistenceHandler;
 
-  constructor(
-    logger: Logger,
-    call: Call,
-    dataSource: DataSource,
-  ) {
-    super(logger, call, dataSource);
-    this.eventPersistenceHandler = new EventPersistenceHandler(this.logger, this.dataSource);
+  constructor(call: Call, dataSource: DataSource) {
+    super(call, dataSource);
+    this.eventPersistenceHandler = new EventPersistenceHandler(
+      call,
+      dataSource,
+    );
   }
 
   setStudent(student: Student): void {
@@ -39,50 +41,70 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
 
     try {
       if (!this.student) {
-        this.logger.error('Student not set for PostEventUpdateHandler');
-        await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.GENERAL.ERROR, this.logger);
+        this.call.logError('Student not set for PostEventUpdateHandler');
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         return false;
       }
 
-    // 1. Create an event selector using the new specialized class
-    if (!this.student) {
-      // This check is already present, but good to re-iterate dependency
-      this.logger.error('Student not set, cannot create EventForUpdateSelector');
-      await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.GENERAL.ERROR, this.logger);
-      return false;
-    }
-    const eventSelector = new EventForUpdateSelector(this.logger, this.call, this.dataSource, this.student);
+      // 1. Create an event selector using the new specialized class
+      if (!this.student) {
+        // This check is already present, but good to re-iterate dependency
+        this.call.logError(
+          'Student not set, cannot create EventForUpdateSelector',
+        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        return false;
+      }
+      const eventSelector = new EventForUpdateSelector(
+        this.call,
+        this.dataSource,
+        this.student,
+      );
 
-    const selectedEventItem = await eventSelector.handleSingleSelection();
+      const selectedEventItem = await eventSelector.handleSingleSelection();
 
-    if (!selectedEventItem) {
-      this.logger.log('No event selected for update by user or selection failed.');
-      // SelectionHelper would have played appropriate messages and hung up if necessary.
-      return false;
-    }
-    const eventToUpdate = selectedEventItem.originalEvent;
-    this.logger.log(`Proceeding with selected event: ${eventToUpdate.name} (ID: ${eventToUpdate.id})`);
+      if (!selectedEventItem) {
+        this.call.logInfo(
+          'No event selected for update by user or selection failed.',
+        );
+        // SelectionHelper would have played appropriate messages and hung up if necessary.
+        return false;
+      }
+      const eventToUpdate = selectedEventItem.originalEvent;
+      this.call.logInfo(
+        `Proceeding with selected event: ${eventToUpdate.name} (ID: ${eventToUpdate.id})`,
+      );
 
-    // 2. Select Completed Path
-    // PathSelectionHandler is a SelectionHelper<LevelType>
-    const pathSelector = new PathSelectionHandler(this.logger, this.call, this.dataSource);
-    const selectedPath = await pathSelector.handleSingleSelection();
+      // 2. Select Completed Path
+      // PathSelectionHandler is a SelectionHelper<LevelType>
+      const pathSelector = new PathSelectionHandler(this.call, this.dataSource);
+      const selectedPath = await pathSelector.handleSingleSelection();
 
-    if (!selectedPath) {
-      this.logger.log('No path selected by the user or selection process failed.');
-      // PathSelectionHandler (via SelectionHelper) would handle messages.
-      await CallUtils.playMessage(this.call, MESSAGE_CONSTANTS.PATH.NO_PATH_SELECTED, this.logger);
-      return false;
-    }
+      if (!selectedPath) {
+        this.call.logInfo(
+          'No path selected by the user or selection process failed.',
+        );
+        // PathSelectionHandler (via SelectionHelper) would handle messages.
+        await this.call.playMessage(MESSAGE_CONSTANTS.PATH.NO_PATH_SELECTED);
+        return false;
+      }
 
       // 3. Update Event Completion Status
-      await this.eventPersistenceHandler.recordEventCompletion(eventToUpdate, selectedPath);
-      await CallUtils.playMessage(this.call, MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS, this.logger);
-      this.logComplete('handlePostEventUpdate', { eventId: eventToUpdate.id, pathId: selectedPath.id });
+      await this.eventPersistenceHandler.recordEventCompletion(
+        eventToUpdate,
+        selectedPath,
+      );
+      await this.call.playMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS);
+      this.logComplete('handlePostEventUpdate', {
+        eventId: eventToUpdate.id,
+        pathId: selectedPath.id,
+      });
       return true;
     } catch (error) {
       this.logError('handlePostEventUpdate', error as Error);
-      await CallUtils.hangupWithMessage(this.call, MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR, this.logger);
+      await this.call.hangupWithMessage(
+        MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR,
+      );
       return false;
     }
   }

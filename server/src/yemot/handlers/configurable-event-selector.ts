@@ -1,13 +1,16 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource } from "typeorm";
-import { Student } from "src/db/entities/Student.entity";
-import { Event as DBEvent } from "src/db/entities/Event.entity";
-import { SelectionHelper, SelectableEntity } from "./selection-helper";
-import { EventEligibilityUtil, EventEligibilityType } from "../utils/event-eligibility.util";
-import { CallUtils } from "../utils/call-utils";
-import { FormatUtils } from "../utils/format-utils";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource } from 'typeorm';
+import { Student } from 'src/db/entities/Student.entity';
+import { Event as DBEvent } from 'src/db/entities/Event.entity';
+import { SelectionHelper, SelectableEntity } from './selection-helper';
+import {
+  EventEligibilityUtil,
+  EventEligibilityType,
+} from '../utils/event-eligibility.util';
+import { CallUtils } from '../utils/call-utils';
+import { FormatUtils } from '../utils/format-utils';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 export interface SelectableEventItem extends SelectableEntity {
   originalEvent: DBEvent;
@@ -20,15 +23,14 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
   private eligibilityCheck: (event: DBEvent) => boolean;
 
   constructor(
-    logger: Logger,
     call: Call,
     dataSource: DataSource,
     student: Student,
     events: DBEvent[],
     eligibilityType: EventEligibilityType = EventEligibilityType.NONE,
-    autoSelectSingleItem: boolean = true,
+    autoSelectSingleItem = true,
   ) {
-    super(logger, call, dataSource, 'אירוע', undefined, autoSelectSingleItem);
+    super(call, dataSource, 'אירוע', undefined, autoSelectSingleItem);
 
     this.student = student;
     this.studentEvents = events;
@@ -39,10 +41,12 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
         this.eligibilityCheck = EventEligibilityUtil.isEligibleForPathSelection;
         break;
       case EventEligibilityType.VOUCHER:
-        this.eligibilityCheck = EventEligibilityUtil.isEligibleForVoucherSelection;
+        this.eligibilityCheck =
+          EventEligibilityUtil.isEligibleForVoucherSelection;
         break;
       case EventEligibilityType.POST_UPDATE:
-        this.eligibilityCheck = EventEligibilityUtil.isEligibleForPostEventUpdate;
+        this.eligibilityCheck =
+          EventEligibilityUtil.isEligibleForPostEventUpdate;
         break;
       case EventEligibilityType.NONE:
       default:
@@ -59,11 +63,13 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
     // Apply shared filtering and sorting logic
     const eligibleEvents = EventEligibilityUtil.filterEligibleEvents(
       allStudentEvents,
-      this.eligibilityCheck
+      this.eligibilityCheck,
     );
 
     if (eligibleEvents.length === 0) {
-      this.logger.log(`No eligible events found for student ${this.student.id}`);
+      this.call.logInfo(
+        `No eligible events found for student ${this.student.id}`,
+      );
       this.items = [];
     } else {
       this.items = eligibleEvents.map((event: DBEvent, index) => {
@@ -75,7 +81,9 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
           originalEvent: event,
         };
       });
-      this.logger.log(`Found ${this.items.length} eligible events for student ${this.student.id}`);
+      this.call.logInfo(
+        `Found ${this.items.length} eligible events for student ${this.student.id}`,
+      );
     }
     this.logComplete(`fetchItems (ConfigurableEventSelector)`);
   }
@@ -84,10 +92,11 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
     const selectedItem = this.getSelectedItem();
     if (selectedItem) {
       // Uses this.entityName ('אירוע') for a general term.
-      await CallUtils.playMessage(
-        this.call, 
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_SELECTION(this.entityName, selectedItem.name), 
-        this.logger
+      await this.call.playMessage(
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_SELECTION(
+          this.entityName,
+          selectedItem.name,
+        ),
       );
     }
   }

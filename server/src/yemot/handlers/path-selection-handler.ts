@@ -1,9 +1,9 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource } from "typeorm";
-import { SelectionHelper } from "./selection-helper";
-import { LevelType } from "src/db/entities/LevelType.entity";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource } from 'typeorm';
+import { SelectionHelper } from './selection-helper';
+import { LevelType } from 'src/db/entities/LevelType.entity';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
  * Specialized handler for selecting paths/tracks
@@ -12,19 +12,17 @@ import { MESSAGE_CONSTANTS } from "../constants/message-constants";
 export class PathSelectionHandler extends SelectionHelper<LevelType> {
   /**
    * Constructor for the PathSelectionHandler
-   * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source
    */
-  constructor(logger: Logger, call: Call, dataSource: DataSource) {
+  constructor(call: Call, dataSource: DataSource) {
     super(
-      logger,
       call,
       dataSource,
       'מסלול',
       dataSource.getRepository(LevelType),
       false, // autoSelectSingleItem: Auto-selection is NOT required for Path selection (only for Event entities). User must explicitly select.
-      1 // Single selection
+      1, // Single selection
     );
   }
 
@@ -41,7 +39,9 @@ export class PathSelectionHandler extends SelectionHelper<LevelType> {
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    let options = this.items.map(item => `להקשת ${item.key} עבור מסלול ${item.name}`).join(', ');
+    const options = this.items
+      .map((item) => `להקשת ${item.key} עבור מסלול ${item.name}`)
+      .join(', ');
     return MESSAGE_CONSTANTS.SELECTION.PATH_SELECTION_PROMPT(options);
   }
 }

@@ -1,10 +1,10 @@
-import { Event as DBEvent } from "src/db/entities/Event.entity";
+import { Event as DBEvent } from 'src/db/entities/Event.entity';
 
 export enum EventEligibilityType {
   PATH = 'PATH',
   VOUCHER = 'VOUCHER',
   POST_UPDATE = 'POST_UPDATE',
-  NONE = 'NONE'
+  NONE = 'NONE',
 }
 
 /**
@@ -18,8 +18,10 @@ export class EventEligibilityUtil {
    * - Not yet completed with post-event path (completedPathReferenceId is null)
    */
   static isEligibleForPathSelection(event: DBEvent): boolean {
-    return event.levelTypeReferenceId === null && 
-           event.completedPathReferenceId === null;
+    return (
+      event.levelTypeReferenceId === null &&
+      event.completedPathReferenceId === null
+    );
   }
 
   /**
@@ -29,8 +31,10 @@ export class EventEligibilityUtil {
    * - No vouchers selected yet (eventGifts is empty or null)
    */
   static isEligibleForVoucherSelection(event: DBEvent): boolean {
-    return event.levelTypeReferenceId !== null &&
-           (!event.eventGifts || event.eventGifts.length === 0);
+    return (
+      event.levelTypeReferenceId !== null &&
+      (!event.eventGifts || event.eventGifts.length === 0)
+    );
   }
 
   /**
@@ -40,14 +44,18 @@ export class EventEligibilityUtil {
    * - Not yet completed with post-event path (completedPathReferenceId is null)
    */
   static isEligibleForPostEventUpdate(event: DBEvent): boolean {
-    return event.completedPathReferenceId === null && 
-           event.eventDate < new Date();
+    return (
+      event.completedPathReferenceId === null && event.eventDate < new Date()
+    );
   }
 
   /**
    * Helper to filter an array of events by eligibility type
    */
-  static filterEligibleEvents(events: DBEvent[], eligibilityCheck: (event: DBEvent) => boolean): DBEvent[] {
+  static filterEligibleEvents(
+    events: DBEvent[],
+    eligibilityCheck: (event: DBEvent) => boolean,
+  ): DBEvent[] {
     return events
       .filter(eligibilityCheck)
       .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime()); // Sort by date ascending

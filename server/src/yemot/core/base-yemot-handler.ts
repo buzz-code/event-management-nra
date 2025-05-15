@@ -1,8 +1,11 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource } from "typeorm";
-import { id_list_message, id_list_message_with_hangup } from "@shared/utils/yemot/yemot-router";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource } from 'typeorm';
+import {
+  id_list_message,
+  id_list_message_with_hangup,
+} from '@shared/utils/yemot/yemot-router';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
  * Interface for options when reading digits from the call
@@ -19,21 +22,18 @@ export interface ReadDigitsOptions {
  * Provides common functionality for call handling, logging, and database operations
  */
 export abstract class BaseYemotHandler {
-  protected logger: Logger;
   protected call: Call;
   protected dataSource: DataSource;
   protected maxRetries = 3; // Default retry count, can be overridden
 
   /**
    * Constructor for the BaseYemotHandler
-   * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source (optional)
    */
-  constructor(logger: Logger, call: Call, dataSource?: DataSource) {
-    this.logger = logger;
+  constructor(call: Call, dataSource?: DataSource) {
     this.call = call;
-    
+
     if (dataSource) {
       this.dataSource = dataSource;
     }
@@ -45,9 +45,16 @@ export abstract class BaseYemotHandler {
    * @param options Options for reading digits
    * @returns The digits entered by the user
    */
-  protected async readDigits(promptText: string, options: ReadDigitsOptions): Promise<string> {
-    this.logger.debug(`Reading digits with prompt: ${promptText}`);
-    return await this.call.read([{ type: 'text', data: promptText }], 'tap', options);
+  protected async readDigits(
+    promptText: string,
+    options: ReadDigitsOptions,
+  ): Promise<string> {
+    this.call.logDebug(`Reading digits with prompt: ${promptText}`);
+    return await this.call.read(
+      [{ type: 'text', data: promptText }],
+      'tap',
+      options,
+    );
   }
 
   /**
@@ -55,7 +62,7 @@ export abstract class BaseYemotHandler {
    * @param message The message to play
    */
   protected async playMessage(message: string): Promise<void> {
-    this.logger.debug(`Playing message: ${message}`);
+    this.call.logDebug(`Playing message: ${message}`);
     await id_list_message(this.call, message);
   }
 
@@ -64,7 +71,7 @@ export abstract class BaseYemotHandler {
    * @param message The message to play before hanging up
    */
   protected async hangupWithMessage(message: string): Promise<void> {
-    this.logger.debug(`Hanging up with message: ${message}`);
+    this.call.logDebug(`Hanging up with message: ${message}`);
     await id_list_message_with_hangup(this.call, message);
   }
 
@@ -78,15 +85,15 @@ export abstract class BaseYemotHandler {
   protected async getConfirmation(
     prompt: string,
     yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
-    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION
+    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION,
   ): Promise<boolean> {
     const message = `${prompt} ${yesOption}, ${noOption}`;
     const response = await this.readDigits(message, {
       max_digits: 1,
       min_digits: 1,
-      digits_allowed: ['1', '2']
+      digits_allowed: ['1', '2'],
     });
-    
+
     return response === '1';
   }
 
@@ -103,28 +110,32 @@ export abstract class BaseYemotHandler {
     operation: () => Promise<T>,
     retryMessage: string,
     errorMessage: string,
-    maxAttempts: number = this.maxRetries
+    maxAttempts: number = this.maxRetries,
   ): Promise<T> {
     let attempts = 0;
     let lastError: Error | null = null;
-    
+
     while (attempts < maxAttempts) {
       try {
         return await operation();
       } catch (error) {
         attempts++;
         lastError = error;
-        this.logger.warn(`Operation failed (attempt ${attempts}/${maxAttempts}): ${error.message}`);
-        
+        this.call.logWarn(
+          `Operation failed (attempt ${attempts}/${maxAttempts}): ${error.message}`,
+        );
+
         if (attempts >= maxAttempts) {
           break;
         }
-        
+
         await this.playMessage(retryMessage);
       }
     }
-    
-    this.logger.error(`Operation failed after ${maxAttempts} attempts: ${lastError?.message}`);
+
+    this.call.logError(
+      `Operation failed after ${maxAttempts} attempts: ${lastError?.message}`,
+    );
     await this.hangupWithMessage(errorMessage);
   }
 
@@ -133,7 +144,7 @@ export abstract class BaseYemotHandler {
    * @param operation Name of the operation
    */
   protected logStart(operation: string): void {
-    this.logger.log(`Starting ${this.constructor.name}.${operation}`);
+    this.call.logInfo(`Starting ${this.constructor.name}.${operation}`);
   }
 
   /**
@@ -143,9 +154,13 @@ export abstract class BaseYemotHandler {
    */
   protected logComplete(operation: string, result?: any): void {
     if (result) {
-      this.logger.log(`Completed ${this.constructor.name}.${operation}: ${JSON.stringify(result)}`);
+      this.call.logInfo(
+        `Completed ${this.constructor.name}.${operation}: ${JSON.stringify(
+          result,
+        )}`,
+      );
     } else {
-      this.logger.log(`Completed ${this.constructor.name}.${operation}`);
+      this.call.logInfo(`Completed ${this.constructor.name}.${operation}`);
     }
   }
 
@@ -155,6 +170,9 @@ export abstract class BaseYemotHandler {
    * @param error The error that occurred
    */
   protected logError(operation: string, error: Error): void {
-    this.logger.error(`Error in ${this.constructor.name}.${operation}: ${error.message}`, error.stack);
+    this.call.logError(
+      `Error in ${this.constructor.name}.${operation}: ${error.message}`,
+      error.stack,
+    );
   }
 }

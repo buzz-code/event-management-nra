@@ -1,10 +1,10 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource, FindOptionsOrder, Repository } from "typeorm";
-import { BaseYemotHandler } from "../core/base-yemot-handler";
-import { CallUtils } from "../utils/call-utils";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
-import { SYSTEM_CONSTANTS } from "../constants/system-constants";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource, FindOptionsOrder, Repository } from 'typeorm';
+import { BaseYemotHandler } from '../core/base-yemot-handler';
+import { CallUtils } from '../utils/call-utils';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
+import { SYSTEM_CONSTANTS } from '../constants/system-constants';
 
 /**
  * Interface for entities that can be selected
@@ -19,19 +19,20 @@ export interface SelectableEntity {
  * SelectionHelper standardizes selection behavior
  * Supports both single and multiple selection patterns
  */
-export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandler {
+export class SelectionHelper<
+  T extends SelectableEntity,
+> extends BaseYemotHandler {
   protected entityName: string;
   protected entityRepository?: Repository<T>; // Made optional
   protected items: T[] = [];
   protected selectedItems: T[] = [];
-  protected autoSelectSingleItem: boolean = false;
-  protected isAutoSelected: boolean = false;
-  protected maxSelections: number = 1;
-  protected selectionConfirmed: boolean = false;
+  protected autoSelectSingleItem = false;
+  protected isAutoSelected = false;
+  protected maxSelections = 1;
+  protected selectionConfirmed = false;
 
   /**
    * Constructor for the SelectionHelper
-   * @param logger Logger instance for logging
    * @param call The Yemot call object
    * @param dataSource The initialized data source
    * @param entityName The name of the entity type (for logging and messages)
@@ -40,15 +41,14 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    * @param maxSelections Maximum number of items that can be selected (default: 1 for single selection)
    */
   constructor(
-    logger: Logger,
     call: Call,
     dataSource: DataSource,
     entityName: string,
     entityRepository?: Repository<T>, // Made optional
-    autoSelectSingleItem: boolean = false,
-    maxSelections: number = 1
+    autoSelectSingleItem = false,
+    maxSelections = 1,
   ) {
-    super(logger, call, dataSource);
+    super(call, dataSource);
     this.entityName = entityName;
     if (entityRepository) {
       this.entityRepository = entityRepository;
@@ -68,10 +68,8 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await CallUtils.hangupWithMessage(
-        this.call,
+      await this.call.hangupWithMessage(
         MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName),
-        this.logger
       );
       this.logComplete('handleSingleSelection', { status: 'no-items' });
       return null;
@@ -81,11 +79,13 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     if (this.autoSelectSingleItem && this.items.length === 1) {
       this.selectedItems = [this.items[0]];
       this.isAutoSelected = true;
-      this.logger.log(`Auto-selected the only available ${this.entityName}: ${this.selectedItems[0].name} (ID: ${this.selectedItems[0].id})`);
-      
+      this.call.logInfo(
+        `Auto-selected the only available ${this.entityName}: ${this.selectedItems[0].name} (ID: ${this.selectedItems[0].id})`,
+      );
+
       // Announce the auto-selection
       await this.announceAutoSelectionResult();
-      
+
       this.logComplete('handleSingleSelection', { status: 'auto-selected' });
       return this.selectedItems[0];
     }
@@ -105,10 +105,8 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
           // Selection wasn't successful, increment attempts
           attempts++;
           if (attempts < SYSTEM_CONSTANTS.MAX_RETRIES) {
-            await CallUtils.playMessage(
-              this.call,
+            await this.call.playMessage(
               MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT,
-              this.logger
             );
           }
         }
@@ -116,23 +114,21 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
         this.logError('handleSingleSelection', error as Error);
         attempts++;
         if (attempts < SYSTEM_CONSTANTS.MAX_RETRIES) {
-          await CallUtils.playMessage(
-            this.call,
-            MESSAGE_CONSTANTS.GENERAL.ERROR,
-            this.logger
-          );
+          await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         }
       }
     }
 
     if (!selectionComplete) {
-      this.logger.error(`Maximum ${this.entityName} selection attempts reached`);
-      await CallUtils.hangupWithMessage(
-        this.call,
-        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
-        this.logger
+      this.call.logError(
+        `Maximum ${this.entityName} selection attempts reached`,
       );
-      this.logComplete('handleSingleSelection', { status: 'max-attempts-reached' });
+      await this.call.hangupWithMessage(
+        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
+      );
+      this.logComplete('handleSingleSelection', {
+        status: 'max-attempts-reached',
+      });
       return null;
     }
 
@@ -151,10 +147,8 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await CallUtils.hangupWithMessage(
-        this.call,
+      await this.call.hangupWithMessage(
         MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName),
-        this.logger
       );
       this.logComplete('handleMultiSelection', { status: 'no-items' });
       return [];
@@ -168,12 +162,12 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
 
     // Check if the selection was confirmed
     if (!this.selectionConfirmed && this.selectedItems.length > 0) {
-      this.logger.warn(`User did not confirm ${this.entityName} selections`);
+      this.call.logWarn(`User did not confirm ${this.entityName} selections`);
       this.logComplete('handleMultiSelection', { status: 'not-confirmed' });
     } else {
-      this.logComplete('handleMultiSelection', { 
+      this.logComplete('handleMultiSelection', {
         status: 'completed',
-        selectedCount: this.selectedItems.length
+        selectedCount: this.selectedItems.length,
       });
     }
 
@@ -187,72 +181,68 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
   protected async executeMultiSelectionFlow(): Promise<void> {
     let continueSelection = true;
     let selectionAttempts = 0;
-    
+
     // Loop for selection
-    while (continueSelection && this.selectedItems.length < this.maxSelections) {
+    while (
+      continueSelection &&
+      this.selectedItems.length < this.maxSelections
+    ) {
       if (selectionAttempts >= SYSTEM_CONSTANTS.MAX_RETRIES) {
-        this.logger.error(`Maximum ${this.entityName} selection attempts reached`);
-        await CallUtils.hangupWithMessage(
-          this.call,
+        this.call.logError(
+          `Maximum ${this.entityName} selection attempts reached`,
+        );
+        await this.call.hangupWithMessage(
           MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
-          this.logger
         );
         return;
       }
-      
+
       // Show current selection status
       if (this.selectedItems.length > 0) {
-        const selectedNames = this.selectedItems.map(item => item.name).join(", ");
-        await CallUtils.playMessage(
-          this.call,
+        const selectedNames = this.selectedItems
+          .map((item) => item.name)
+          .join(', ');
+        await this.call.playMessage(
           MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames),
-          this.logger
         );
       }
-      
+
       try {
         // Execute a single selection
         const selectionComplete = await this.executeSelectionPrompt();
-        
+
         if (selectionComplete) {
           selectionAttempts = 0;
-          
+
           // Check if we should continue selecting more items
           if (this.selectedItems.length < this.maxSelections) {
-            continueSelection = await CallUtils.getConfirmation(
-              this.call,
-              MESSAGE_CONSTANTS.SELECTION.LAST_SELECTION(this.entityName, this.selectedItems[this.selectedItems.length - 1].name),
-              this.logger,
+            continueSelection = await this.call.getConfirmation(
+              MESSAGE_CONSTANTS.SELECTION.LAST_SELECTION(
+                this.entityName,
+                this.selectedItems[this.selectedItems.length - 1].name,
+              ),
               MESSAGE_CONSTANTS.SELECTION.CONTINUE_OPTION,
-              MESSAGE_CONSTANTS.SELECTION.FINISH_OPTION
+              MESSAGE_CONSTANTS.SELECTION.FINISH_OPTION,
             );
           } else {
-            await CallUtils.playMessage(
-              this.call,
-              MESSAGE_CONSTANTS.SELECTION.MAX_SELECTIONS_REACHED(this.maxSelections),
-              this.logger
+            await this.call.playMessage(
+              MESSAGE_CONSTANTS.SELECTION.MAX_SELECTIONS_REACHED(
+                this.maxSelections,
+              ),
             );
             continueSelection = false;
           }
         } else {
           selectionAttempts++;
-          await CallUtils.playMessage(
-            this.call,
-            MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT,
-            this.logger
-          );
+          await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT);
         }
       } catch (error) {
         this.logError('executeMultiSelectionFlow', error as Error);
         selectionAttempts++;
-        await CallUtils.playMessage(
-          this.call,
-          MESSAGE_CONSTANTS.GENERAL.ERROR,
-          this.logger
-        );
+        await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
       }
     }
-    
+
     // If we have selected items, confirm the selection
     if (this.selectedItems.length > 0) {
       await this.finalizeMultiSelection();
@@ -264,43 +254,35 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   protected async finalizeMultiSelection(): Promise<void> {
     // List all selected items
-    const selectedNames = this.selectedItems.map(item => item.name).join(", ");
-    await CallUtils.playMessage(
-      this.call,
+    const selectedNames = this.selectedItems
+      .map((item) => item.name)
+      .join(', ');
+    await this.call.playMessage(
       MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames),
-      this.logger
     );
 
     // Warning about final selection
-    if (this.entityName === "שובר" || this.entityName === "שוברים") {
-      await CallUtils.playMessage(
-        this.call,
-        MESSAGE_CONSTANTS.VOUCHER.FINAL_WARNING,
-        this.logger
-      );
+    if (this.entityName === 'שובר' || this.entityName === 'שוברים') {
+      await this.call.playMessage(MESSAGE_CONSTANTS.VOUCHER.FINAL_WARNING);
     }
 
     // Confirm selection
-    this.selectionConfirmed = await CallUtils.getConfirmation(
-      this.call,
+    this.selectionConfirmed = await this.call.getConfirmation(
       '',
-      this.logger,
       MESSAGE_CONSTANTS.SELECTION.CONFIRM_OPTION,
-      MESSAGE_CONSTANTS.SELECTION.RESTART_OPTION
+      MESSAGE_CONSTANTS.SELECTION.RESTART_OPTION,
     );
 
     if (!this.selectionConfirmed) {
-      await CallUtils.playMessage(
-        this.call,
-        this.entityName === "שובר" || this.entityName === "שוברים" 
+      await this.call.playMessage(
+        this.entityName === 'שובר' || this.entityName === 'שוברים'
           ? MESSAGE_CONSTANTS.VOUCHER.RETRY_SELECTION
           : MESSAGE_CONSTANTS.SELECTION.RESTART_MESSAGE(this.entityName),
-        this.logger
       );
-      
+
       // Clear selection to start over
       this.selectedItems = [];
-      
+
       // Execute multi-selection flow again
       await this.executeMultiSelectionFlow();
     }
@@ -312,52 +294,53 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   protected async executeSelectionPrompt(): Promise<boolean> {
     this.logStart('executeSelectionPrompt');
-    
+
     // Items are expected to have keys from fetchItems.
     // If a subclass overrides fetchItems and doesn't assign keys,
     // this would be an issue. For now, we assume keys are present.
     const items = this.items;
 
-    const maxDigits = Math.max(...items.map(item => item.key.toString().length));
-    const allowedKeys = items.map(item => item.key.toString());
+    const maxDigits = Math.max(
+      ...items.map((item) => item.key.toString().length),
+    );
+    const allowedKeys = items.map((item) => item.key.toString());
 
     const prompt = this.createSelectionPrompt();
 
-    const selection = await CallUtils.readDigits(
-      this.call,
-      prompt,
-      this.logger,
-      {
-        max_digits: maxDigits,
-        digits_allowed: allowedKeys
-      }
-    );
+    const selection = await this.call.readDigits(prompt, {
+      max_digits: maxDigits,
+      digits_allowed: allowedKeys,
+    });
 
     const selectedKey = parseInt(selection);
     const selectedItem = this.findItemByKey(selectedKey);
-    
+
     if (selectedItem !== null) {
       // For multi-selection, check if item is already selected
-      if (this.maxSelections > 1) {      if (this.isItemSelected(selectedItem)) {
-        await CallUtils.playMessage(
-          this.call,
-          MESSAGE_CONSTANTS.SELECTION.ALREADY_SELECTED(this.entityName, selectedItem.name),
-          this.logger
-        );
+      if (this.maxSelections > 1) {
+        if (this.isItemSelected(selectedItem)) {
+          await this.call.playMessage(
+            MESSAGE_CONSTANTS.SELECTION.ALREADY_SELECTED(
+              this.entityName,
+              selectedItem.name,
+            ),
+          );
           return false;
         }
-        
+
         // Add to selections
         this.selectedItems.push(selectedItem);
       } else {
         // For single selection, replace selection
         this.selectedItems = [selectedItem];
       }
-      
-      this.logger.log(`User selected ${this.entityName}: ${selectedItem.name} (${selectedItem.key})`);
+
+      this.call.logInfo(
+        `User selected ${this.entityName}: ${selectedItem.name} (${selectedItem.key})`,
+      );
       return true;
     } else {
-      this.logger.warn(`Invalid ${this.entityName} selection: ${selectedKey}`);
+      this.call.logWarn(`Invalid ${this.entityName} selection: ${selectedKey}`);
       return false;
     }
   }
@@ -367,7 +350,9 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    let options = this.items.map(item => `להקשת ${item.key} עבור ${item.name}`).join(', ');
+    const options = this.items
+      .map((item) => `להקשת ${item.key} עבור ${item.name}`)
+      .join(', ');
     return MESSAGE_CONSTANTS.SELECTION.PROMPT(this.entityName, options);
   }
 
@@ -377,7 +362,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    * @returns The found item or null if not found
    */
   protected findItemByKey(key: number): T | null {
-    return this.items.find(item => item.key === key) || null;
+    return this.items.find((item) => item.key === key) || null;
   }
 
   /**
@@ -386,7 +371,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    * @returns Whether the item is already selected
    */
   protected isItemSelected(item: T): boolean {
-    return this.selectedItems.some(selected => selected.id === item.id);
+    return this.selectedItems.some((selected) => selected.id === item.id);
   }
 
   /**
@@ -397,25 +382,29 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     this.logStart('fetchItems');
 
     if (!this.entityRepository) {
-      this.logger.warn(`entityRepository is not set for ${this.entityName}. Subclass should override fetchItems or provide a repository.`);
+      this.call.logWarn(
+        `entityRepository is not set for ${this.entityName}. Subclass should override fetchItems or provide a repository.`,
+      );
       this.items = [];
       this.logComplete('fetchItems', { count: 0, status: 'no-repository' });
       return;
     }
-    
+
     // Basic implementation - fetch all items ordered by key
     try {
       this.items = await this.entityRepository.find({
         order: { key: 'ASC' } as FindOptionsOrder<T>, // Type assertion for order
       });
-      
+
       // Assign keys to items (starting from 1)
       // Removed dynamic key assignment. Items are expected to have keys from the database.
       // this.items.forEach((item, index) => {
       //   item.key = index + 1;
       // });
-      
-      this.logger.log(`Fetched ${this.items.length} ${this.entityName} options`);
+
+      this.call.logInfo(
+        `Fetched ${this.items.length} ${this.entityName} options`,
+      );
       this.logComplete('fetchItems', { count: this.items.length });
     } catch (error) {
       this.logError('fetchItems', error as Error);
@@ -428,17 +417,17 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   protected async announceSelectionResult(): Promise<void> {
     if (this.selectedItems.length === 1) {
-      await CallUtils.playMessage(
-        this.call,
+      await this.call.playMessage(
         `בחרת ב${this.entityName}: ${this.selectedItems[0].name}`,
-        this.logger
       );
     } else if (this.selectedItems.length > 1) {
-      const selectedNames = this.selectedItems.map(item => item.name).join(", ");
-      await CallUtils.playMessage(
-        this.call,
-        `בחרת ב${this.entityName === 'שובר' ? 'שוברים' : this.entityName}: ${selectedNames}`,
-        this.logger
+      const selectedNames = this.selectedItems
+        .map((item) => item.name)
+        .join(', ');
+      await this.call.playMessage(
+        `בחרת ב${
+          this.entityName === 'שובר' ? 'שוברים' : this.entityName
+        }: ${selectedNames}`,
       );
     }
   }
@@ -448,10 +437,11 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   protected async announceAutoSelectionResult(): Promise<void> {
     if (this.selectedItems.length === 1) {
-      await CallUtils.playMessage(
-        this.call,
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED(this.entityName, this.selectedItems[0].name),
-        this.logger
+      await this.call.playMessage(
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED(
+          this.entityName,
+          this.selectedItems[0].name,
+        ),
       );
     }
   }
@@ -462,26 +452,29 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   async handleSelectionWithExisting(existingItem: T): Promise<T | null> {
     if (existingItem) {
-      this.logger.log(`Found existing ${this.entityName}: ${existingItem.name}`);
-      await CallUtils.playMessage(
-        this.call,
-        MESSAGE_CONSTANTS.SELECTION.CURRENT_ITEM(this.entityName, existingItem.name),
-        this.logger
+      this.call.logInfo(
+        `Found existing ${this.entityName}: ${existingItem.name}`,
       );
-      
+      await this.call.playMessage(
+        MESSAGE_CONSTANTS.SELECTION.CURRENT_ITEM(
+          this.entityName,
+          existingItem.name,
+        ),
+      );
+
       // Ask if they want to change it
-      const changeSelection = await CallUtils.getConfirmation(
-        this.call,
+      const changeSelection = await this.call.getConfirmation(
         MESSAGE_CONSTANTS.SELECTION.CHANGE_PROMPT(this.entityName),
-        this.logger,
         MESSAGE_CONSTANTS.SELECTION.CHANGE_OPTION,
-        MESSAGE_CONSTANTS.SELECTION.KEEP_OPTION
+        MESSAGE_CONSTANTS.SELECTION.KEEP_OPTION,
       );
-      
+
       if (!changeSelection) {
         // User chose to keep the existing selection
         this.selectedItems = [existingItem];
-        this.logger.log(`User kept existing ${this.entityName}: ${existingItem.name}`);
+        this.call.logInfo(
+          `User kept existing ${this.entityName}: ${existingItem.name}`,
+        );
         return existingItem;
       }
     }

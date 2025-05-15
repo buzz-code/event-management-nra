@@ -1,12 +1,12 @@
-import { Logger } from "@nestjs/common";
-import { Call } from "yemot-router2";
-import { DataSource, IsNull, LessThan } from "typeorm";
-import { Student } from "src/db/entities/Student.entity";
-import { Event } from "src/db/entities/Event.entity";
-import { SelectionHelper, SelectableEntity } from "./selection-helper";
-import { CallUtils } from "../utils/call-utils";
-import { FormatUtils } from "../utils/format-utils";
-import { MESSAGE_CONSTANTS } from "../constants/message-constants";
+import { Logger } from '@nestjs/common';
+import { Call } from 'yemot-router2';
+import { DataSource, IsNull, LessThan } from 'typeorm';
+import { Student } from 'src/db/entities/Student.entity';
+import { Event } from 'src/db/entities/Event.entity';
+import { SelectionHelper, SelectableEntity } from './selection-helper';
+import { CallUtils } from '../utils/call-utils';
+import { FormatUtils } from '../utils/format-utils';
+import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 export interface SelectableEventItem extends SelectableEntity {
   originalEvent: Event;
@@ -16,14 +16,13 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
   private student: Student;
 
   constructor(
-    logger: Logger,
     call: Call,
     dataSource: DataSource,
     student: Student,
-    autoSelectSingleItem: boolean = true,
+    autoSelectSingleItem = true,
   ) {
     // No repository is passed to the base class, as fetchItems is overridden
-    super(logger, call, dataSource, 'אירוע לעדכון', undefined, autoSelectSingleItem);
+    super(call, dataSource, 'אירוע לעדכון', undefined, autoSelectSingleItem);
     this.student = student;
   }
 
@@ -41,7 +40,9 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
     });
 
     if (eligibleEvents.length === 0) {
-      this.logger.log(`No eligible events for update found for student ${this.student.id}`);
+      this.call.logInfo(
+        `No eligible events for update found for student ${this.student.id}`,
+      );
       this.items = [];
     } else {
       this.items = eligibleEvents.map((event, index) => {
@@ -53,7 +54,9 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
           originalEvent: event,
         };
       });
-      this.logger.log(`Found ${this.items.length} eligible events for student ${this.student.id}`);
+      this.call.logInfo(
+        `Found ${this.items.length} eligible events for student ${this.student.id}`,
+      );
     }
     this.logComplete('fetchItems (EventForUpdateSelector)');
   }
@@ -61,10 +64,8 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
   protected async announceAutoSelectionResult(): Promise<void> {
     const selectedItem = this.getSelectedItem();
     if (selectedItem) {
-      await CallUtils.playMessage(
-        this.call, 
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_UPDATE(selectedItem.name), 
-        this.logger
+      await this.call.playMessage(
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_UPDATE(selectedItem.name),
       );
     }
   }
