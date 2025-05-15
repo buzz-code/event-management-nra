@@ -9,16 +9,16 @@ import {
   Index,
   BeforeInsert,
   BeforeUpdate,
-} from "typeorm";
-import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, MaxLength, IsNumber } from "@shared/utils/validation/class-validator-he";
-import { StringType, NumberType } from "@shared/utils/entity/class-transformer";
-import { IsOptional } from "class-validator";
-import { IHasUserId } from "@shared/base-entity/interface";
-import { fillDefaultYearValue } from "@shared/utils/entity/year.util";
+} from 'typeorm';
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
+import { IsOptional } from 'class-validator';
+import { IHasUserId } from '@shared/base-entity/interface';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
-@Entity("level_types")
-@Index("level_types_user_id_idx", ["userId"], {})
+@Entity('level_types')
+@Index('level_types_user_id_idx', ['userId'], {})
 export class LevelType implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -29,7 +29,7 @@ export class LevelType implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
@@ -43,13 +43,13 @@ export class LevelType implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
   @IsNumber({}, { always: true })
-  @Column("int")
+  @Column('int')
   key: number;
 
   @IsOptional({ always: true })
   @StringType
   @MaxLength(1000, { always: true })
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
   @IsOptional({ always: true })

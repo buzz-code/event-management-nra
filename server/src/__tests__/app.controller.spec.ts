@@ -18,19 +18,21 @@ describe('AppController', () => {
         {
           provide: AuthService,
           useValue: {
-            getCookieWithJwtToken: jest.fn(user => {
+            getCookieWithJwtToken: jest.fn((user) => {
               if (user) return 'cookie';
               throw new UnauthorizedException();
             }),
-            getCookieForImpersonate: jest.fn(user => {
+            getCookieForImpersonate: jest.fn((user) => {
               if (user) return 'cookie';
               throw new UnauthorizedException();
             }),
-            getCookieForLogOut: jest.fn().mockResolvedValue('Authentication=; HttpOnly; Path=/; Max-Age=0; SameSite=true'),
+            getCookieForLogOut: jest
+              .fn()
+              .mockResolvedValue('Authentication=; HttpOnly; Path=/; Max-Age=0; SameSite=true'),
             registerUser: jest.fn().mockRejectedValue(new UnauthorizedException()),
             getProfile: jest.fn().mockResolvedValue({}),
             updateSettings: jest.fn().mockResolvedValue({}),
-          }
+          },
         },
       ],
     }).compile();
@@ -44,8 +46,13 @@ describe('AppController', () => {
   });
 
   it('should log in a user and return a success message', async () => {
-    const req = { user: { email: 'test@example.com' } } as unknown as AuthenticatedRequest;
-    const res = { setHeader: jest.fn(), send: jest.fn() } as unknown as Response;
+    const req = {
+      user: { email: 'test@example.com' },
+    } as unknown as AuthenticatedRequest;
+    const res = {
+      setHeader: jest.fn(),
+      send: jest.fn(),
+    } as unknown as Response;
 
     await appController.login(req, res);
 
@@ -55,8 +62,13 @@ describe('AppController', () => {
   });
 
   it('should register a user and return a success message', async () => {
-    const req = { user: { email: 'test@example.com' } } as unknown as AuthenticatedRequest;
-    const res = { setHeader: jest.fn(), send: jest.fn() } as unknown as Response;
+    const req = {
+      user: { email: 'test@example.com' },
+    } as unknown as AuthenticatedRequest;
+    const res = {
+      setHeader: jest.fn(),
+      send: jest.fn(),
+    } as unknown as Response;
 
     await appController.register(req, res);
 
@@ -67,17 +79,23 @@ describe('AppController', () => {
 
   it('should throw an UnauthorizedException when login with unauthenticated user', async () => {
     const req = { user: null } as unknown as AuthenticatedRequest;
-    const res = { setHeader: jest.fn(), send: jest.fn() } as unknown as Response;
+    const res = {
+      setHeader: jest.fn(),
+      send: jest.fn(),
+    } as unknown as Response;
 
     await expect(appController.login(req, res)).rejects.toThrow(UnauthorizedException);
   });
 
   it('should throw an UnauthorizedException with non-admin user impersonation', async () => {
-    const req = { 
-      user: { permissions: {} }, 
-      body: { userId: 1 } 
+    const req = {
+      user: { permissions: {} },
+      body: { userId: 1 },
     } as unknown as AuthenticatedRequest;
-    const res = { setHeader: jest.fn(), send: jest.fn() } as unknown as Response;
+    const res = {
+      setHeader: jest.fn(),
+      send: jest.fn(),
+    } as unknown as Response;
 
     await expect(appController.impersonate(req, res)).rejects.toThrow(UnauthorizedException);
   });
@@ -90,22 +108,23 @@ describe('AppController', () => {
 
     await appController.logOut(responseMock);
 
-    expect(responseMock.setHeader).toHaveBeenCalledWith(
-      'Set-Cookie',
-      expect.any(String)
-    );
+    expect(responseMock.setHeader).toHaveBeenCalledWith('Set-Cookie', expect.any(String));
     expect(responseMock.sendStatus).toHaveBeenCalledWith(200);
   });
 
-  it('should return the user\'s profile information', async () => {
-    const req = { 
-      user: { 
-        id: 1, 
-        email: 'test@example.com', 
-        name: 'Test User' 
-      } 
+  it("should return the user's profile information", async () => {
+    const req = {
+      user: {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test User',
+      },
     } as unknown as AuthenticatedRequest;
-    const expectedProfile = { id: 1, email: 'test@example.com', name: 'Test User' };
+    const expectedProfile = {
+      id: 1,
+      email: 'test@example.com',
+      name: 'Test User',
+    };
 
     const profile = await appController.getProfile(req);
 
@@ -118,9 +137,9 @@ describe('AppController', () => {
       setHeader: jest.fn(),
       send: jest.fn(),
     } as unknown as Response;
-    const req = { 
-      body: { userId }, 
-      user: { permissions: { admin: true } } 
+    const req = {
+      body: { userId },
+      user: { permissions: { admin: true } },
     } as unknown as AuthenticatedRequest;
 
     await appController.impersonate(req, responseMock);

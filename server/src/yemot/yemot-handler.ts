@@ -1,8 +1,5 @@
 import { Logger } from '@nestjs/common';
-import {
-  YemotCallHandler,
-  YemotCallProcessor,
-} from '@shared/utils/yemot/yemot-router';
+import { YemotCallHandler, YemotCallProcessor } from '@shared/utils/yemot/yemot-router';
 import { Call } from 'yemot-router2';
 import { DataSource } from 'typeorm';
 import { getDataSource } from '@shared/utils/entity/foreignKey.util';
@@ -68,15 +65,8 @@ export class CallHandler {
     this.logger.log('Using refactored components');
 
     this.handlerFactory = new YemotHandlerFactory(this.dataSource, this.call);
-    const extendedCall = createExtendedCall(
-      this.call,
-      this.logger,
-      this.dataSource,
-    );
-    this.flowOrchestrator = new YemotFlowOrchestrator(
-      extendedCall,
-      this.handlerFactory,
-    );
+    const extendedCall = createExtendedCall(this.call, this.logger, this.dataSource);
+    this.flowOrchestrator = new YemotFlowOrchestrator(extendedCall, this.handlerFactory);
   }
 
   /**

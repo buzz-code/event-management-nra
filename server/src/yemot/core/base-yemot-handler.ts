@@ -1,10 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
 import { DataSource } from 'typeorm';
-import {
-  id_list_message,
-  id_list_message_with_hangup,
-} from '@shared/utils/yemot/yemot-router';
+import { id_list_message, id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
@@ -45,16 +42,9 @@ export abstract class BaseYemotHandler {
    * @param options Options for reading digits
    * @returns The digits entered by the user
    */
-  protected async readDigits(
-    promptText: string,
-    options: ReadDigitsOptions,
-  ): Promise<string> {
+  protected async readDigits(promptText: string, options: ReadDigitsOptions): Promise<string> {
     this.call.logDebug(`Reading digits with prompt: ${promptText}`);
-    return await this.call.read(
-      [{ type: 'text', data: promptText }],
-      'tap',
-      options,
-    );
+    return await this.call.read([{ type: 'text', data: promptText }], 'tap', options);
   }
 
   /**
@@ -121,9 +111,7 @@ export abstract class BaseYemotHandler {
       } catch (error) {
         attempts++;
         lastError = error;
-        this.call.logWarn(
-          `Operation failed (attempt ${attempts}/${maxAttempts}): ${error.message}`,
-        );
+        this.call.logWarn(`Operation failed (attempt ${attempts}/${maxAttempts}): ${error.message}`);
 
         if (attempts >= maxAttempts) {
           break;
@@ -133,9 +121,7 @@ export abstract class BaseYemotHandler {
       }
     }
 
-    this.call.logError(
-      `Operation failed after ${maxAttempts} attempts: ${lastError?.message}`,
-    );
+    this.call.logError(`Operation failed after ${maxAttempts} attempts: ${lastError?.message}`);
     await this.hangupWithMessage(errorMessage);
   }
 
@@ -154,11 +140,7 @@ export abstract class BaseYemotHandler {
    */
   protected logComplete(operation: string, result?: any): void {
     if (result) {
-      this.call.logInfo(
-        `Completed ${this.constructor.name}.${operation}: ${JSON.stringify(
-          result,
-        )}`,
-      );
+      this.call.logInfo(`Completed ${this.constructor.name}.${operation}: ${JSON.stringify(result)}`);
     } else {
       this.call.logInfo(`Completed ${this.constructor.name}.${operation}`);
     }
@@ -170,9 +152,6 @@ export abstract class BaseYemotHandler {
    * @param error The error that occurred
    */
   protected logError(operation: string, error: Error): void {
-    this.call.logError(
-      `Error in ${this.constructor.name}.${operation}: ${error.message}`,
-      error.stack,
-    );
+    this.call.logError(`Error in ${this.constructor.name}.${operation}: ${error.message}`, error.stack);
   }
 }

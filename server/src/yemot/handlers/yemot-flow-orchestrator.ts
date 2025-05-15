@@ -42,11 +42,9 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
       // Step 1: Handle student identification and menu interaction
       // This consolidates the previous authentication and menu presentation steps
-      const userInteractionHandler =
-        this.handlerFactory.createUserInteractionHandler();
+      const userInteractionHandler = this.handlerFactory.createUserInteractionHandler();
 
-      const interactionResult =
-        await userInteractionHandler.handleUserInteraction();
+      const interactionResult = await userInteractionHandler.handleUserInteraction();
 
       if (interactionResult) {
         this.student = interactionResult.student;
@@ -55,9 +53,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       }
 
       if (!interactionResult) {
-        this.call.logWarn(
-          'User interaction failed (authentication or menu selection), ending call flow.',
-        );
+        this.call.logWarn('User interaction failed (authentication or menu selection), ending call flow.');
         // Specific messages and hangup should be handled within UserInteractionHandler
         return;
       }
@@ -65,9 +61,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       this.student = interactionResult.student;
       const menuOption = interactionResult.menuOption;
 
-      this.call.logInfo(
-        `Student ${this.student.id} selected menu option: ${menuOption}`,
-      );
+      this.call.logInfo(`Student ${this.student.id} selected menu option: ${menuOption}`);
 
       // Step 2: Handle the selected menu option
       switch (menuOption) {
@@ -104,13 +98,9 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
     const userFilter = {
       phoneNumber: this.call.ApiDID,
     };
-    const user = await this.dataSource
-      .getRepository(User)
-      .findOneBy(userFilter);
+    const user = await this.dataSource.getRepository(User).findOneBy(userFilter);
     if (!user) {
-      this.call.logError(
-        `User not found for phone number: ${this.call.ApiDID}`,
-      );
+      this.call.logError(`User not found for phone number: ${this.call.ApiDID}`);
       await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
       return;
     }
@@ -130,15 +120,12 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       // This replaces event type selection, date handling, and existence checking
       if (!this.student) {
         // Check student before creating handler that requires it
-        this.call.logError(
-          'Student is null, cannot proceed with event registration.',
-        );
+        this.call.logError('Student is null, cannot proceed with event registration.');
         await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         return;
       }
 
-      const eventRegistrationHandler =
-        this.handlerFactory.createEventRegistrationHandler(this.student);
+      const eventRegistrationHandler = this.handlerFactory.createEventRegistrationHandler(this.student);
 
       // Handle the entire event registration process including:
       // 1. Event type selection
@@ -146,8 +133,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       // 3. Check for existing events
       // 4. Voucher selection (new step)
       // 5. Create event with vouchers
-      const registrationResult =
-        await eventRegistrationHandler.handleEventRegistration();
+      const registrationResult = await eventRegistrationHandler.handleEventRegistration();
 
       if (!registrationResult) {
         // The handler will already have informed the user about any issues or hung up.
@@ -181,19 +167,13 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
     try {
       if (!this.student) {
-        this.call.logError(
-          'Student is null, cannot proceed with path selection flow.',
-        );
+        this.call.logError('Student is null, cannot proceed with path selection flow.');
         await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         return;
       }
 
       // 1. Select an event for path assignment (auto-select if only one event)
-      const eventSelector =
-        this.handlerFactory.createEventForPathAssignmentSelector(
-          this.student,
-          this.studentEvents,
-        );
+      const eventSelector = this.handlerFactory.createEventForPathAssignmentSelector(this.student, this.studentEvents);
 
       const selectedEventItem = await eventSelector.handleSingleSelection();
       if (!selectedEventItem) {
@@ -206,9 +186,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         return;
       }
       const eventForPath = selectedEventItem.originalEvent;
-      this.call.logInfo(
-        `Selected event for path selection: ${eventForPath.name} (ID: ${eventForPath.id})`,
-      );
+      this.call.logInfo(`Selected event for path selection: ${eventForPath.name} (ID: ${eventForPath.id})`);
 
       // 2. Use path handler for path selection (no auto-select for paths)
       const pathHandler = this.handlerFactory.createPathHandler();
@@ -230,37 +208,23 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       }
 
       // 3. Save the path to the event using the event persistence handler
-      const eventPersistence =
-        this.handlerFactory.createEventPersistenceHandler();
+      const eventPersistence = this.handlerFactory.createEventPersistenceHandler();
       // Correctly pass eventForPath as existingEvent, and null for vouchers
-      const updatedEvent = await eventPersistence.saveEvent(
-        this.student,
-        null,
-        null,
-        selectedPath,
-        null,
-        eventForPath,
-      );
+      const updatedEvent = await eventPersistence.saveEvent(this.student, null, null, selectedPath, null, eventForPath);
 
       // Update the event in our local array with the new data
-      const eventIndex = this.studentEvents.findIndex(
-        (e) => e.id === updatedEvent.id,
-      );
+      const eventIndex = this.studentEvents.findIndex((e) => e.id === updatedEvent.id);
       if (eventIndex !== -1) {
         this.studentEvents[eventIndex] = updatedEvent;
       }
 
       // Option to continue to voucher selection or finish
-      const continueToVouchers = await this.call.getConfirmation(
-        MESSAGE_CONSTANTS.PATH.CONTINUE_TO_VOUCHERS,
-      );
+      const continueToVouchers = await this.call.getConfirmation(MESSAGE_CONSTANTS.PATH.CONTINUE_TO_VOUCHERS);
 
       if (continueToVouchers) {
         await this.executeVoucherSelectionFlow(updatedEvent);
       } else {
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.PATH.SELECTION_SUCCESS,
-        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.PATH.SELECTION_SUCCESS);
       }
     } catch (error) {
       this.logError('executePathSelectionFlow', error as Error);
@@ -274,16 +238,12 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
    * Allows selecting vouchers for an existing event
    * @param selectedEvent Optional: An event that was already selected in a previous step (e.g., path selection)
    */
-  async executeVoucherSelectionFlow(
-    selectedEvent: DBEvent | null = null,
-  ): Promise<void> {
+  async executeVoucherSelectionFlow(selectedEvent: DBEvent | null = null): Promise<void> {
     this.logStart('executeVoucherSelectionFlow');
 
     try {
       if (!this.student) {
-        this.call.logError(
-          'Student is null, cannot proceed with voucher selection flow.',
-        );
+        this.call.logError('Student is null, cannot proceed with voucher selection flow.');
         await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         return;
       }
@@ -298,17 +258,14 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         );
       } else {
         // 1. Select an event for voucher assignment (auto-select if only one event)
-        const eventSelector =
-          this.handlerFactory.createEventForVoucherAssignmentSelector(
-            this.student,
-            this.studentEvents,
-          );
+        const eventSelector = this.handlerFactory.createEventForVoucherAssignmentSelector(
+          this.student,
+          this.studentEvents,
+        );
         const selectedEventItem = await eventSelector.handleSingleSelection();
 
         if (!selectedEventItem) {
-          this.call.logWarn(
-            'No event selected for voucher assignment. Ending voucher flow.',
-          );
+          this.call.logWarn('No event selected for voucher assignment. Ending voucher flow.');
           // Selector should handle messages.
           // Orchestrator is responsible for final error message and hangup if selector doesn't.
           await this.call.hangupWithMessage(
@@ -333,13 +290,9 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       }
 
       // 3. Only save if the selection was confirmed by the handler
-      if (
-        voucherHandler.isSelectionConfirmed() ||
-        selectedVouchers.length === 0
-      ) {
+      if (voucherHandler.isSelectionConfirmed() || selectedVouchers.length === 0) {
         // Save the vouchers to the event using the event persistence handler
-        const eventPersistence =
-          this.handlerFactory.createEventPersistenceHandler();
+        const eventPersistence = this.handlerFactory.createEventPersistenceHandler();
         // Correctly pass eventForVouchers as existingEvent and selectedVouchers for vouchers
         const updatedEvent = await eventPersistence.saveEvent(
           this.student,
@@ -351,31 +304,23 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         );
 
         // Update the event in our local array with the new data
-        const eventIndex = this.studentEvents.findIndex(
-          (e) => e.id === updatedEvent.id,
-        );
+        const eventIndex = this.studentEvents.findIndex((e) => e.id === updatedEvent.id);
         if (eventIndex !== -1) {
           this.studentEvents[eventIndex] = updatedEvent;
         }
 
         // 4. Orchestrator plays final success message and hangs up
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.VOUCHER.SELECTION_SUCCESS,
-        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.VOUCHER.SELECTION_SUCCESS);
       } else {
         this.call.logWarn('Voucher selection was not confirmed by user');
         // Handler should have played the "retry selection" message.
         // Orchestrator plays the final "not confirmed" message and hangs up.
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.VOUCHER.SELECTION_NOT_CONFIRMED,
-        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.VOUCHER.SELECTION_NOT_CONFIRMED);
       }
     } catch (error) {
       this.logError('executeVoucherSelectionFlow', error as Error);
       // Generic error message for unexpected errors
-      await this.call.hangupWithMessage(
-        MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR,
-      );
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR);
     }
   }
 
@@ -388,44 +333,32 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
     try {
       // Use the new PostEventUpdateHandler
-      const postEventUpdateHandler =
-        this.handlerFactory.createPostEventUpdateHandler();
+      const postEventUpdateHandler = this.handlerFactory.createPostEventUpdateHandler();
 
       if (!this.student) {
-        this.call.logError(
-          'Student is null, cannot proceed with post-celebration update.',
-        );
+        this.call.logError('Student is null, cannot proceed with post-celebration update.');
         await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         return;
       }
 
       postEventUpdateHandler.setStudent(this.student);
-      const flowCompletedSuccessfully =
-        await postEventUpdateHandler.handlePostEventUpdate();
+      const flowCompletedSuccessfully = await postEventUpdateHandler.handlePostEventUpdate();
 
       if (flowCompletedSuccessfully) {
         this.call.logInfo('Post-event update flow completed successfully.');
         // The handler itself plays success/error messages and can hang up.
         // Orchestrator plays the final success message and hangs up.
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS,
-        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS);
       } else {
-        this.call.logInfo(
-          'Post-event update flow did not complete successfully or was aborted by user.',
-        );
+        this.call.logInfo('Post-event update flow did not complete successfully or was aborted by user.');
         // Handler should have played appropriate messages.
         // Orchestrator plays the final error message and hangs up if the handler didn't.
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR,
-        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR);
       }
     } catch (error) {
       this.logError('executePostCelebrationUpdateFlow', error as Error);
       // Generic error message for unexpected errors
-      await this.call.hangupWithMessage(
-        MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR,
-      );
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR);
     }
   }
 }

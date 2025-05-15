@@ -24,14 +24,12 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Maximum attempts reached message
      */
-    MAX_ATTEMPTS_REACHED:
-      'מספר נסיונות הבחירה הגיע למקסימום. אנא נסי להתקשר שנית מאוחר יותר.',
+    MAX_ATTEMPTS_REACHED: 'מספר נסיונות הבחירה הגיע למקסימום. אנא נסי להתקשר שנית מאוחר יותר.',
 
     /**
      * Welcome message with student name
      */
-    WELCOME: (name: string): string =>
-      `שלום ${name}, ברוכה הבאה למערכת הדיווח האוטומטית.`,
+    WELCOME: (name: string): string => `שלום ${name}, ברוכה הבאה למערכת הדיווח האוטומטית.`,
 
     /**
      * Yes option for confirmation prompts
@@ -48,20 +46,17 @@ export const MESSAGE_CONSTANTS = {
     /**
      * No options available message
      */
-    NO_OPTIONS: (entityName: string): string =>
-      `אין אפשרויות ${entityName} במערכת כרגע. אנא פנה למנהל המערכת.`,
+    NO_OPTIONS: (entityName: string): string => `אין אפשרויות ${entityName} במערכת כרגע. אנא פנה למנהל המערכת.`,
 
     /**
      * Selection summary message
      */
-    SELECTION_SUMMARY: (selectedNames: string): string =>
-      `בחרת ב: ${selectedNames}`,
+    SELECTION_SUMMARY: (selectedNames: string): string => `בחרת ב: ${selectedNames}`,
 
     /**
      * Last selection message
      */
-    LAST_SELECTION: (entityName: string, itemName: string): string =>
-      `בחרת ב${entityName}: ${itemName}.`,
+    LAST_SELECTION: (entityName: string, itemName: string): string => `בחרת ב${entityName}: ${itemName}.`,
 
     /**
      * Continue selection option
@@ -76,8 +71,7 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Maximum selections reached message
      */
-    MAX_SELECTIONS_REACHED: (maxSelections: number): string =>
-      `הגעת למקסימום של ${maxSelections} אפשרויות בחירה`,
+    MAX_SELECTIONS_REACHED: (maxSelections: number): string => `הגעת למקסימום של ${maxSelections} אפשרויות בחירה`,
 
     /**
      * Confirm selection option
@@ -92,8 +86,7 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Restart selection message
      */
-    RESTART_MESSAGE: (entityName: string): string =>
-      `נחזור לבחירת ה${entityName} מההתחלה`,
+    RESTART_MESSAGE: (entityName: string): string => `נחזור לבחירת ה${entityName} מההתחלה`,
 
     /**
      * Already selected message
@@ -110,40 +103,33 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Auto-selected message
      */
-    AUTO_SELECTED: (entityName: string, itemName: string): string =>
-      `מצאנו ${entityName} אחד זמין: ${itemName}`,
+    AUTO_SELECTED: (entityName: string, itemName: string): string => `מצאנו ${entityName} אחד זמין: ${itemName}`,
 
     /**
      * Auto-selected event for selection message
      */
-    AUTO_SELECTED_FOR_SELECTION: (
-      entityName: string,
-      itemName: string,
-    ): string => `מצאנו ${entityName} אחד זמין לבחירה: ${itemName}`,
+    AUTO_SELECTED_FOR_SELECTION: (entityName: string, itemName: string): string =>
+      `מצאנו ${entityName} אחד זמין לבחירה: ${itemName}`,
 
     /**
      * Auto-selected event for update message
      */
-    AUTO_SELECTED_FOR_UPDATE: (itemName: string): string =>
-      `מצאנו אירוע אחד זמין לעדכון: ${itemName}`,
+    AUTO_SELECTED_FOR_UPDATE: (itemName: string): string => `מצאנו אירוע אחד זמין לעדכון: ${itemName}`,
 
     /**
      * Path selection prompt
      */
-    PATH_SELECTION_PROMPT: (options: string): string =>
-      `אנא בחרי את המסלול על ידי הקשת המספר המתאים: ${options}`,
+    PATH_SELECTION_PROMPT: (options: string): string => `אנא בחרי את המסלול על ידי הקשת המספר המתאים: ${options}`,
 
     /**
      * Current item message
      */
-    CURRENT_ITEM: (entityName: string, itemName: string): string =>
-      `ה${entityName} הנוכחי הוא: ${itemName}`,
+    CURRENT_ITEM: (entityName: string, itemName: string): string => `ה${entityName} הנוכחי הוא: ${itemName}`,
 
     /**
      * Change selection prompt
      */
-    CHANGE_PROMPT: (entityName: string): string =>
-      `האם ברצונך לשנות את ה${entityName}?`,
+    CHANGE_PROMPT: (entityName: string): string => `האם ברצונך לשנות את ה${entityName}?`,
 
     /**
      * Change selection option
@@ -170,14 +156,12 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Month selection prompt
      */
-    MONTH_PROMPT: (options: string): string =>
-      `אנא הקש את מספר החודש העברי, ${options}.`,
+    MONTH_PROMPT: (options: string): string => `אנא הקש את מספר החודש העברי, ${options}.`,
 
     /**
      * Invalid month error
      */
-    INVALID_MONTH: (maxMonth: number): string =>
-      `החודש שהוקש אינו תקין. אנא הקש מספר בין 1 ל-${maxMonth}.`,
+    INVALID_MONTH: (maxMonth: number): string => `החודש שהוקש אינו תקין. אנא הקש מספר בין 1 ל-${maxMonth}.`,
 
     /**
      * Date confirmation message
@@ -209,8 +193,7 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Student not found message
      */
-    STUDENT_NOT_FOUND:
-      'לא נמצאה תלמידה עם מספר תעודת הזהות שהוקשה, אנא נסי שוב',
+    STUDENT_NOT_FOUND: 'לא נמצאה תלמידה עם מספר תעודת הזהות שהוקשה, אנא נסי שוב',
   },
 
   MENU: {
@@ -224,14 +207,10 @@ export const MESSAGE_CONSTANTS = {
      * Menu option descriptions
      */
     MENU_OPTIONS: {
-      EVENT_REPORTING: (option: string): string =>
-        `לדיווח על אירוע הקישי ${option}`,
-      PATH_SELECTION: (option: string): string =>
-        `לבחירת מסלול ראשונית הקישי ${option}`,
-      VOUCHER_SELECTION: (option: string): string =>
-        `לבחירת שוברים ראשונית הקישי ${option}`,
-      POST_EVENT_UPDATE: (option: string): string =>
-        `לעדכון פרטי מסלול לאחר אירוע הקישי ${option}`,
+      EVENT_REPORTING: (option: string): string => `לדיווח על אירוע הקישי ${option}`,
+      PATH_SELECTION: (option: string): string => `לבחירת מסלול ראשונית הקישי ${option}`,
+      VOUCHER_SELECTION: (option: string): string => `לבחירת שוברים ראשונית הקישי ${option}`,
+      POST_EVENT_UPDATE: (option: string): string => `לעדכון פרטי מסלול לאחר אירוע הקישי ${option}`,
       EXIT: (option: string): string => `לסיום הקישי ${option}`,
     },
 
@@ -267,14 +246,12 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Event type selection confirmation
      */
-    TYPE_SELECTED: (eventTypeName: string): string =>
-      `בחרת באירוע מסוג ${eventTypeName}`,
+    TYPE_SELECTED: (eventTypeName: string): string => `בחרת באירוע מסוג ${eventTypeName}`,
 
     /**
      * Event type selection prompt
      */
-    TYPE_SELECTION_PROMPT: (options: string): string =>
-      `בחרי את סוג האירוע: ${options}`,
+    TYPE_SELECTION_PROMPT: (options: string): string => `בחרי את סוג האירוע: ${options}`,
   },
 
   PATH: {
@@ -318,8 +295,7 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Warning message about finality of voucher selection
      */
-    FINAL_WARNING:
-      'שים/י לב: לאחר אישור בחירת השוברים, לא ניתן יהיה לשנות את הבחירה!',
+    FINAL_WARNING: 'שים/י לב: לאחר אישור בחירת השוברים, לא ניתן יהיה לשנות את הבחירה!',
 
     /**
      * Retry voucher selection message
@@ -329,8 +305,7 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Current vouchers message
      */
-    CURRENT_VOUCHERS: (voucherNames: string): string =>
-      `השוברים הנוכחיים שלך הם: ${voucherNames}`,
+    CURRENT_VOUCHERS: (voucherNames: string): string => `השוברים הנוכחיים שלך הם: ${voucherNames}`,
 
     /**
      * Change vouchers prompt
@@ -350,8 +325,7 @@ export const MESSAGE_CONSTANTS = {
     /**
      * Voucher selection prompt
      */
-    SELECTION_PROMPT: (options: string): string =>
-      `אנא בחרי שובר על ידי הקשת המספר המתאים: ${options}`,
+    SELECTION_PROMPT: (options: string): string => `אנא בחרי שובר על ידי הקשת המספר המתאים: ${options}`,
   },
 
   POST_EVENT: {

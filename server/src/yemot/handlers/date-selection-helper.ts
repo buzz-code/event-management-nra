@@ -71,9 +71,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
           this.gregorianDate = this.convertToGregorian();
 
           // Format the date in Hebrew
-          this.fullHebrewDate = FormatUtils.formatHebrewDate(
-            this.gregorianDate,
-          );
+          this.fullHebrewDate = FormatUtils.formatHebrewDate(this.gregorianDate);
 
           // Confirm the date with the user
           dateConfirmed = await this.confirmDate();
@@ -140,13 +138,9 @@ export class DateSelectionHelper extends BaseYemotHandler {
     this.logStart('collectMonth');
 
     const months = this.getHebrewMonthsList();
-    const monthNames = months.map(
-      ({ hebrewName }, index) => `${index + 1} - ${hebrewName}`,
-    );
+    const monthNames = months.map(({ hebrewName }, index) => `${index + 1} - ${hebrewName}`);
 
-    const monthMessage = MESSAGE_CONSTANTS.DATE.MONTH_PROMPT(
-      monthNames.join(', '),
-    );
+    const monthMessage = MESSAGE_CONSTANTS.DATE.MONTH_PROMPT(monthNames.join(', '));
 
     const month = await this.call.readDigits(monthMessage, {
       max_digits: 2,
@@ -198,10 +192,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     // First convert using the current year
     const dateWithCurrentYear = toGregorianDate({
       year: this.currentJewishYear,
-      monthName: getJewishMonthByIndex(
-        this.selectedMonth,
-        this.currentJewishYear,
-      ),
+      monthName: getJewishMonthByIndex(this.selectedMonth, this.currentJewishYear),
       day: this.selectedDay,
     });
 
@@ -218,10 +209,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
       // Convert again using the next year
       return toGregorianDate({
         year: this.nextJewishYear,
-        monthName: getJewishMonthByIndex(
-          this.selectedMonth,
-          this.nextJewishYear,
-        ),
+        monthName: getJewishMonthByIndex(this.selectedMonth, this.nextJewishYear),
         day: this.selectedDay,
       });
     }
@@ -250,12 +238,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
    * @returns Object containing the selected date details
    */
   getSelectedDate(): DateSelectionResult | null {
-    if (
-      !this.selectedDay ||
-      !this.selectedMonth ||
-      !this.fullHebrewDate ||
-      !this.gregorianDate
-    ) {
+    if (!this.selectedDay || !this.selectedMonth || !this.fullHebrewDate || !this.gregorianDate) {
       return null;
     }
 

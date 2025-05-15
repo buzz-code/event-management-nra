@@ -19,9 +19,7 @@ export interface SelectableEntity {
  * SelectionHelper standardizes selection behavior
  * Supports both single and multiple selection patterns
  */
-export class SelectionHelper<
-  T extends SelectableEntity,
-> extends BaseYemotHandler {
+export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandler {
   protected entityName: string;
   protected entityRepository?: Repository<T>; // Made optional
   protected items: T[] = [];
@@ -68,9 +66,7 @@ export class SelectionHelper<
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await this.call.hangupWithMessage(
-        MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName),
-      );
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName));
       this.logComplete('handleSingleSelection', { status: 'no-items' });
       return null;
     }
@@ -105,9 +101,7 @@ export class SelectionHelper<
           // Selection wasn't successful, increment attempts
           attempts++;
           if (attempts < SYSTEM_CONSTANTS.MAX_RETRIES) {
-            await this.call.playMessage(
-              MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT,
-            );
+            await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT);
           }
         }
       } catch (error) {
@@ -120,12 +114,8 @@ export class SelectionHelper<
     }
 
     if (!selectionComplete) {
-      this.call.logError(
-        `Maximum ${this.entityName} selection attempts reached`,
-      );
-      await this.call.hangupWithMessage(
-        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
-      );
+      this.call.logError(`Maximum ${this.entityName} selection attempts reached`);
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED);
       this.logComplete('handleSingleSelection', {
         status: 'max-attempts-reached',
       });
@@ -147,9 +137,7 @@ export class SelectionHelper<
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await this.call.hangupWithMessage(
-        MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName),
-      );
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName));
       this.logComplete('handleMultiSelection', { status: 'no-items' });
       return [];
     }
@@ -183,28 +171,17 @@ export class SelectionHelper<
     let selectionAttempts = 0;
 
     // Loop for selection
-    while (
-      continueSelection &&
-      this.selectedItems.length < this.maxSelections
-    ) {
+    while (continueSelection && this.selectedItems.length < this.maxSelections) {
       if (selectionAttempts >= SYSTEM_CONSTANTS.MAX_RETRIES) {
-        this.call.logError(
-          `Maximum ${this.entityName} selection attempts reached`,
-        );
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
-        );
+        this.call.logError(`Maximum ${this.entityName} selection attempts reached`);
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED);
         return;
       }
 
       // Show current selection status
       if (this.selectedItems.length > 0) {
-        const selectedNames = this.selectedItems
-          .map((item) => item.name)
-          .join(', ');
-        await this.call.playMessage(
-          MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames),
-        );
+        const selectedNames = this.selectedItems.map((item) => item.name).join(', ');
+        await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames));
       }
 
       try {
@@ -225,11 +202,7 @@ export class SelectionHelper<
               MESSAGE_CONSTANTS.SELECTION.FINISH_OPTION,
             );
           } else {
-            await this.call.playMessage(
-              MESSAGE_CONSTANTS.SELECTION.MAX_SELECTIONS_REACHED(
-                this.maxSelections,
-              ),
-            );
+            await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.MAX_SELECTIONS_REACHED(this.maxSelections));
             continueSelection = false;
           }
         } else {
@@ -254,12 +227,8 @@ export class SelectionHelper<
    */
   protected async finalizeMultiSelection(): Promise<void> {
     // List all selected items
-    const selectedNames = this.selectedItems
-      .map((item) => item.name)
-      .join(', ');
-    await this.call.playMessage(
-      MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames),
-    );
+    const selectedNames = this.selectedItems.map((item) => item.name).join(', ');
+    await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames));
 
     // Warning about final selection
     if (this.entityName === 'שובר' || this.entityName === 'שוברים') {
@@ -300,9 +269,7 @@ export class SelectionHelper<
     // this would be an issue. For now, we assume keys are present.
     const items = this.items;
 
-    const maxDigits = Math.max(
-      ...items.map((item) => item.key.toString().length),
-    );
+    const maxDigits = Math.max(...items.map((item) => item.key.toString().length));
     const allowedKeys = items.map((item) => item.key.toString());
 
     const prompt = this.createSelectionPrompt();
@@ -319,12 +286,7 @@ export class SelectionHelper<
       // For multi-selection, check if item is already selected
       if (this.maxSelections > 1) {
         if (this.isItemSelected(selectedItem)) {
-          await this.call.playMessage(
-            MESSAGE_CONSTANTS.SELECTION.ALREADY_SELECTED(
-              this.entityName,
-              selectedItem.name,
-            ),
-          );
+          await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.ALREADY_SELECTED(this.entityName, selectedItem.name));
           return false;
         }
 
@@ -335,9 +297,7 @@ export class SelectionHelper<
         this.selectedItems = [selectedItem];
       }
 
-      this.call.logInfo(
-        `User selected ${this.entityName}: ${selectedItem.name} (${selectedItem.key})`,
-      );
+      this.call.logInfo(`User selected ${this.entityName}: ${selectedItem.name} (${selectedItem.key})`);
       return true;
     } else {
       this.call.logWarn(`Invalid ${this.entityName} selection: ${selectedKey}`);
@@ -350,9 +310,7 @@ export class SelectionHelper<
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    const options = this.items
-      .map((item) => `להקשת ${item.key} עבור ${item.name}`)
-      .join(', ');
+    const options = this.items.map((item) => `להקשת ${item.key} עבור ${item.name}`).join(', ');
     return MESSAGE_CONSTANTS.SELECTION.PROMPT(this.entityName, options);
   }
 
@@ -402,9 +360,7 @@ export class SelectionHelper<
       //   item.key = index + 1;
       // });
 
-      this.call.logInfo(
-        `Fetched ${this.items.length} ${this.entityName} options`,
-      );
+      this.call.logInfo(`Fetched ${this.items.length} ${this.entityName} options`);
       this.logComplete('fetchItems', { count: this.items.length });
     } catch (error) {
       this.logError('fetchItems', error as Error);
@@ -417,18 +373,10 @@ export class SelectionHelper<
    */
   protected async announceSelectionResult(): Promise<void> {
     if (this.selectedItems.length === 1) {
-      await this.call.playMessage(
-        `בחרת ב${this.entityName}: ${this.selectedItems[0].name}`,
-      );
+      await this.call.playMessage(`בחרת ב${this.entityName}: ${this.selectedItems[0].name}`);
     } else if (this.selectedItems.length > 1) {
-      const selectedNames = this.selectedItems
-        .map((item) => item.name)
-        .join(', ');
-      await this.call.playMessage(
-        `בחרת ב${
-          this.entityName === 'שובר' ? 'שוברים' : this.entityName
-        }: ${selectedNames}`,
-      );
+      const selectedNames = this.selectedItems.map((item) => item.name).join(', ');
+      await this.call.playMessage(`בחרת ב${this.entityName === 'שובר' ? 'שוברים' : this.entityName}: ${selectedNames}`);
     }
   }
 
@@ -438,10 +386,7 @@ export class SelectionHelper<
   protected async announceAutoSelectionResult(): Promise<void> {
     if (this.selectedItems.length === 1) {
       await this.call.playMessage(
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED(
-          this.entityName,
-          this.selectedItems[0].name,
-        ),
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED(this.entityName, this.selectedItems[0].name),
       );
     }
   }
@@ -452,15 +397,8 @@ export class SelectionHelper<
    */
   async handleSelectionWithExisting(existingItem: T): Promise<T | null> {
     if (existingItem) {
-      this.call.logInfo(
-        `Found existing ${this.entityName}: ${existingItem.name}`,
-      );
-      await this.call.playMessage(
-        MESSAGE_CONSTANTS.SELECTION.CURRENT_ITEM(
-          this.entityName,
-          existingItem.name,
-        ),
-      );
+      this.call.logInfo(`Found existing ${this.entityName}: ${existingItem.name}`);
+      await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.CURRENT_ITEM(this.entityName, existingItem.name));
 
       // Ask if they want to change it
       const changeSelection = await this.call.getConfirmation(
@@ -472,9 +410,7 @@ export class SelectionHelper<
       if (!changeSelection) {
         // User chose to keep the existing selection
         this.selectedItems = [existingItem];
-        this.call.logInfo(
-          `User kept existing ${this.entityName}: ${existingItem.name}`,
-        );
+        this.call.logInfo(`User kept existing ${this.entityName}: ${existingItem.name}`);
         return existingItem;
       }
     }

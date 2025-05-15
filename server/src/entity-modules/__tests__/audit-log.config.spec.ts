@@ -16,11 +16,26 @@ describe('audit-log.config', () => {
       const headers = config.exporter.getExportHeaders(['id']);
       // First check all regular headers
       expect(headers).toHaveLength(6);
-      expect(headers[0] as IColumn).toEqual({ value: 'userId', label: 'משתמש' });
-      expect(headers[1] as IColumn).toEqual({ value: 'entityId', label: 'מזהה שורה' });
-      expect(headers[2] as IColumn).toEqual({ value: 'entityName', label: 'טבלה' });
-      expect(headers[3] as IColumn).toEqual({ value: 'operation', label: 'פעולה' });
-      expect(headers[5] as IColumn).toEqual({ value: 'createdAt', label: 'תאריך יצירה' });
+      expect(headers[0] as IColumn).toEqual({
+        value: 'userId',
+        label: 'משתמש',
+      });
+      expect(headers[1] as IColumn).toEqual({
+        value: 'entityId',
+        label: 'מזהה שורה',
+      });
+      expect(headers[2] as IColumn).toEqual({
+        value: 'entityName',
+        label: 'טבלה',
+      });
+      expect(headers[3] as IColumn).toEqual({
+        value: 'operation',
+        label: 'פעולה',
+      });
+      expect(headers[5] as IColumn).toEqual({
+        value: 'createdAt',
+        label: 'תאריך יצירה',
+      });
 
       // Check formatter header separately
       const formatterHeader = headers[4] as IColumn;
@@ -42,7 +57,7 @@ describe('audit-log.config', () => {
       // Create mock connection
       const mockConnection = {
         options: {},
-        createQueryBuilder: jest.fn()
+        createQueryBuilder: jest.fn(),
       } as unknown as Connection;
 
       // Create mock repo with required TypeORM properties
@@ -51,25 +66,25 @@ describe('audit-log.config', () => {
         update: jest.fn(),
         target: AuditLog,
         manager: {
-          connection: mockConnection
+          connection: mockConnection,
         },
         metadata: {
           columns: [],
           relations: [],
-          connection: mockConnection
-        }
+          connection: mockConnection,
+        },
       } as unknown as Repository<AuditLog>;
 
       mockStudentRepo = {
-        insert: jest.fn()
+        insert: jest.fn(),
       };
 
       mockDataSource = {
-        getRepository: jest.fn().mockReturnValue(mockStudentRepo)
+        getRepository: jest.fn().mockReturnValue(mockStudentRepo),
       };
 
       mockMailService = {
-        sendMail: jest.fn()
+        sendMail: jest.fn(),
       };
 
       const ServiceClass = config.service;
@@ -86,8 +101,8 @@ describe('audit-log.config', () => {
             entityName: 'student',
             operation: 'DELETE',
             entityData: { name: 'Test Student' },
-            isReverted: false
-          }
+            isReverted: false,
+          },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
@@ -98,23 +113,22 @@ describe('audit-log.config', () => {
           parsed: {
             extra: {
               action: 'revert',
-              ids: '1'
-            }
-          }
+              ids: '1',
+            },
+          },
         };
 
         const result = await service.doAction(req, {});
         expect(result).toBe('reverted 1 items');
 
-        expect(mockRepo.findBy).toHaveBeenCalledWith({ id: expect.any(Object) });
+        expect(mockRepo.findBy).toHaveBeenCalledWith({
+          id: expect.any(Object),
+        });
         expect(mockStudentRepo.insert).toHaveBeenCalledWith({
           name: 'Test Student',
-          id: 100
+          id: 100,
         });
-        expect(mockRepo.update).toHaveBeenCalledWith(
-          { id: 1 },
-          { isReverted: true }
-        );
+        expect(mockRepo.update).toHaveBeenCalledWith({ id: 1 }, { isReverted: true });
       });
 
       it('should handle revert action with unknown operation', async () => {
@@ -125,8 +139,8 @@ describe('audit-log.config', () => {
             entityName: 'student',
             operation: 'UNKNOWN',
             entityData: { name: 'Test Student' },
-            isReverted: false
-          }
+            isReverted: false,
+          },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
@@ -136,17 +150,14 @@ describe('audit-log.config', () => {
           parsed: {
             extra: {
               action: 'revert',
-              ids: '1'
-            }
-          }
+              ids: '1',
+            },
+          },
         };
 
         const result = await service.doAction(req, {});
         expect(result).toBe('reverted 0 items, failed 1 items');
-        expect(console.log).toHaveBeenCalledWith(
-          'AuditLogService.revert: error',
-          expect.any(Error)
-        );
+        expect(console.log).toHaveBeenCalledWith('AuditLogService.revert: error', expect.any(Error));
       });
 
       it('should skip already reverted logs', async () => {
@@ -157,8 +168,8 @@ describe('audit-log.config', () => {
             entityName: 'student',
             operation: 'DELETE',
             entityData: { name: 'Test Student' },
-            isReverted: true
-          }
+            isReverted: true,
+          },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
@@ -167,9 +178,9 @@ describe('audit-log.config', () => {
           parsed: {
             extra: {
               action: 'revert',
-              ids: '1'
-            }
-          }
+              ids: '1',
+            },
+          },
         };
 
         const result = await service.doAction(req, {});
@@ -185,8 +196,8 @@ describe('audit-log.config', () => {
             entityName: 'unknown',
             operation: 'DELETE',
             entityData: { name: 'Test' },
-            isReverted: false
-          }
+            isReverted: false,
+          },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
@@ -195,9 +206,9 @@ describe('audit-log.config', () => {
           parsed: {
             extra: {
               action: 'revert',
-              ids: '1'
-            }
-          }
+              ids: '1',
+            },
+          },
         };
 
         const result = await service.doAction(req, {});
@@ -213,7 +224,7 @@ describe('audit-log.config', () => {
             entityName: 'student',
             operation: 'DELETE',
             entityData: { name: 'Student 1' },
-            isReverted: false
+            isReverted: false,
           },
           {
             id: 2,
@@ -221,8 +232,8 @@ describe('audit-log.config', () => {
             entityName: 'student',
             operation: 'DELETE',
             entityData: { name: 'Student 2' },
-            isReverted: false
-          }
+            isReverted: false,
+          },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
@@ -233,9 +244,9 @@ describe('audit-log.config', () => {
           parsed: {
             extra: {
               action: 'revert',
-              ids: '1,2'
-            }
-          }
+              ids: '1,2',
+            },
+          },
         };
 
         const result = await service.doAction(req, {});

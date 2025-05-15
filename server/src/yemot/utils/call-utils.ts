@@ -1,9 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { Call, TapOptions } from 'yemot-router2';
-import {
-  id_list_message,
-  id_list_message_with_hangup,
-} from '@shared/utils/yemot/yemot-router';
+import { id_list_message, id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { SYSTEM_CONSTANTS } from '../constants/system-constants';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
@@ -31,15 +28,11 @@ export class CallUtils {
     logger.debug(`Getting confirmation: ${message}`);
     const promptMessage = `${message} ${yesOption}, ${noOption}`;
 
-    const response = (await call.read(
-      [{ type: 'text', data: promptMessage }],
-      'tap',
-      {
-        max_digits: 1,
-        min_digits: 1,
-        digits_allowed: ['1', '2'],
-      },
-    )) as string;
+    const response = (await call.read([{ type: 'text', data: promptMessage }], 'tap', {
+      max_digits: 1,
+      min_digits: 1,
+      digits_allowed: ['1', '2'],
+    })) as string;
 
     const confirmed = response === '1';
     logger.debug(`Confirmation response: ${confirmed ? 'Yes' : 'No'}`);
@@ -55,19 +48,10 @@ export class CallUtils {
    * @param options Options for reading digits
    * @returns The digits entered by the user
    */
-  static async readDigits(
-    call: Call,
-    promptText: string,
-    logger: Logger,
-    options: TapOptions,
-  ): Promise<string> {
+  static async readDigits(call: Call, promptText: string, logger: Logger, options: TapOptions): Promise<string> {
     logger.debug(`Reading digits with prompt: ${promptText}`);
 
-    const result = (await call.read(
-      [{ type: 'text', data: promptText }],
-      'tap',
-      options,
-    )) as string;
+    const result = (await call.read([{ type: 'text', data: promptText }], 'tap', options)) as string;
 
     logger.debug(`Digits entered: ${result}`);
     return result;
@@ -79,11 +63,7 @@ export class CallUtils {
    * @param message The message to play
    * @param logger Logger for logging the interaction
    */
-  static async playMessage(
-    call: Call,
-    message: string,
-    logger: Logger,
-  ): Promise<void> {
+  static async playMessage(call: Call, message: string, logger: Logger): Promise<void> {
     logger.debug(`Playing message: ${message}`);
     await id_list_message(call, message);
   }
@@ -94,11 +74,7 @@ export class CallUtils {
    * @param message The message to play before hanging up
    * @param logger Logger for logging the interaction
    */
-  static async hangupWithMessage(
-    call: Call,
-    message: string,
-    logger: Logger,
-  ): Promise<void> {
+  static async hangupWithMessage(call: Call, message: string, logger: Logger): Promise<void> {
     logger.debug(`Hanging up with message: ${message}`);
     await id_list_message_with_hangup(call, message);
   }

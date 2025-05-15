@@ -9,18 +9,20 @@ jest.mock('@shared/base-entity/base-entity.module', () => {
   const MockBaseEntityModule = {
     register: jest.fn().mockReturnValue({
       module: class MockBaseEntityModule {},
-      providers: [{
-        provide: 'CONFIG',
-        useValue: { entity: class MockEntity {} }
-      }]
-    })
+      providers: [
+        {
+          provide: 'CONFIG',
+          useValue: { entity: class MockEntity {} },
+        },
+      ],
+    }),
   };
-  
+
   // Export the mock for tests to use
   global.MockBaseEntityModule = MockBaseEntityModule;
-  
+
   return {
-    BaseEntityModule: MockBaseEntityModule
+    BaseEntityModule: MockBaseEntityModule,
   };
 });
 
@@ -42,16 +44,16 @@ import textConfig from '../entity-modules/text.config';
 import { StudentBaseKlass } from '../db/view-entities/StudentBaseKlass.entity';
 import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { RecievedMail } from '@shared/entities/RecievedMail.entity';
-import { Image } from "@shared/entities/Image.entity";
+import { Image } from '@shared/entities/Image.entity';
 import { ReportMonth } from '../db/entities/ReportMonth.entity';
-import { AttReportAndGrade } from "../db/view-entities/AttReportAndGrade.entity";
-import { StudentGlobalReport } from "../db/view-entities/StudentGlobalReport.entity";
-import { KnownAbsenceWithReportMonth } from "../db/view-entities/KnownAbsenceWithReportMonth.entity";
-import { GradeName } from "../db/entities/GradeName.entity";
-import { AttGradeEffect } from "../db/entities/AttGradeEffect";
-import { GradeEffectByUser } from "@shared/view-entities/GradeEffectByUser.entity";
-import { AbsCountEffectByUser } from "@shared/view-entities/AbsCountEffectByUser.entity";
-import { LessonKlassName } from "../db/view-entities/LessonKlassName.entity";
+import { AttReportAndGrade } from '../db/view-entities/AttReportAndGrade.entity';
+import { StudentGlobalReport } from '../db/view-entities/StudentGlobalReport.entity';
+import { KnownAbsenceWithReportMonth } from '../db/view-entities/KnownAbsenceWithReportMonth.entity';
+import { GradeName } from '../db/entities/GradeName.entity';
+import { AttGradeEffect } from '../db/entities/AttGradeEffect';
+import { GradeEffectByUser } from '@shared/view-entities/GradeEffectByUser.entity';
+import { AbsCountEffectByUser } from '@shared/view-entities/AbsCountEffectByUser.entity';
+import { LessonKlassName } from '../db/view-entities/LessonKlassName.entity';
 
 describe('EntitiesModule', () => {
   let module: TestingModule;
@@ -63,13 +65,13 @@ describe('EntitiesModule', () => {
       getRepository: jest.fn().mockReturnValue({
         metadata: {
           columns: [],
-          relations: []
-        }
+          relations: [],
+        },
       }),
       getMetadata: jest.fn().mockReturnValue({
         columns: [],
-        relations: []
-      })
+        relations: [],
+      }),
     };
 
     // Create test module
@@ -107,13 +109,13 @@ describe('EntitiesModule', () => {
                 AttGradeEffect,
                 GradeEffectByUser,
                 AbsCountEffectByUser,
-                LessonKlassName
+                LessonKlassName,
               ],
-              synchronize: true
-            }
-          })
-        }
-      ]
+              synchronize: true,
+            },
+          }),
+        },
+      ],
     }).compile();
   });
 
@@ -126,8 +128,8 @@ describe('EntitiesModule', () => {
       const imports = Reflect.getMetadata('imports', EntitiesModule);
       expect(imports).toBeDefined();
       expect(Array.isArray(imports)).toBe(true);
-      
-      imports.forEach(imp => {
+
+      imports.forEach((imp) => {
         expect(typeof imp).toBe('object');
         expect(imp).toHaveProperty('module');
       });
@@ -146,7 +148,7 @@ describe('EntitiesModule', () => {
       { name: 'studentKlassConfig', config: studentKlassConfig },
       { name: 'studentConfig', config: studentConfig },
       { name: 'teacherConfig', config: teacherConfig },
-      { name: 'textConfig', config: textConfig }
+      { name: 'textConfig', config: textConfig },
     ];
 
     configsToTest.forEach(({ name, config }) => {
@@ -164,12 +166,15 @@ describe('EntitiesModule', () => {
       { name: 'ReportMonth', entity: ReportMonth },
       { name: 'AttReportAndGrade', entity: AttReportAndGrade },
       { name: 'StudentGlobalReport', entity: StudentGlobalReport },
-      { name: 'KnownAbsenceWithReportMonth', entity: KnownAbsenceWithReportMonth },
+      {
+        name: 'KnownAbsenceWithReportMonth',
+        entity: KnownAbsenceWithReportMonth,
+      },
       { name: 'GradeName', entity: GradeName },
       { name: 'AttGradeEffect', entity: AttGradeEffect },
       { name: 'GradeEffectByUser', entity: GradeEffectByUser },
       { name: 'AbsCountEffectByUser', entity: AbsCountEffectByUser },
-      { name: 'LessonKlassName', entity: LessonKlassName }
+      { name: 'LessonKlassName', entity: LessonKlassName },
     ];
 
     entitiesToTest.forEach(({ name, entity }) => {
@@ -177,7 +182,7 @@ describe('EntitiesModule', () => {
         expect(entity).toBeDefined();
         // Verify the entity is registered with TypeORM
         const metadata = getMetadataArgsStorage();
-        const entityMetadata = metadata.tables.find(table => {
+        const entityMetadata = metadata.tables.find((table) => {
           const target = table.target;
           if (typeof target === 'function') {
             return target === entity;
@@ -195,7 +200,7 @@ describe('EntitiesModule', () => {
       expect(imports).toBeDefined();
       expect(Array.isArray(imports)).toBe(true);
 
-      imports.forEach(imp => {
+      imports.forEach((imp) => {
         expect(typeof imp).toBe('object');
         expect(imp).toHaveProperty('module');
         expect(imp).toHaveProperty('providers');
@@ -205,8 +210,8 @@ describe('EntitiesModule', () => {
 
     it('should have valid configurations for all registered entities', () => {
       const imports = Reflect.getMetadata('imports', EntitiesModule);
-      imports.forEach(imp => {
-        const config = imp.providers.find(p => p.provide === 'CONFIG').useValue;
+      imports.forEach((imp) => {
+        const config = imp.providers.find((p) => p.provide === 'CONFIG').useValue;
         expect(config).toBeDefined();
         expect(config.entity).toBeDefined();
       });

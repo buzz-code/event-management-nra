@@ -4,7 +4,7 @@ import { IUserInitializationService } from '@shared/auth/user-initialization.int
 
 @Injectable()
 export class UserInitializationService implements IUserInitializationService {
-  constructor() { }
+  constructor() {}
 
-  async initializeUserData(user: User): Promise<void> { }
+  async initializeUserData(user: User): Promise<void> {}
 }

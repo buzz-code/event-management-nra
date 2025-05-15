@@ -4,10 +4,7 @@ import { DataSource } from 'typeorm';
 import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 import { SelectionHelper, SelectableEntity } from './selection-helper';
-import {
-  EventEligibilityUtil,
-  EventEligibilityType,
-} from '../utils/event-eligibility.util';
+import { EventEligibilityUtil, EventEligibilityType } from '../utils/event-eligibility.util';
 import { CallUtils } from '../utils/call-utils';
 import { FormatUtils } from '../utils/format-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
@@ -41,12 +38,10 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
         this.eligibilityCheck = EventEligibilityUtil.isEligibleForPathSelection;
         break;
       case EventEligibilityType.VOUCHER:
-        this.eligibilityCheck =
-          EventEligibilityUtil.isEligibleForVoucherSelection;
+        this.eligibilityCheck = EventEligibilityUtil.isEligibleForVoucherSelection;
         break;
       case EventEligibilityType.POST_UPDATE:
-        this.eligibilityCheck =
-          EventEligibilityUtil.isEligibleForPostEventUpdate;
+        this.eligibilityCheck = EventEligibilityUtil.isEligibleForPostEventUpdate;
         break;
       case EventEligibilityType.NONE:
       default:
@@ -61,15 +56,10 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
     const allStudentEvents = this.studentEvents;
 
     // Apply shared filtering and sorting logic
-    const eligibleEvents = EventEligibilityUtil.filterEligibleEvents(
-      allStudentEvents,
-      this.eligibilityCheck,
-    );
+    const eligibleEvents = EventEligibilityUtil.filterEligibleEvents(allStudentEvents, this.eligibilityCheck);
 
     if (eligibleEvents.length === 0) {
-      this.call.logInfo(
-        `No eligible events found for student ${this.student.id}`,
-      );
+      this.call.logInfo(`No eligible events found for student ${this.student.id}`);
       this.items = [];
     } else {
       this.items = eligibleEvents.map((event: DBEvent, index) => {
@@ -81,9 +71,7 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
           originalEvent: event,
         };
       });
-      this.call.logInfo(
-        `Found ${this.items.length} eligible events for student ${this.student.id}`,
-      );
+      this.call.logInfo(`Found ${this.items.length} eligible events for student ${this.student.id}`);
     }
     this.logComplete(`fetchItems (ConfigurableEventSelector)`);
   }
@@ -93,10 +81,7 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
     if (selectedItem) {
       // Uses this.entityName ('אירוע') for a general term.
       await this.call.playMessage(
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_SELECTION(
-          this.entityName,
-          selectedItem.name,
-        ),
+        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_SELECTION(this.entityName, selectedItem.name),
       );
     }
   }

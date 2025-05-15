@@ -110,15 +110,15 @@
 //             </div>
 //             <div class="header-wrapper">
 //                 <% if (student) { %>
-//                     <h4>שם התלמידה: 
+//                     <h4>שם התלמידה:
 //                         <span class="value"><%= student.name %></span>
 //                     </h4>
-//                     <h4>מספר תז: 
+//                     <h4>מספר תז:
 //                         <span class="value"><%= student.tz %></span>
 //                     </h4>
 //                 <% } %>
 //                 <% if (studentBaseKlass && !reportParams.groupByKlass) { %>
-//                     <h4> 
+//                     <h4>
 //                         <span class="value"><%= studentBaseKlass.klassName %></span>
 //                     </h4>
 //                 <% } %>
@@ -133,7 +133,7 @@
 //                             </h4>
 //                         <% } %>
 //                     </div>
-    
+
 //                     <% var reports = reportData.reports %>
 //                     <table>
 //                     <% if (reports.length > 0) { %>
@@ -154,8 +154,8 @@
 //                                     <td class="full-cell"><%= report.lesson && report.lesson.name %></td>
 //                                     <td class="full-cell"><%= report.teacher && report.teacher.name %></td>
 
-//                                     <% var att_percents = Math.round((((report.lessonsCount ?? 1) - (report.absCount ?? 0)) / (report.lessonsCount ?? 1)) * 100) %> 
-                                    
+//                                     <% var att_percents = Math.round((((report.lessonsCount ?? 1) - (report.absCount ?? 0)) / (report.lessonsCount ?? 1)) * 100) %>
+
 //                                     <% if (report.lessonsCount && report.lessonsCount * 2 == report.absCount) { %>
 //                                         <td class="full-cell"><%= report.grade %></td>
 //                                         <td class="full-cell">&nbsp;</td>
@@ -163,16 +163,16 @@
 //                                         <% if (reportParams.grades) { %>
 //                                             <td class="full-cell">
 //                                             <% if (report.grade != undefined && report.grade != null) { %>
-//                                                 <% var grade_effect = att_grade_effect?.find(item => item.percents <= att_percents || item.count >= report.absCount)?.effect ?? 0 %> 
+//                                                 <% var grade_effect = att_grade_effect?.find(item => item.percents <= att_percents || item.count >= report.absCount)?.effect ?? 0 %>
 //                                                 <% var isOriginalGrade = report.grade > 100 || report.grade == 0 %>
-//                                                 <% var affected_grade = isOriginalGrade ? report.grade : Math.min(100, report.grade + grade_effect) %> 
-//                                                 <% var matching_grade_name = grade_names?.find(item => item.key <= affected_grade)?.name %> 
+//                                                 <% var affected_grade = isOriginalGrade ? report.grade : Math.min(100, report.grade + grade_effect) %>
+//                                                 <% var matching_grade_name = grade_names?.find(item => item.key <= affected_grade)?.name %>
 
-//                                                 <% if (matching_grade_name) { %> 
+//                                                 <% if (matching_grade_name) { %>
 //                                                     <%= matching_grade_name %>
-//                                                 <% } else { %> 
+//                                                 <% } else { %>
 //                                                     <%= affected_grade %>%
-//                                                 <% } %> 
+//                                                 <% } %>
 //                                             <% } else { %>
 //                                                 &nbsp;
 //                                             <% } %>
@@ -192,12 +192,12 @@
 //                                 <% } %>
 
 //                                 <% var reportsNoSpecial = reports.filter(item => item.lessonsCount * 2 != item.absCount) %>
-//                                 <% var total_lesson_count = reportsNoSpecial.reduce((a, b) => a + b.lessonsCount, 0) %> 
-//                                 <% var total_abs_count = reportsNoSpecial.reduce((a, b) => a + b.absCount, 0) %> 
-//                                 <% var total_att_count = total_lesson_count - total_abs_count %> 
+//                                 <% var total_lesson_count = reportsNoSpecial.reduce((a, b) => a + b.lessonsCount, 0) %>
+//                                 <% var total_abs_count = reportsNoSpecial.reduce((a, b) => a + b.absCount, 0) %>
+//                                 <% var total_att_count = total_lesson_count - total_abs_count %>
 
 //                                 <th>
-//                                     <%= 
+//                                     <%=
 //                                         Math.round(((total_att_count) / total_lesson_count) * 100)
 //                                     %>%
 //                                 </th>
@@ -213,7 +213,7 @@
 //                                     <% if (!reportParams.groupByKlass) { %>
 //                                         <% approved_abs_value = Object.values(approved_abs_count)[0] %>
 //                                     <% } %>
-//                                     <%= 
+//                                     <%=
 //                                         Math.round(
 //                                             (
 //                                                 (

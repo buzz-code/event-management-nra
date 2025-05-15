@@ -1,4 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Unique, BeforeInsert, BeforeUpdate, DataSource, Column, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+  BeforeInsert,
+  BeforeUpdate,
+  DataSource,
+  Column,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Event } from './Event.entity';
 import { Gift } from './Gift.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
@@ -26,7 +39,12 @@ export class EventGift implements IHasUserId {
       dataSource = await getDataSource([Gift]);
 
       this.giftReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Gift, { key: this.giftKey, year: this.year }, this.userId, this.giftReferenceId, this.giftKey
+        dataSource,
+        Gift,
+        { key: this.giftKey, year: this.year },
+        this.userId,
+        this.giftReferenceId,
+        this.giftKey,
       );
     } finally {
       dataSource?.destroy();
@@ -36,21 +54,25 @@ export class EventGift implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsNotEmpty({ always: true })
   @Column({ nullable: false })
   eventReferenceId: number;
 
-  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftReferenceId), { always: true })
+  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftReferenceId), {
+    always: true,
+  })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
   giftKey: number;
 
-  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftKey) && Boolean(eventGift.giftReferenceId), { always: true })
+  @ValidateIf((eventGift: EventGift) => !Boolean(eventGift.giftKey) && Boolean(eventGift.giftReferenceId), {
+    always: true,
+  })
   @Column({ nullable: false })
   giftReferenceId: number;
 
@@ -66,7 +88,10 @@ export class EventGift implements IHasUserId {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Event, event => event.eventGifts, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Event, (event) => event.eventGifts, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'eventReferenceId' })
   event: Event;
 

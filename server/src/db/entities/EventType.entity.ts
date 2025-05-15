@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 import { IsOptional, IsNumber } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
@@ -7,7 +16,7 @@ import { IHasUserId } from '@shared/base-entity/interface';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('event_types')
-@Index("event_types_user_id_idx", ["userId"], {})
+@Index('event_types_user_id_idx', ['userId'], {})
 export class EventType implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -18,7 +27,7 @@ export class EventType implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
@@ -32,7 +41,7 @@ export class EventType implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
   @IsNumber({}, { always: true })
-  @Column("int")
+  @Column('int')
   key: number;
 
   @IsOptional({ always: true })

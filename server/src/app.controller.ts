@@ -10,9 +10,7 @@ import { AuthenticatedRequest } from '@shared/auth/auth.types';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private authService: AuthService) { }
+  constructor(private readonly appService: AppService, private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
@@ -54,7 +52,7 @@ export class AppController {
   @Post('auth/impersonate')
   async impersonate(@Request() req: AuthenticatedRequest, @Res() response: Response) {
     if (!req.user.permissions.admin || !req.body.userId) {
-      console.log('impersonate non authorized')
+      console.log('impersonate non authorized');
       throw new UnauthorizedException();
     }
     const cookie = await this.authService.getCookieForImpersonate(req.body.userId);

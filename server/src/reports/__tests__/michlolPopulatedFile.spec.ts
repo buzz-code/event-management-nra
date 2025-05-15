@@ -81,9 +81,9 @@ describe('michlolPopulatedFile', () => {
         michlolFileData: [{ A: '', B: '', C: 'Test Lesson', D: 'invalid' }],
       });
 
-      await expect(michlolPopulatedFile.getReportData(params, mockDataSource as DataSource))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(michlolPopulatedFile.getReportData(params, mockDataSource as DataSource)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should process file with no matching students', async () => {
@@ -130,12 +130,8 @@ describe('michlolPopulatedFile', () => {
         { studentReferenceId: 1, reportDate: '2025-01-01' },
         { studentReferenceId: 2, reportDate: '2025-01-01' },
       ];
-      const mockKnownAbsences = [
-        { studentReferenceId: 1, isApproved: true },
-      ];
-      const mockAttGradeEffects = [
-        { percents: 90, count: 1 },
-      ];
+      const mockKnownAbsences = [{ studentReferenceId: 1, isApproved: true }];
+      const mockAttGradeEffects = [{ percents: 90, count: 1 }];
 
       (mockLessonRepo.findOne as jest.Mock).mockResolvedValue(mockLesson);
       (mockStudentRepo.find as jest.Mock).mockResolvedValue(mockStudents);
@@ -145,7 +141,7 @@ describe('michlolPopulatedFile', () => {
 
       (reportDataUtil.groupDataByKeys as jest.Mock).mockImplementation((data, keys) => {
         const result = {};
-        data.forEach(item => {
+        data.forEach((item) => {
           const key = item[keys[0]];
           result[key] = [item];
         });
@@ -183,8 +179,8 @@ describe('michlolPopulatedFile', () => {
       });
 
       // Verify the updated grades in specialFields
-      const gradeFields = result.specialFields.filter(field => field.cell.c === 4);
-      expect(gradeFields.some(field => field.value === '90')).toBeTruthy();
+      const gradeFields = result.specialFields.filter((field) => field.cell.c === 4);
+      expect(gradeFields.some((field) => field.value === '90')).toBeTruthy();
     });
   });
 

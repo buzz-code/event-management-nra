@@ -97,18 +97,8 @@ export class YemotHandlerFactory {
    * @param student Authenticated student
    * @returns An EventForPathAssignmentSelector instance
    */
-  createEventForPathAssignmentSelector(
-    student: Student,
-    events: DBEvent[],
-  ): ConfigurableEventSelector {
-    return new ConfigurableEventSelector(
-      this.call,
-      this.dataSource,
-      student,
-      events,
-      EventEligibilityType.PATH,
-      true,
-    );
+  createEventForPathAssignmentSelector(student: Student, events: DBEvent[]): ConfigurableEventSelector {
+    return new ConfigurableEventSelector(this.call, this.dataSource, student, events, EventEligibilityType.PATH, true);
   }
 
   /**
@@ -117,10 +107,7 @@ export class YemotHandlerFactory {
    * @param events Student's events
    * @returns An EventForVoucherAssignmentSelector instance
    */
-  createEventForVoucherAssignmentSelector(
-    student: Student,
-    events: DBEvent[],
-  ): ConfigurableEventSelector {
+  createEventForVoucherAssignmentSelector(student: Student, events: DBEvent[]): ConfigurableEventSelector {
     return new ConfigurableEventSelector(
       this.call,
       this.dataSource,
@@ -137,10 +124,7 @@ export class YemotHandlerFactory {
    * @param events Student's events
    * @returns An EventForPostUpdateSelector instance
    */
-  createEventForPostUpdateSelector(
-    student: Student,
-    events: DBEvent[],
-  ): ConfigurableEventSelector {
+  createEventForPostUpdateSelector(student: Student, events: DBEvent[]): ConfigurableEventSelector {
     return new ConfigurableEventSelector(
       this.call,
       this.dataSource,

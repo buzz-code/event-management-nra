@@ -11,22 +11,22 @@ import {
   BeforeInsert,
   BeforeUpdate,
   DataSource,
-} from "typeorm";
-import { IsOptional, IsNumber, ValidateIf } from "class-validator";
-import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty } from "@shared/utils/validation/class-validator-he";
-import { NumberType } from "@shared/utils/entity/class-transformer";
-import { IHasUserId } from "@shared/base-entity/interface";
-import { Student } from "./Student.entity";
-import { Class } from "./Class.entity";
-import { fillDefaultYearValue } from "@shared/utils/entity/year.util";
-import { findOneAndAssignReferenceId, getDataSource } from "@shared/utils/entity/foreignKey.util";
+} from 'typeorm';
+import { IsOptional, IsNumber, ValidateIf } from 'class-validator';
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty } from '@shared/utils/validation/class-validator-he';
+import { NumberType } from '@shared/utils/entity/class-transformer';
+import { IHasUserId } from '@shared/base-entity/interface';
+import { Student } from './Student.entity';
+import { Class } from './Class.entity';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
+import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 
-@Entity("student_classes")
-@Unique(["studentReferenceId", "classReferenceId", "year"])
-@Index("student_classes_user_id_idx", ["userId"], {})
-@Index("student_classes_student_idx", ["studentReferenceId"], {})
-@Index("student_classes_class_idx", ["classReferenceId"], {})
+@Entity('student_classes')
+@Unique(['studentReferenceId', 'classReferenceId', 'year'])
+@Index('student_classes_user_id_idx', ['userId'], {})
+@Index('student_classes_student_idx', ['studentReferenceId'], {})
+@Index('student_classes_class_idx', ['classReferenceId'], {})
 export class StudentClass implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -43,7 +43,7 @@ export class StudentClass implements IHasUserId {
         { tz: this.studentTz },
         this.userId,
         this.studentReferenceId,
-        this.studentTz
+        this.studentTz,
       );
       this.classReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -51,7 +51,7 @@ export class StudentClass implements IHasUserId {
         { key: this.classKey, year: this.year },
         this.userId,
         this.classReferenceId,
-        this.classKey
+        this.classKey,
       );
     } finally {
       dataSource?.destroy();
@@ -61,7 +61,7 @@ export class StudentClass implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsOptional({ always: true })
@@ -70,7 +70,9 @@ export class StudentClass implements IHasUserId {
   @Column({ nullable: true })
   year: number;
 
-  @ValidateIf((obj: StudentClass) => !Boolean(obj.studentReferenceId), { always: true })
+  @ValidateIf((obj: StudentClass) => !Boolean(obj.studentReferenceId), {
+    always: true,
+  })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -82,7 +84,9 @@ export class StudentClass implements IHasUserId {
   @Column({ nullable: true })
   studentReferenceId: number;
 
-  @ValidateIf((obj: StudentClass) => !Boolean(obj.classReferenceId), { always: true })
+  @ValidateIf((obj: StudentClass) => !Boolean(obj.classReferenceId), {
+    always: true,
+  })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -101,10 +105,10 @@ export class StudentClass implements IHasUserId {
   updatedAt: Date;
 
   @ManyToOne(() => Student, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: "studentReferenceId" })
+  @JoinColumn({ name: 'studentReferenceId' })
   student: Student;
 
   @ManyToOne(() => Class, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: "classReferenceId" })
+  @JoinColumn({ name: 'classReferenceId' })
   class: Class;
 }

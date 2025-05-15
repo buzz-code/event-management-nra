@@ -44,11 +44,7 @@ export class EventPersistenceHandler {
    */
   private logComplete(operation: string, result?: any): void {
     if (result) {
-      this.call.logInfo(
-        `Completed EventPersistenceHandler.${operation}: ${JSON.stringify(
-          result,
-        )}`,
-      );
+      this.call.logInfo(`Completed EventPersistenceHandler.${operation}: ${JSON.stringify(result)}`);
     } else {
       this.call.logInfo(`Completed EventPersistenceHandler.${operation}`);
     }
@@ -60,10 +56,7 @@ export class EventPersistenceHandler {
    * @param error The error that occurred
    */
   private logError(operation: string, error: Error): void {
-    this.call.logError(
-      `Error in EventPersistenceHandler.${operation}: ${error.message}`,
-      error.stack,
-    );
+    this.call.logError(`Error in EventPersistenceHandler.${operation}: ${error.message}`, error.stack);
   }
 
   /**
@@ -86,8 +79,7 @@ export class EventPersistenceHandler {
   ): Promise<DBEvent> {
     this.logStart('saveEvent');
 
-    if (eventType)
-      this.call.logInfo(`Event type: ${eventType.id} - ${eventType.name}`);
+    if (eventType) this.call.logInfo(`Event type: ${eventType.id} - ${eventType.name}`);
     if (eventDate) this.call.logInfo(`Event date: ${eventDate}`);
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -123,9 +115,7 @@ export class EventPersistenceHandler {
           await queryRunner.manager.delete(EventGift, {
             eventReferenceId: this.savedEvent.id,
           });
-          this.call.logInfo(
-            `Removed existing vouchers for event ${this.savedEvent.id}`,
-          );
+          this.call.logInfo(`Removed existing vouchers for event ${this.savedEvent.id}`);
         }
       }
 
@@ -139,9 +129,7 @@ export class EventPersistenceHandler {
         });
 
         await queryRunner.manager.save(EventGift, eventVouchers);
-        this.call.logInfo(
-          `Added ${eventVouchers.length} vouchers to event ${this.savedEvent.id}`,
-        );
+        this.call.logInfo(`Added ${eventVouchers.length} vouchers to event ${this.savedEvent.id}`);
       }
 
       await queryRunner.commitTransaction();
@@ -149,24 +137,15 @@ export class EventPersistenceHandler {
 
       // Fetch the updated event with all relations
       // Load fresh copy of the saved event with all relations
-      const updatedEvent = await queryRunner.manager
-        .getRepository(DBEvent)
-        .findOne({
-          where: {
-            id: this.savedEvent!.id,
-          },
-          relations: [
-            'eventType',
-            'levelType',
-            'eventGifts',
-            'eventGifts.gift',
-          ],
-        });
+      const updatedEvent = await queryRunner.manager.getRepository(DBEvent).findOne({
+        where: {
+          id: this.savedEvent!.id,
+        },
+        relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift'],
+      });
 
       if (!updatedEvent) {
-        throw new Error(
-          `Could not fetch updated event with ID ${this.savedEvent.id}`,
-        );
+        throw new Error(`Could not fetch updated event with ID ${this.savedEvent.id}`);
       }
 
       this.savedEvent = updatedEvent;
@@ -195,9 +174,7 @@ export class EventPersistenceHandler {
     eventNote.noteText = note;
 
     try {
-      const savedNote = await this.dataSource
-        .getRepository(EventNote)
-        .save(eventNote);
+      const savedNote = await this.dataSource.getRepository(EventNote).save(eventNote);
       this.logComplete('addEventNote', {
         eventId: event.id,
         noteId: savedNote.id,
@@ -215,10 +192,7 @@ export class EventPersistenceHandler {
    * @param completed Whether the event was completed
    * @returns The updated event
    */
-  async updateEventCompletion(
-    event: DBEvent,
-    completed: boolean,
-  ): Promise<DBEvent> {
+  async updateEventCompletion(event: DBEvent, completed: boolean): Promise<DBEvent> {
     this.logStart('updateEventCompletion');
 
     event.completed = completed;
@@ -228,17 +202,10 @@ export class EventPersistenceHandler {
       await this.dataSource.getRepository(DBEvent).save(event);
 
       // Load fresh copy with relations
-      const updatedEvent = await this.dataSource
-        .getRepository(DBEvent)
-        .findOne({
-          where: { id: event.id },
-          relations: [
-            'eventType',
-            'levelType',
-            'eventGifts',
-            'eventGifts.gift',
-          ],
-        });
+      const updatedEvent = await this.dataSource.getRepository(DBEvent).findOne({
+        where: { id: event.id },
+        relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift'],
+      });
 
       if (!updatedEvent) {
         throw new Error(`Could not fetch updated event with ID ${event.id}`);
@@ -261,10 +228,7 @@ export class EventPersistenceHandler {
    * @param includeCompleted Whether to include completed events
    * @returns Array of events
    */
-  async findStudentEvents(
-    student: Student,
-    includeCompleted?: boolean,
-  ): Promise<DBEvent[]> {
+  async findStudentEvents(student: Student, includeCompleted?: boolean): Promise<DBEvent[]> {
     this.logStart('findStudentEvents');
 
     try {
@@ -312,13 +276,7 @@ export class EventPersistenceHandler {
     try {
       const event = await this.dataSource.getRepository(DBEvent).findOne({
         where: { id: eventId },
-        relations: [
-          'eventType',
-          'levelType',
-          'eventGifts',
-          'eventGifts.gift',
-          'student',
-        ],
+        relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift', 'student'],
       });
 
       this.logComplete('findEventById', { eventId, found: !!event });
@@ -335,10 +293,7 @@ export class EventPersistenceHandler {
    * @param completedPath The path (LevelType) that was completed.
    * @returns The updated event.
    */
-  async recordEventCompletion(
-    eventToUpdate: DBEvent,
-    completedPath: LevelType,
-  ): Promise<DBEvent> {
+  async recordEventCompletion(eventToUpdate: DBEvent, completedPath: LevelType): Promise<DBEvent> {
     this.logStart('recordEventCompletion');
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -350,9 +305,7 @@ export class EventPersistenceHandler {
         id: eventToUpdate.id,
       });
       if (!event) {
-        throw new Error(
-          `Event with ID ${eventToUpdate.id} not found for completion update.`,
-        );
+        throw new Error(`Event with ID ${eventToUpdate.id} not found for completion update.`);
       }
 
       event.completedPathReferenceId = completedPath.id;

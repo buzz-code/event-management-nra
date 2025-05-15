@@ -19,19 +19,15 @@ describe('StudentPercentReportConfig', () => {
         transaction: jest.fn((cb) => cb()),
       },
       metadata: {
-        columns: [
-          { propertyName: 'id' },
-          { propertyName: 'name' },
-          { propertyName: 'userId' }
-        ],
+        columns: [{ propertyName: 'id' }, { propertyName: 'name' }, { propertyName: 'userId' }],
         connection: { options: { type: 'mysql' } },
-        targetName: 'TestEntity'
+        targetName: 'TestEntity',
       },
       createQueryBuilder: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       getCount: jest.fn(),
-      save: jest.fn().mockImplementation(entity => Promise.resolve(entity))
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
     } as any;
 
     mockRepos = {
@@ -150,63 +146,75 @@ describe('StudentPercentReportConfig', () => {
       headers?: any[];
     }
 
-    const mockData: ExtendedStudentPercentReport[] = [{
-      id: '1_1_1_1_1_2023',
-      studentReferenceId: 1,
-      teacherReferenceId: 1,
-      klassReferenceId: 1,
-      lessonReferenceId: 1,
-      userId: 1,
-      year: 2023,
-      absCount: 5,
-      lessonsCount: 10,
-      absPercents: 0.2,
-      attPercents: 0.8,
-      gradeAvg: 85,
-      student: null,
-      teacher: null,
-      lesson: null,
-      klass: null,
-      studentBaseKlass: null,
-    }];
+    const mockData: ExtendedStudentPercentReport[] = [
+      {
+        id: '1_1_1_1_1_2023',
+        studentReferenceId: 1,
+        teacherReferenceId: 1,
+        klassReferenceId: 1,
+        lessonReferenceId: 1,
+        userId: 1,
+        year: 2023,
+        absCount: 5,
+        lessonsCount: 10,
+        absPercents: 0.2,
+        attPercents: 0.8,
+        gradeAvg: 85,
+        student: null,
+        teacher: null,
+        lesson: null,
+        klass: null,
+        studentBaseKlass: null,
+      },
+    ];
 
-    const mockReportData = [{
-      studentReferenceId: 1,
-      teacherReferenceId: 1,
-      klassReferenceId: 1,
-      lessonReferenceId: 1,
-      userId: 1,
-      year: 2023,
-      type: 'grade',
-      grade: 3,
-      estimation: 'Good',
-      comments: 'Nice work',
-      reportDate: new Date(),
-    }];
+    const mockReportData = [
+      {
+        studentReferenceId: 1,
+        teacherReferenceId: 1,
+        klassReferenceId: 1,
+        lessonReferenceId: 1,
+        userId: 1,
+        year: 2023,
+        type: 'grade',
+        grade: 3,
+        estimation: 'Good',
+        comments: 'Nice work',
+        reportDate: new Date(),
+      },
+    ];
 
-    const mockAbsences = [{
-      studentReferenceId: 1,
-      klassReferenceId: 1,
-      lessonReferenceId: 1,
-      userId: 1,
-      year: 2023,
-    }];
+    const mockAbsences = [
+      {
+        studentReferenceId: 1,
+        klassReferenceId: 1,
+        lessonReferenceId: 1,
+        userId: 1,
+        year: 2023,
+      },
+    ];
 
-    const mockLessons = [{
-      id: '1',
-      howManyLessons: 10,
-    }];
+    const mockLessons = [
+      {
+        id: '1',
+        howManyLessons: 10,
+      },
+    ];
 
-    const mockGradeNames = [{
-      userId: 1,
-      key: 'A',
-      value: '90-100',
-    }];
+    const mockGradeNames = [
+      {
+        userId: 1,
+        key: 'A',
+        value: '90-100',
+      },
+    ];
 
-    const mockEffects = [{
-      id: '1_0',
-      effect: -5,
-    }];
+    const mockEffects = [
+      {
+        id: '1_0',
+        effect: -5,
+      },
+    ];
 
     beforeEach(() => {
       mockRepos.AttReportAndGrade.find.mockResolvedValue(mockReportData);

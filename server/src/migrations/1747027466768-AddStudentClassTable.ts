@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddStudentClassTable1747027466768 implements MigrationInterface {
-    name = 'AddStudentClassTable1747027466768'
+  name = 'AddStudentClassTable1747027466768';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE \`student_classes\` (
                 \`id\` int NOT NULL AUTO_INCREMENT,
                 \`user_id\` int NOT NULL,
@@ -22,38 +22,37 @@ export class AddStudentClassTable1747027466768 implements MigrationInterface {
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             ALTER TABLE \`student_classes\`
             ADD CONSTRAINT \`FK_64129dca85e1aa49a277dce81d5\` FOREIGN KEY (\`studentReferenceId\`) REFERENCES \`students\`(\`id\`) ON DELETE CASCADE ON UPDATE NO ACTION
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             ALTER TABLE \`student_classes\`
             ADD CONSTRAINT \`FK_1d2537916600593353f8a79363e\` FOREIGN KEY (\`classReferenceId\`) REFERENCES \`classes\`(\`id\`) ON DELETE CASCADE ON UPDATE NO ACTION
         `);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             ALTER TABLE \`student_classes\` DROP FOREIGN KEY \`FK_1d2537916600593353f8a79363e\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             ALTER TABLE \`student_classes\` DROP FOREIGN KEY \`FK_64129dca85e1aa49a277dce81d5\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`IDX_1a74fabb33731a4f123b7671f9\` ON \`student_classes\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_classes_user_id_idx\` ON \`student_classes\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_classes_student_idx\` ON \`student_classes\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_classes_class_idx\` ON \`student_classes\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE \`student_classes\`
         `);
-    }
-
+  }
 }

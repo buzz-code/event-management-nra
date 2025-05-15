@@ -6,10 +6,12 @@ describe('KlassConfig', () => {
   it('should have correct base configuration', () => {
     expect(klassConfig.entity).toBe(Klass);
     expect(klassConfig.query).toBeDefined();
-    expect(klassConfig.query.join).toEqual(expect.objectContaining({
-      teacher: {},
-      klassType: {},
-    }));
+    expect(klassConfig.query.join).toEqual(
+      expect.objectContaining({
+        teacher: {},
+        klassType: {},
+      }),
+    );
   });
 
   it('should have correct exporter configuration', () => {
@@ -27,15 +29,17 @@ describe('KlassConfig', () => {
       },
     } as CrudRequest;
 
-    const mockInnerFunc = jest.fn(req => req);
+    const mockInnerFunc = jest.fn((req) => req);
 
     const result = klassConfig.exporter.processReqForExport(mockRequest, mockInnerFunc);
 
     expect(mockInnerFunc).toHaveBeenCalledWith(mockRequest);
-    expect(mockRequest.options.query.join).toEqual(expect.objectContaining({
-      klassType: { eager: true },
-      teacher: { eager: true },
-    }));
+    expect(mockRequest.options.query.join).toEqual(
+      expect.objectContaining({
+        klassType: { eager: true },
+        teacher: { eager: true },
+      }),
+    );
     expect(result).toBe(mockRequest);
   });
 
@@ -43,10 +47,12 @@ describe('KlassConfig', () => {
     const fields = ['key', 'name', 'klassType.name', 'teacher.name'];
     const headers = klassConfig.exporter.getExportHeaders(fields);
 
-    expect(headers).toEqual(expect.arrayContaining([
-      { value: 'key', label: 'מזהה' },
-      { value: 'name', label: 'שם' },
-      { value: 'teacher.name', label: 'מורה' },
-    ]));
+    expect(headers).toEqual(
+      expect.arrayContaining([
+        { value: 'key', label: 'מזהה' },
+        { value: 'name', label: 'שם' },
+        { value: 'teacher.name', label: 'מורה' },
+      ]),
+    );
   });
 });

@@ -39,9 +39,7 @@ export class PathSelectionHandler extends SelectionHelper<LevelType> {
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    const options = this.items
-      .map((item) => `להקשת ${item.key} עבור מסלול ${item.name}`)
-      .join(', ');
+    const options = this.items.map((item) => `להקשת ${item.key} עבור מסלול ${item.name}`).join(', ');
     return MESSAGE_CONSTANTS.SELECTION.PATH_SELECTION_PROMPT(options);
   }
 }

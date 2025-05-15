@@ -28,7 +28,7 @@ async function bootstrap() {
     credentials: true,
     origin: [
       new RegExp('http(s?)://' + process.env.DOMAIN_NAME),
-      process.env.IP_ADDRESS && new RegExp('http(s?)://' + process.env.IP_ADDRESS + ':[\d]*'),
+      process.env.IP_ADDRESS && new RegExp('http(s?)://' + process.env.IP_ADDRESS + ':[d]*'),
       'http://localhost:30013',
     ],
   });

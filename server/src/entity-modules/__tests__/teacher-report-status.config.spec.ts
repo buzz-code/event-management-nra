@@ -51,21 +51,21 @@ interface ActionResult {
 
 jest.mock('src/reports/reportGenerator', () => ({
   getTeacherStatusFileReportParams: jest.fn(),
-  sendTeacherReportFileMail: jest.fn()
+  sendTeacherReportFileMail: jest.fn(),
 }));
 
 describe('teacher-report-status.config', () => {
   describe('getConfig', () => {
     it('should return TeacherReportStatus entity and export headers configuration', () => {
       expect(config.entity).toBe(TeacherReportStatus);
-      
+
       const headers = config.exporter.getExportHeaders([]);
       expect(headers).toHaveLength(4);
       expect(headers).toEqual([
         { value: 'teacherName', label: 'מורה' },
         { value: 'reportMonthName', label: 'תקופת דיווח' },
         { value: 'reportedLessonNames', label: 'שיעורים שדווחו' },
-        { value: 'notReportedLessonNames', label: 'שיעורים שלא דווחו' }
+        { value: 'notReportedLessonNames', label: 'שיעורים שלא דווחו' },
       ]);
     });
   });
@@ -79,33 +79,29 @@ describe('teacher-report-status.config', () => {
       const mockRepository = {
         target: TeacherReportStatus,
         manager: {
-          transaction: jest.fn()
+          transaction: jest.fn(),
         },
         metadata: {
-          columns: [
-            { propertyName: 'id' },
-            { propertyName: 'name' },
-            { propertyName: 'userId' }
-          ],
+          columns: [{ propertyName: 'id' }, { propertyName: 'name' }, { propertyName: 'userId' }],
           connection: { options: { type: 'mysql' } },
-          targetName: 'TestEntity'
+          targetName: 'TestEntity',
         },
         createQueryBuilder: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         getCount: jest.fn(),
-        save: jest.fn().mockImplementation(entity => Promise.resolve(entity))
+        save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
       } as any;
-  
+
       mockDataSource = {
         createQueryRunner: jest.fn(),
-        getRepository: jest.fn().mockReturnValue(mockRepository)
+        getRepository: jest.fn().mockReturnValue(mockRepository),
       } as any as DataSource;
 
       mockMailSendService = {
         mailerService: {
-          sendMail: jest.fn()
-        }
+          sendMail: jest.fn(),
+        },
       } as unknown as jest.Mocked<MailSendService>;
 
       service = new config.service(mockRepository, mockMailSendService);
@@ -121,7 +117,7 @@ describe('teacher-report-status.config', () => {
         const req: MockRequest = {
           parsed: {
             extra: {
-              report: 'teacherReportFile'
+              report: 'teacherReportFile',
             },
             fields: [],
             paramsFilter: [],
@@ -129,9 +125,9 @@ describe('teacher-report-status.config', () => {
             or: [],
             join: [],
             sort: [],
-            classTransformOptions: {}
+            classTransformOptions: {},
           },
-          options: {}
+          options: {},
         };
 
         const result = await service.getReportData(req as unknown as CrudRequest);
@@ -139,7 +135,7 @@ describe('teacher-report-status.config', () => {
         expect(req.parsed.extra.isGrades).toBe(false);
         expect(result).toEqual({
           generator: service['reportsDict'].teacherReportFile,
-          params: mockParams
+          params: mockParams,
         });
         expect(getTeacherStatusFileReportParams).toHaveBeenCalledWith(req);
       });
@@ -148,7 +144,7 @@ describe('teacher-report-status.config', () => {
         const req: MockRequest = {
           parsed: {
             extra: {
-              report: 'unknownReport'
+              report: 'unknownReport',
             },
             fields: [],
             paramsFilter: [],
@@ -156,17 +152,18 @@ describe('teacher-report-status.config', () => {
             or: [],
             join: [],
             sort: [],
-            classTransformOptions: {}
+            classTransformOptions: {},
           },
-          options: {}
+          options: {},
         };
 
-        const mockParentResult: ReportData = { 
+        const mockParentResult: ReportData = {
           generator: null,
-          params: { someData: 'value' }
+          params: { someData: 'value' },
         };
-        
-        const parentGetReportData =jest.spyOn(BaseEntityService.prototype, 'getReportData')
+
+        const parentGetReportData = jest
+          .spyOn(BaseEntityService.prototype, 'getReportData')
           .mockResolvedValue(mockParentResult);
 
         const result = await service.getReportData(req as unknown as CrudRequest);
@@ -185,7 +182,7 @@ describe('teacher-report-status.config', () => {
         const req: MockRequest = {
           parsed: {
             extra: {
-              action: 'teacherReportFile'
+              action: 'teacherReportFile',
             },
             fields: [],
             paramsFilter: [],
@@ -193,9 +190,9 @@ describe('teacher-report-status.config', () => {
             or: [],
             join: [],
             sort: [],
-            classTransformOptions: {}
+            classTransformOptions: {},
           },
-          options: {}
+          options: {},
         };
         const body: Record<string, unknown> = { someData: 'value' };
 
@@ -203,18 +200,14 @@ describe('teacher-report-status.config', () => {
 
         expect(req.parsed.extra.isGrades).toBe(false);
         expect(result).toEqual(mockResult);
-        expect(sendTeacherReportFileMail).toHaveBeenCalledWith(
-          req,
-          mockDataSource,
-          mockMailSendService
-        );
+        expect(sendTeacherReportFileMail).toHaveBeenCalledWith(req, mockDataSource, mockMailSendService);
       });
 
       it('should fall back to parent doAction for unknown action', async () => {
         const req: MockRequest = {
           parsed: {
             extra: {
-              action: 'unknownAction'
+              action: 'unknownAction',
             },
             fields: [],
             paramsFilter: [],
@@ -222,17 +215,18 @@ describe('teacher-report-status.config', () => {
             or: [],
             join: [],
             sort: [],
-            classTransformOptions: {}
+            classTransformOptions: {},
           },
-          options: {}
+          options: {},
         };
         const body: Record<string, unknown> = { someData: 'value' };
         const mockParentResult: ActionResult = { someOtherData: 'value' };
-        
-        const parentDoAction = jest.spyOn(BaseEntityService.prototype, 'doAction')
+
+        const parentDoAction = jest
+          .spyOn(BaseEntityService.prototype, 'doAction')
           .mockImplementation(() => Promise.resolve(mockParentResult));
 
-          const result = await service.doAction(req as unknown as CrudRequest, body);
+        const result = await service.doAction(req as unknown as CrudRequest, body);
 
         expect(result).toEqual(mockParentResult);
         expect(parentDoAction).toHaveBeenCalledWith(req, body);

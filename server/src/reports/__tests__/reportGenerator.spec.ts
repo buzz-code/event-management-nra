@@ -2,7 +2,11 @@ import { BaseReportGenerator } from '@shared/utils/report/report.generators';
 import { CrudRequest } from '@dataui/crud';
 import { DataSource } from 'typeorm';
 import { MailSendService } from '@shared/utils/mail/mail-send.service';
-import { generateStudentReportCard, getTeacherStatusFileReportParams, sendTeacherReportFileMail } from '../reportGenerator';
+import {
+  generateStudentReportCard,
+  getTeacherStatusFileReportParams,
+  sendTeacherReportFileMail,
+} from '../reportGenerator';
 import * as yearUtil from '@shared/utils/entity/year.util';
 import * as authUtil from '@shared/auth/auth.util';
 import * as mailAddressUtil from '@shared/utils/mail/mail-address.util';
@@ -29,7 +33,7 @@ const createMockCrudRequest = (extra: any, auth: any = { id: 'default' }): CrudR
     cache: 0,
     includeDeleted: 0,
     extra,
-    classTransformOptions: {}
+    classTransformOptions: {},
   },
   options: {
     routes: {
@@ -40,10 +44,10 @@ const createMockCrudRequest = (extra: any, auth: any = { id: 'default' }): CrudR
       updateOneBase: { interceptors: [], decorators: [] },
       replaceOneBase: { interceptors: [], decorators: [] },
       deleteOneBase: { interceptors: [], decorators: [] },
-      recoverOneBase: { interceptors: [], decorators: [] }
-    }
+      recoverOneBase: { interceptors: [], decorators: [] },
+    },
   },
-  auth
+  auth,
 });
 
 describe('reportGenerator', () => {
@@ -60,7 +64,7 @@ describe('reportGenerator', () => {
       const reqExtra = {
         ids: '1,2,3',
         attendance: true,
-        grades: true
+        grades: true,
       };
       const generator: BaseReportGenerator = {} as any;
 
@@ -73,7 +77,7 @@ describe('reportGenerator', () => {
         studentId: '1',
         year: mockYear,
         attendance: true,
-        grades: true
+        grades: true,
       });
     });
 
@@ -81,7 +85,7 @@ describe('reportGenerator', () => {
       const userId = '123';
       const reqExtra = {
         ids: '1',
-        year: 2024
+        year: 2024,
       };
       const generator: BaseReportGenerator = {} as any;
 
@@ -96,11 +100,14 @@ describe('reportGenerator', () => {
       const mockUserId = '456';
       (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(mockUserId);
 
-      const mockRequest = createMockCrudRequest({
-        ids: '10,20',
-        isGrades: true,
-        lessonReferenceId: '100'
-      }, { id: mockUserId });
+      const mockRequest = createMockCrudRequest(
+        {
+          ids: '10,20',
+          isGrades: true,
+          lessonReferenceId: '100',
+        },
+        { id: mockUserId },
+      );
 
       const result = getTeacherStatusFileReportParams(mockRequest);
 
@@ -109,7 +116,7 @@ describe('reportGenerator', () => {
         userId: mockUserId,
         id: '10',
         isGrades: true,
-        lessonReferenceId: 100
+        lessonReferenceId: 100,
       });
     });
 
@@ -117,10 +124,13 @@ describe('reportGenerator', () => {
       const mockUserId = '456';
       (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(mockUserId);
 
-      const mockRequest = createMockCrudRequest({
-        ids: '10',
-        isGrades: true
-      }, { id: mockUserId });
+      const mockRequest = createMockCrudRequest(
+        {
+          ids: '10',
+          isGrades: true,
+        },
+        { id: mockUserId },
+      );
 
       const result = getTeacherStatusFileReportParams(mockRequest);
 
@@ -132,12 +142,15 @@ describe('reportGenerator', () => {
     it('should send teacher report file email', async () => {
       const mockUserId = '789';
       const mockReplyToAddress = 'teacher@test.com';
-      const mockRequest = createMockCrudRequest({
-        ids: '30',
-        isGrades: true,
-        mailSubject: 'Report for {0}',
-        mailBody: 'Report content for {0}'
-      }, { id: mockUserId });
+      const mockRequest = createMockCrudRequest(
+        {
+          ids: '30',
+          isGrades: true,
+          mailSubject: 'Report for {0}',
+          mailBody: 'Report content for {0}',
+        },
+        { id: mockUserId },
+      );
 
       const mockDataSource = {} as DataSource;
       const mockMailService = {} as MailSendService;

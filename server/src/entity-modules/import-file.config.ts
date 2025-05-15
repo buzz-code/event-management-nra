@@ -1,6 +1,6 @@
-import { BaseEntityModuleOptions } from "@shared/base-entity/interface";
-import { IContent, IHeader } from "@shared/utils/exporter/types";
-import { ImportFile } from "@shared/entities/ImportFile.entity";
+import { BaseEntityModuleOptions } from '@shared/base-entity/interface';
+import { IContent, IHeader } from '@shared/utils/exporter/types';
+import { ImportFile } from '@shared/entities/ImportFile.entity';
 
 const entityNameDictionary = {
   student: 'תלמידות',
@@ -8,12 +8,12 @@ const entityNameDictionary = {
   klass: 'כיתות',
   lesson: 'שיעורים',
   att_report: 'דיווחי נוכחות',
-  grade: 'ציונים'
+  grade: 'ציונים',
 };
 
 const successDictionary = {
   true: '✓ הצליח',
-  false: '✗ נכשל'
+  false: '✗ נכשל',
 };
 
 function getConfig(): BaseEntityModuleOptions {
@@ -27,28 +27,29 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'entityIds.length', label: 'מספר רשומות' },
           {
             value: (record: ImportFile) => entityNameDictionary[record.entityName] || record.entityName,
-            label: 'סוג טבלה'
+            label: 'סוג טבלה',
           },
           {
             value: (record: ImportFile) => successDictionary[record.fullSuccess?.toString()],
-            label: 'הצלחה'
+            label: 'הצלחה',
           },
           { value: 'response', label: 'תגובה' },
           {
-            value: (record: ImportFile) => new Date(record.createdAt).toLocaleString('he-IL', {
-              timeZone: 'Asia/Jerusalem',
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false
-            }),
-            label: 'תאריך יצירה'
+            value: (record: ImportFile) =>
+              new Date(record.createdAt).toLocaleString('he-IL', {
+                timeZone: 'Asia/Jerusalem',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              }),
+            label: 'תאריך יצירה',
           },
         ];
-      }
-    }
+      },
+    },
   };
 }
 

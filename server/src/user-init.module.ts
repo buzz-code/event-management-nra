@@ -5,4 +5,4 @@ import { UserInitializationService } from './user-initialization.service';
   providers: [UserInitializationService],
   exports: [UserInitializationService],
 })
-export class UserInitModule { }
+export class UserInitModule {}

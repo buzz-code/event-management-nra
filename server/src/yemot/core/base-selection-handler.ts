@@ -17,9 +17,7 @@ export interface SelectableEntity {
  * Abstract base handler for selection operations (both single and multiple)
  * Contains shared functionality for fetching items, validation, and basic selection flow
  */
-export abstract class BaseSelectionHandler<
-  T extends SelectableEntity,
-> extends BaseYemotHandler {
+export abstract class BaseSelectionHandler<T extends SelectableEntity> extends BaseYemotHandler {
   protected items: T[] = [];
   protected repository: Repository<T>;
   protected entityName: string;
@@ -31,12 +29,7 @@ export abstract class BaseSelectionHandler<
    * @param entityName The name of the entity type (for logging and messages)
    * @param entityRepository The repository to use for fetching entities
    */
-  constructor(
-    call: Call,
-    dataSource: DataSource,
-    entityName: string,
-    entityRepository: Repository<T>,
-  ) {
+  constructor(call: Call, dataSource: DataSource, entityName: string, entityRepository: Repository<T>) {
     super(call, dataSource);
     this.entityName = entityName;
     this.repository = entityRepository;
@@ -45,9 +38,7 @@ export abstract class BaseSelectionHandler<
   /**
    * Fetches all items from the repository
    */
-  protected async fetchItems(
-    orderBy: keyof T = 'key' as keyof T,
-  ): Promise<void> {
+  protected async fetchItems(orderBy: keyof T = 'key' as keyof T): Promise<void> {
     this.logStart('fetchItems');
 
     this.items = await this.repository.find({
@@ -59,9 +50,7 @@ export abstract class BaseSelectionHandler<
     if (this.items.length === 0) {
       this.call.logWarn(`No ${this.entityName} options found in the database`);
     } else {
-      this.call.logInfo(
-        `Found ${this.items.length} ${this.entityName} options`,
-      );
+      this.call.logInfo(`Found ${this.items.length} ${this.entityName} options`);
     }
 
     this.logComplete('fetchItems');
@@ -78,9 +67,7 @@ export abstract class BaseSelectionHandler<
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await this.hangupWithMessage(
-        `אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`,
-      );
+      await this.hangupWithMessage(`אין אפשרויות ${this.entityName} במערכת כרגע. אנא פנה למנהל המערכת.`);
       return;
     }
 
@@ -111,12 +98,8 @@ export abstract class BaseSelectionHandler<
     }
 
     if (!selectionComplete) {
-      this.call.logError(
-        `Maximum ${this.entityName} selection attempts reached`,
-      );
-      await this.hangupWithMessage(
-        'מספר נסיונות הבחירה הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.',
-      );
+      this.call.logError(`Maximum ${this.entityName} selection attempts reached`);
+      await this.hangupWithMessage('מספר נסיונות הבחירה הגיע למקסימום. אנא נסה להתקשר שנית מאוחר יותר.');
       return;
     }
 

@@ -18,28 +18,28 @@ import { JwtModule } from '@nestjs/jwt';
 jest.mock('../entities.module', () => ({
   EntitiesModule: class {
     static imports = [];
-  }
+  },
 }));
 
 jest.mock('@shared/config/pino.config', () => ({
   getPinoConfig: jest.fn().mockImplementation((isDev) => ({
-    pinoHttp: { level: isDev ? 'debug' : 'info' }
-  }))
+    pinoHttp: { level: isDev ? 'debug' : 'info' },
+  })),
 }));
 
 // Mock JWT configuration
 jest.mock('@shared/auth/constants', () => ({
   jwtConstants: {
     secret: 'test-secret',
-    maxAge: '60s'
-  }
+    maxAge: '60s',
+  },
 }));
 
 // Other external configurations
 jest.mock('@shared/config/pino.config', () => ({
   getPinoConfig: jest.fn().mockReturnValue({
-    pinoHttp: { level: 'silent' }
-  })
+    pinoHttp: { level: 'silent' },
+  }),
 }));
 
 jest.mock('@shared/config/typeorm.config', () => ({
@@ -47,8 +47,8 @@ jest.mock('@shared/config/typeorm.config', () => ({
     type: 'sqlite',
     database: ':memory:',
     synchronize: true,
-    logging: false
-  }
+    logging: false,
+  },
 }));
 
 describe('AppModule', () => {
@@ -56,13 +56,11 @@ describe('AppModule', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        AppModule
-      ],
+      imports: [AppModule],
     })
-    .overrideProvider('JWT_SECRET')
-    .useValue('test-secret')
-    .compile();
+      .overrideProvider('JWT_SECRET')
+      .useValue('test-secret')
+      .compile();
 
     module = moduleRef;
   });
@@ -83,27 +81,21 @@ describe('AppModule', () => {
 
   it('should configure ThrottlerModule with correct options', () => {
     const throttlerModule = Reflect.getMetadata('imports', AppModule);
-    const throttlerConfig = throttlerModule.find(
-      (imp: any) => imp && imp.module === ThrottlerModule
-    );
+    const throttlerConfig = throttlerModule.find((imp: any) => imp && imp.module === ThrottlerModule);
     expect(throttlerConfig).toBeDefined();
     expect(throttlerConfig.module).toBe(ThrottlerModule);
   });
 
   it('should register ThrottlerGuard as APP_GUARD', () => {
     const providers = Reflect.getMetadata('providers', AppModule);
-    const guardProvider = providers.find(
-      (provider: any) => provider.provide === APP_GUARD
-    );
+    const guardProvider = providers.find((provider: any) => provider.provide === APP_GUARD);
     expect(guardProvider).toBeDefined();
     expect(guardProvider.useClass).toBe(ThrottlerGuard);
   });
 
   it('should configure TypeOrmModule', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
-    const typeOrmConfig = imports.find(
-      (imp: any) => imp && imp.module === TypeOrmModule
-    );
+    const typeOrmConfig = imports.find((imp: any) => imp && imp.module === TypeOrmModule);
     expect(typeOrmConfig).toBeDefined();
     expect(typeOrmConfig.module).toBe(TypeOrmModule);
   });
@@ -115,9 +107,7 @@ describe('AppModule', () => {
 
   it('should configure LoggerModule with Pino', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
-    const loggerConfig = imports.find(
-      (imp: any) => imp && imp.module === LoggerModule
-    );
+    const loggerConfig = imports.find((imp: any) => imp && imp.module === LoggerModule);
     expect(loggerConfig).toBeDefined();
     expect(loggerConfig.module).toBe(LoggerModule);
     expect(getPinoConfig).toHaveBeenCalled();
@@ -135,37 +125,33 @@ describe('AppModule', () => {
 
   it('should import AuthModule', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
-    const authModuleImport = imports.find(
-      (imp: any) => imp && imp.module === AuthModule
-    );
+    const authModuleImport = imports.find((imp: any) => imp && imp.module === AuthModule);
     expect(authModuleImport).toBeDefined();
   });
 
   it('should configure YemotModule with chain', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
-    const yemotConfig = imports.find(
-      (imp: any) => imp && imp.module === YemotModule
-    );
+    const yemotConfig = imports.find((imp: any) => imp && imp.module === YemotModule);
     expect(yemotConfig).toBeDefined();
     expect(yemotConfig.module).toBe(YemotModule);
   });
 
   describe('Environment configuration', () => {
     const previousEnv = process.env.NODE_ENV;
-    
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    
+
     afterEach(() => {
       process.env.NODE_ENV = previousEnv;
     });
 
     it('should configure Pino logger for development environment', async () => {
       process.env.NODE_ENV = 'development';
-      
+
       const moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule.forRoot(getPinoConfig(true))]
+        imports: [LoggerModule.forRoot(getPinoConfig(true))],
       }).compile();
 
       const loggerModule = moduleRef.get(LoggerModule);
@@ -175,9 +161,9 @@ describe('AppModule', () => {
 
     it('should configure Pino logger for production environment', async () => {
       process.env.NODE_ENV = 'production';
-      
+
       const moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule.forRoot(getPinoConfig(false))]
+        imports: [LoggerModule.forRoot(getPinoConfig(false))],
       }).compile();
 
       const loggerModule = moduleRef.get(LoggerModule);

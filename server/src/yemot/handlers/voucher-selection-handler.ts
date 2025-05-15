@@ -19,11 +19,7 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
    * @param dataSource The initialized data source
    * @param maxVouchers Maximum number of vouchers that can be selected
    */
-  constructor(
-    call: Call,
-    dataSource: DataSource,
-    maxVouchers: number = SYSTEM_CONSTANTS.MAX_VOUCHERS,
-  ) {
+  constructor(call: Call, dataSource: DataSource, maxVouchers: number = SYSTEM_CONSTANTS.MAX_VOUCHERS) {
     super(
       call,
       dataSource,
@@ -49,20 +45,15 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
    * Handles voucher selection with existing event vouchers
    * @param existingEventGifts The existing event vouchers that may be reused
    */
-  async handleVoucherSelectionWithExisting(
-    existingEventGifts: EventGift[] | null,
-  ): Promise<Gift[]> {
+  async handleVoucherSelectionWithExisting(existingEventGifts: EventGift[] | null): Promise<Gift[]> {
     this.logStart('handleVoucherSelectionWithExisting');
 
     if (existingEventGifts && existingEventGifts.length > 0) {
-      const existingVouchers =
-        this.extractVouchersFromEventVouchers(existingEventGifts);
+      const existingVouchers = this.extractVouchersFromEventVouchers(existingEventGifts);
 
       const voucherNames = existingVouchers.map((v) => v.name).join(', ');
       this.call.logInfo(`Found existing vouchers: ${voucherNames}`);
-      await this.call.playMessage(
-        MESSAGE_CONSTANTS.VOUCHER.CURRENT_VOUCHERS(voucherNames),
-      );
+      await this.call.playMessage(MESSAGE_CONSTANTS.VOUCHER.CURRENT_VOUCHERS(voucherNames));
 
       // Ask if they want to change
       const changeSelection = await this.call.getConfirmation(
@@ -96,9 +87,7 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
    * @returns The formatted prompt string
    */
   protected createSelectionPrompt(): string {
-    const options = this.items
-      .map((item) => `להקשת ${item.key} עבור שובר ${item.name}`)
-      .join(' ');
+    const options = this.items.map((item) => `להקשת ${item.key} עבור שובר ${item.name}`).join(' ');
     return MESSAGE_CONSTANTS.VOUCHER.SELECTION_PROMPT(options);
   }
 

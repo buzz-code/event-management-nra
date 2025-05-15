@@ -9,11 +9,13 @@ describe('KlassTypeConfig', () => {
   it('should return correct export headers', () => {
     const fields = ['key', 'name'];
     const headers = klassTypeConfig.exporter.getExportHeaders(fields);
-    
-    expect(headers).toEqual(expect.arrayContaining([
-      { value: 'key', label: 'מזהה' },
-      { value: 'name', label: 'שם' },
-    ]));
+
+    expect(headers).toEqual(
+      expect.arrayContaining([
+        { value: 'key', label: 'מזהה' },
+        { value: 'name', label: 'שם' },
+      ]),
+    );
   });
 
   it('should return correct import definition', () => {
@@ -26,9 +28,7 @@ describe('KlassTypeConfig', () => {
     // Check the returned definition
     expect(result).toEqual({
       importFields: mockImportFields,
-      specialFields: expect.arrayContaining([
-        { cell: { c: 0, r: 1 }, value: 'test' }
-      ])
+      specialFields: expect.arrayContaining([{ cell: { c: 0, r: 1 }, value: 'test' }]),
     });
   });
 });

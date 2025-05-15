@@ -10,11 +10,11 @@ import * as reportUtil from '@shared/utils/report/report.util';
 import * as authUtil from '@shared/auth/auth.util';
 
 jest.mock('@shared/utils/report/report.util', () => ({
-  generateCommonFileResponse: jest.fn()
+  generateCommonFileResponse: jest.fn(),
 }));
 
 jest.mock('@shared/auth/auth.util', () => ({
-  getUserIdFromUser: jest.fn()
+  getUserIdFromUser: jest.fn(),
 }));
 
 describe('grade.config', () => {
@@ -34,7 +34,7 @@ describe('grade.config', () => {
       expect(gradeConfig.entity).toBe(Grade);
       expect(gradeConfig.service).toBeDefined();
       expect(gradeConfig.query).toBeDefined();
-      
+
       // Validate complete query configuration
       const queryConfig = gradeConfig.query;
       expect(queryConfig).toBeDefined();
@@ -49,7 +49,7 @@ describe('grade.config', () => {
 
       // Validate all required relationships are present
       const requiredRelations = ['studentBaseKlass', 'student', 'teacher', 'lesson', 'klass'];
-      requiredRelations.forEach(relation => {
+      requiredRelations.forEach((relation) => {
         expect(queryConfig.join[relation]).toBeDefined();
       });
     });
@@ -62,14 +62,7 @@ describe('grade.config', () => {
       });
 
       it('should define correct import fields structure', () => {
-        expect(importConfig.importFields).toEqual([
-          'klassId',
-          'studentTz',
-          '',
-          'grade',
-          'estimation',
-          'comments',
-        ]);
+        expect(importConfig.importFields).toEqual(['klassId', 'studentTz', '', 'grade', 'estimation', 'comments']);
         expect(importConfig.importFields).toHaveLength(6);
       });
 
@@ -110,15 +103,15 @@ describe('grade.config', () => {
           columns: [{ propertyName: 'id' }],
           relations: [],
           connection: { options: { type: 'postgres' } },
-          targetName: 'Grade'
+          targetName: 'Grade',
         },
         manager: {
           connection: {
             createQueryRunner: jest.fn().mockReturnValue({
-              manager: {}
-            })
-          }
-        }
+              manager: {},
+            }),
+          },
+        },
       };
 
       dataSource = {
@@ -128,8 +121,8 @@ describe('grade.config', () => {
           startTransaction: jest.fn(),
           commitTransaction: jest.fn(),
           rollbackTransaction: jest.fn(),
-          release: jest.fn()
-        })
+          release: jest.fn(),
+        }),
       } as any;
 
       module = await Test.createTestingModule({
@@ -137,21 +130,21 @@ describe('grade.config', () => {
           gradeConfig.service,
           {
             provide: ENTITY_REPOSITORY,
-            useValue: repository
+            useValue: repository,
           },
           {
             provide: ENTITY_EXPORTER,
-            useValue: gradeConfig.exporter
+            useValue: gradeConfig.exporter,
           },
           {
             provide: MailSendService,
-            useValue: { send: jest.fn() }
+            useValue: { send: jest.fn() },
           },
           {
             provide: DataSource,
-            useValue: dataSource
-          }
-        ]
+            useValue: dataSource,
+          },
+        ],
       }).compile();
 
       service = module.get<InstanceType<typeof gradeConfig.service>>(gradeConfig.service);
@@ -173,11 +166,11 @@ describe('grade.config', () => {
           cache: 0,
           extra: {
             action: 'michlolPopulatedFile',
-            fileName: 'test.xlsx'
-          }
+            fileName: 'test.xlsx',
+          },
         },
         options: {},
-        auth: { id: 123 }
+        auth: { id: 123 },
       } as CrudRequest<any, any>;
 
       // Cast service to any to access implementation details in tests
@@ -195,7 +188,9 @@ describe('grade.config', () => {
       const expectedGenerator = gradeService.reportsDict.michlolPopulatedFile;
 
       (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(123);
-      (reportUtil.generateCommonFileResponse as jest.Mock).mockResolvedValue({ success: true });
+      (reportUtil.generateCommonFileResponse as jest.Mock).mockResolvedValue({
+        success: true,
+      });
 
       const result = await service.doAction(mockReq, body);
 
@@ -205,9 +200,9 @@ describe('grade.config', () => {
         {
           userId: 123,
           michlolFileName: 'test.xlsx',
-          michlolFileData: body.data
+          michlolFileData: body.data,
         },
-        dataSource
+        dataSource,
       );
 
       expect(result).toEqual({ success: true });
@@ -219,7 +214,7 @@ describe('grade.config', () => {
       jest.spyOn(BaseEntityService.prototype, 'doAction').mockResolvedValue(mockResponse);
 
       const result = await service.doAction(mockReq, {});
-      
+
       expect(result).toBe(mockResponse);
     });
 
@@ -227,9 +222,7 @@ describe('grade.config', () => {
       const gradeService = service as any;
       expect(gradeService.reportsDict).toBeDefined();
       expect(gradeService.reportsDict.michlolPopulatedFile).toBeDefined();
-      expect(gradeService.reportsDict.michlolPopulatedFile).toEqual(
-        expect.any(Object)
-      );
+      expect(gradeService.reportsDict.michlolPopulatedFile).toEqual(expect.any(Object));
     });
 
     it('should initialize with correct default values', () => {
@@ -239,8 +232,8 @@ describe('grade.config', () => {
       expect(gradeService.reportsDict.michlolPopulatedFile).toEqual(
         expect.objectContaining({
           getReportData: expect.any(Function),
-          getReportName: expect.any(Function)
-        })
+          getReportName: expect.any(Function),
+        }),
       );
     });
 
@@ -248,13 +241,14 @@ describe('grade.config', () => {
       const unknownReportReq = createMockRequest({
         parsed: {
           ...createBaseParsedParams(),
-          extra: { action: 'nonexistentReport' }
-        }
+          extra: { action: 'nonexistentReport' },
+        },
       });
-      
-      const mockSuperDoAction = jest.spyOn(BaseEntityService.prototype, 'doAction')
+
+      const mockSuperDoAction = jest
+        .spyOn(BaseEntityService.prototype, 'doAction')
         .mockResolvedValue({ fallback: true });
-      
+
       const result = await service.doAction(unknownReportReq, {});
       expect(result).toEqual({ fallback: true });
       expect(mockSuperDoAction).toHaveBeenCalledWith(unknownReportReq, {});
@@ -267,27 +261,29 @@ describe('grade.config', () => {
           ...createBaseParsedParams(),
           extra: {
             action: 'michlolPopulatedFile',
-            fileName: 'test.xlsx'
-          }
-        }
+            fileName: 'test.xlsx',
+          },
+        },
       });
 
       (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(123);
-      (reportUtil.generateCommonFileResponse as jest.Mock).mockResolvedValue({ success: true });
+      (reportUtil.generateCommonFileResponse as jest.Mock).mockResolvedValue({
+        success: true,
+      });
 
       const gradeService = service as any;
       const expectedGenerator = gradeService.reportsDict.michlolPopulatedFile;
 
       const result = await service.doAction(validReq, testData);
-      
+
       expect(reportUtil.generateCommonFileResponse).toHaveBeenCalledWith(
         expectedGenerator,
         {
           userId: 123,
           michlolFileName: 'test.xlsx',
-          michlolFileData: testData.data
+          michlolFileData: testData.data,
         },
-        dataSource
+        dataSource,
       );
 
       expect(result).toEqual({ success: true });
@@ -310,19 +306,20 @@ describe('grade.config', () => {
       includeDeleted: 0,
       extra: {
         action: 'michlolPopulatedFile',
-        fileName: 'test.xlsx'
-      }
+        fileName: 'test.xlsx',
+      },
     });
 
-    const createMockRequest = (overrides: Partial<CrudRequest> = {}): CrudRequest<any, any> => ({
-      parsed: {
-        ...createBaseParsedParams(),
-        ...(overrides.parsed || {})
-      },
-      options: {},
-      auth: { id: 123 },
-      ...overrides
-    } as CrudRequest<any, any>);
+    const createMockRequest = (overrides: Partial<CrudRequest> = {}): CrudRequest<any, any> =>
+      ({
+        parsed: {
+          ...createBaseParsedParams(),
+          ...(overrides.parsed || {}),
+        },
+        options: {},
+        auth: { id: 123 },
+        ...overrides,
+      } as CrudRequest<any, any>);
 
     describe('error handling', () => {
       beforeEach(() => {
@@ -334,32 +331,24 @@ describe('grade.config', () => {
           parsed: {
             ...createBaseParsedParams(),
             extra: {
-              action: 'michlolPopulatedFile'
+              action: 'michlolPopulatedFile',
               // fileName missing
-            }
-          }
+            },
+          },
         });
 
         (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(123);
-        (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(
-          new Error('fileName is required')
-        );
+        (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(new Error('fileName is required'));
 
-        await expect(service.doAction(reqWithoutFileName, { data: {} }))
-          .rejects
-          .toThrow('fileName is required');
+        await expect(service.doAction(reqWithoutFileName, { data: {} })).rejects.toThrow('fileName is required');
       });
 
       it('should handle missing data in body', async () => {
         const emptyBody = {};
         (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(123);
-        (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(
-          new Error('data is required')
-        );
+        (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(new Error('data is required'));
 
-        await expect(service.doAction(mockReq, emptyBody))
-          .rejects
-          .toThrow('data is required');
+        await expect(service.doAction(mockReq, emptyBody)).rejects.toThrow('data is required');
       });
 
       it('should handle file generation failure', async () => {
@@ -367,9 +356,7 @@ describe('grade.config', () => {
         (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(123);
         (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(error);
 
-        await expect(service.doAction(mockReq, { data: {} }))
-          .rejects
-          .toThrow('File generation failed');
+        await expect(service.doAction(mockReq, { data: {} })).rejects.toThrow('File generation failed');
       });
 
       it('should handle invalid user auth', async () => {
@@ -378,34 +365,28 @@ describe('grade.config', () => {
           throw authError;
         });
 
-        await expect(service.doAction(mockReq, { data: {} }))
-          .rejects
-          .toThrow('Invalid auth');
+        await expect(service.doAction(mockReq, { data: {} })).rejects.toThrow('Invalid auth');
       });
 
       it('should handle invalid file data format', async () => {
         const invalidData = {
           data: {
             invalidFormat: true,
-            missingRequiredFields: true
-          }
+            missingRequiredFields: true,
+          },
         };
 
         (authUtil.getUserIdFromUser as jest.Mock).mockReturnValue(123);
-        (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(
-          new Error('Invalid file data format')
-        );
+        (reportUtil.generateCommonFileResponse as jest.Mock).mockRejectedValue(new Error('Invalid file data format'));
 
-        await expect(service.doAction(mockReq, invalidData))
-          .rejects
-          .toThrow('Invalid file data format');
+        await expect(service.doAction(mockReq, invalidData)).rejects.toThrow('Invalid file data format');
 
         expect(reportUtil.generateCommonFileResponse).toHaveBeenCalledWith(
           expect.any(Object),
           expect.objectContaining({
-            michlolFileData: invalidData.data
+            michlolFileData: invalidData.data,
           }),
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
@@ -423,11 +404,11 @@ describe('grade.config', () => {
           startTransaction: jest.fn().mockResolvedValue(undefined),
           commitTransaction: jest.fn().mockResolvedValue(undefined),
           rollbackTransaction: jest.fn().mockResolvedValue(undefined),
-          release: jest.fn().mockResolvedValue(undefined)
+          release: jest.fn().mockResolvedValue(undefined),
         };
 
         dataSource.createQueryRunner.mockReturnValue(queryRunner);
-        
+
         // Mock generateCommonFileResponse to trigger actual transaction flow in the service
         (reportUtil.generateCommonFileResponse as jest.Mock).mockImplementation(async (generator, params, ds) => {
           const runner = ds.createQueryRunner();
@@ -458,9 +439,9 @@ describe('grade.config', () => {
           expect.objectContaining({
             userId: 123,
             michlolFileName: 'test.xlsx',
-            michlolFileData: testData.data
+            michlolFileData: testData.data,
           }),
-          dataSource
+          dataSource,
         );
 
         expect(dataSource.createQueryRunner).toHaveBeenCalled();
@@ -485,9 +466,7 @@ describe('grade.config', () => {
           }
         });
 
-        await expect(service.doAction(mockReq, { data: {} }))
-          .rejects
-          .toThrow('Transaction failed');
+        await expect(service.doAction(mockReq, { data: {} })).rejects.toThrow('Transaction failed');
 
         expect(queryRunner.connect).toHaveBeenCalled();
         expect(queryRunner.startTransaction).toHaveBeenCalled();

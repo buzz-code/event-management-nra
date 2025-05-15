@@ -18,22 +18,22 @@ describe('att-report.config', () => {
 
     it('should have proper export configuration', () => {
       expect(config.exporter).toBeDefined();
-      
+
       // Test processReqForExport
       const mockReq = {
         options: {
-          query: { join: {} }
-        }
+          query: { join: {} },
+        },
       };
-      const mockInnerFunc = jest.fn(req => req);
-      
+      const mockInnerFunc = jest.fn((req) => req);
+
       config.exporter.processReqForExport(mockReq as any, mockInnerFunc);
-      
+
       expect(mockReq.options.query.join).toEqual({
         student: { eager: true },
         teacher: { eager: true },
         klass: { eager: true },
-        lesson: { eager: true }
+        lesson: { eager: true },
       });
       expect(mockInnerFunc).toHaveBeenCalledWith(mockReq);
 
@@ -45,7 +45,7 @@ describe('att-report.config', () => {
 
     it('should have proper import configuration', () => {
       const importConfig = config.exporter.getImportDefinition(['test']);
-      
+
       expect(importConfig.importFields).toHaveLength(6);
       expect(importConfig.specialFields).toHaveLength(4);
       expect(importConfig.hardCodedFields).toHaveLength(1);
@@ -57,15 +57,15 @@ describe('att-report.config', () => {
     it('should calculate absCount with lateCount and default lateValue', () => {
       const report = {
         absCount: 2,
-        lateCount: 3
+        lateCount: 3,
       } as AttReport & { lateCount: number };
-      
+
       const user = {
-        additionalData: {}
+        additionalData: {},
       } as User;
 
       calcAttLateCount(report, user);
-      
+
       // With default lateValue of 0.3: 2 + (3 * 0.3) = 2.9
       expect(report.absCount).toBe(2.9);
       expect(report.lateCount).toBeUndefined();
@@ -74,15 +74,15 @@ describe('att-report.config', () => {
     it('should use custom lateValue from user data', () => {
       const report = {
         absCount: 2,
-        lateCount: 2
+        lateCount: 2,
       } as AttReport & { lateCount: number };
-      
+
       const user = {
-        additionalData: { lateValue: 0.5 }
+        additionalData: { lateValue: 0.5 },
       } as User;
 
       calcAttLateCount(report, user);
-      
+
       // With lateValue of 0.5: 2 + (2 * 0.5) = 3
       expect(report.absCount).toBe(3);
     });
@@ -90,15 +90,15 @@ describe('att-report.config', () => {
     it('should handle NaN values', () => {
       const report = {
         absCount: NaN,
-        lateCount: NaN
+        lateCount: NaN,
       } as AttReport & { lateCount: number };
-      
+
       const user = {
-        additionalData: { lateValue: 0.5 }
+        additionalData: { lateValue: 0.5 },
       } as User;
 
       calcAttLateCount(report, user);
-      
+
       expect(report.absCount).toBe(0);
     });
   });

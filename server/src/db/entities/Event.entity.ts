@@ -1,4 +1,17 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn, Index, BeforeInsert, BeforeUpdate, DataSource } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+  BeforeInsert,
+  BeforeUpdate,
+  DataSource,
+} from 'typeorm';
 import { EventType } from './EventType.entity';
 import { Teacher } from './Teacher.entity';
 import { Student } from './Student.entity';
@@ -36,23 +49,48 @@ export class Event implements IHasUserId {
       dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
-        dataSource, EventType, { key: this.eventTypeId, year: this.year }, null, this.eventTypeReferenceId, this.eventTypeId
+        dataSource,
+        EventType,
+        { key: this.eventTypeId, year: this.year },
+        null,
+        this.eventTypeReferenceId,
+        this.eventTypeId,
       );
 
       this.teacherReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Teacher, { tz: this.teacherTz }, this.userId, this.teacherReferenceId, this.teacherTz
+        dataSource,
+        Teacher,
+        { tz: this.teacherTz },
+        this.userId,
+        this.teacherReferenceId,
+        this.teacherTz,
       );
 
       this.studentReferenceId = await findOneAndAssignReferenceId(
-        dataSource, Student, { tz: this.studentTz }, this.userId, this.studentReferenceId, this.studentTz
+        dataSource,
+        Student,
+        { tz: this.studentTz },
+        this.userId,
+        this.studentReferenceId,
+        this.studentTz,
       );
 
       this.levelTypeReferenceId = await findOneAndAssignReferenceId(
-        dataSource, LevelType, { key: this.levelTypeId, year: this.year }, this.userId, this.levelTypeReferenceId, this.levelTypeId
+        dataSource,
+        LevelType,
+        { key: this.levelTypeId, year: this.year },
+        this.userId,
+        this.levelTypeReferenceId,
+        this.levelTypeId,
       );
 
       this.completedPathReferenceId = await findOneAndAssignReferenceId(
-        dataSource, LevelType, { key: this.completedPathKey, year: this.year }, this.userId, this.completedPathReferenceId, this.completedPathKey
+        dataSource,
+        LevelType,
+        { key: this.completedPathKey, year: this.year },
+        this.userId,
+        this.completedPathReferenceId,
+        this.completedPathKey,
       );
 
       if (this.eventDate) {
@@ -67,7 +105,7 @@ export class Event implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
@@ -113,7 +151,9 @@ export class Event implements IHasUserId {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   grade: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.eventTypeReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.eventTypeReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -124,7 +164,9 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   eventTypeReferenceId: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.teacherReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.teacherReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -135,7 +177,9 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   teacherReferenceId: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.studentReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.studentReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -146,7 +190,9 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   studentReferenceId: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.levelTypeReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.levelTypeReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -157,14 +203,18 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   levelTypeReferenceId: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.completedPathReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.completedPathReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
   completedPathKey: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.completedPathKey) && Boolean(event.completedPathReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.completedPathKey) && Boolean(event.completedPathReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
@@ -210,12 +260,12 @@ export class Event implements IHasUserId {
   completedPath: LevelType;
 
   @ManyToOne(() => User, { createForeignKeyConstraints: false })
-  @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
+  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
 
-  @OneToMany(() => EventNote, note => note.event)
+  @OneToMany(() => EventNote, (note) => note.event)
   notes: EventNote[];
 
-  @OneToMany(() => EventGift, eventGift => eventGift.event)
+  @OneToMany(() => EventGift, (eventGift) => eventGift.event)
   eventGifts: EventGift[];
 }

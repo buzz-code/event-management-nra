@@ -9,7 +9,7 @@ import {
   getAttPercents,
   getUnknownAbsCount,
   getDisplayGrade,
-  getGradeEffect
+  getGradeEffect,
 } from '../studentReportData.util';
 import { AttReportAndGrade } from 'src/db/view-entities/AttReportAndGrade.entity';
 import { GradeName } from 'src/db/entities/GradeName.entity';
@@ -27,7 +27,7 @@ describe('studentReportData.util', () => {
         klassReferenceId: '789',
         lessonReferenceId: '101112',
         userId: '131415',
-        year: '2024'
+        year: '2024',
       });
     });
 
@@ -52,15 +52,17 @@ describe('studentReportData.util', () => {
 
       const result = getReportDataFilterBySprAndDates(ids, startDate, endDate);
 
-      expect(result).toEqual([{
-        studentReferenceId: 123,
-        teacherReferenceId: 456,
-        klassReferenceId: 789,
-        lessonReferenceId: 101112,
-        userId: 131415,
-        year: 2024,
-        reportDate: Between(startDate, endDate)
-      }]);
+      expect(result).toEqual([
+        {
+          studentReferenceId: 123,
+          teacherReferenceId: 456,
+          klassReferenceId: 789,
+          lessonReferenceId: 101112,
+          userId: 131415,
+          year: 2024,
+          reportDate: Between(startDate, endDate),
+        },
+      ]);
     });
 
     it('should handle multiple SPR IDs', () => {
@@ -84,55 +86,45 @@ describe('studentReportData.util', () => {
 
       const result = getKnownAbsenceFilterBySprAndDates(ids, startDate, endDate);
 
-      expect(result).toEqual([{
-        isApproved: true,
-        userId: 131415,
-        studentReferenceId: 123,
-        reportDate: Between(startDate, endDate),
-        year: 2024
-      }]);
+      expect(result).toEqual([
+        {
+          isApproved: true,
+          userId: 131415,
+          studentReferenceId: 123,
+          reportDate: Between(startDate, endDate),
+          year: 2024,
+        },
+      ]);
     });
   });
 
   describe('getReportsFilterForReportCard', () => {
     it('should create filter with both reportDate and global lessons', () => {
       const reportDateFilter = Between(new Date('2024-01-01'), new Date('2024-12-31'));
-      const result = getReportsFilterForReportCard(
-        123,
-        2024,
-        reportDateFilter,
-        '1,2,3',
-        '4,5'
-      );
+      const result = getReportsFilterForReportCard(123, 2024, reportDateFilter, '1,2,3', '4,5');
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
         studentReferenceId: 123,
         year: 2024,
         lessonReferenceId: Not(In(['4', '5'])),
-        reportDate: reportDateFilter
+        reportDate: reportDateFilter,
       });
       expect(result[1]).toEqual({
         studentReferenceId: 123,
         year: 2024,
-        lessonReferenceId: In(['1', '2', '3'])
+        lessonReferenceId: In(['1', '2', '3']),
       });
     });
 
     it('should handle empty deny lesson ids', () => {
       // Test when both global and deny lesson IDs are undefined strings
-      const filterResult = getReportsFilterForReportCard(
-        123,
-        2024,
-        null,
-        'undefined',
-        'undefined'
-      );
+      const filterResult = getReportsFilterForReportCard(123, 2024, null, 'undefined', 'undefined');
 
       expect(filterResult[0]).toMatchObject({
         studentReferenceId: 123,
         year: 2024,
-        lessonReferenceId: undefined
+        lessonReferenceId: undefined,
       });
     });
   });
@@ -143,20 +135,17 @@ describe('studentReportData.util', () => {
         howManyLessons: 10,
         absCount: 2,
         type: 'grade',
-        grade: 8500
+        grade: 8500,
       } as AttReportAndGrade,
       {
         howManyLessons: 5,
         absCount: 1,
         type: 'grade',
-        grade: 9000
-      } as AttReportAndGrade
+        grade: 9000,
+      } as AttReportAndGrade,
     ];
 
-    const mockAbsencesData = [
-      { absnceCount: 1 },
-      { absnceCount: 1 }
-    ];
+    const mockAbsencesData = [{ absnceCount: 1 }, { absnceCount: 1 }];
 
     it('should calculate correct report statistics', () => {
       const result = calcReportsData(mockReportData, mockAbsencesData);
@@ -208,7 +197,7 @@ describe('studentReportData.util', () => {
     const mockGradeNames: GradeName[] = [
       { key: 90, name: 'A' } as GradeName,
       { key: 80, name: 'B' } as GradeName,
-      { key: 70, name: 'C' } as GradeName
+      { key: 70, name: 'C' } as GradeName,
     ];
 
     it('should return correct grade display with grade names', () => {
@@ -234,23 +223,23 @@ describe('studentReportData.util', () => {
     const mockEffects: AttGradeEffect[] = [
       { percents: 90, count: 2, effect: 5 } as AttGradeEffect,
       { percents: 80, count: 3, effect: 0 } as AttGradeEffect,
-      { percents: 70, count: 4, effect: -5 } as AttGradeEffect
+      { percents: 70, count: 4, effect: -5 } as AttGradeEffect,
     ];
 
     it('should return correct effect based on attendance percentage', () => {
       // Effects are returned for the first matching rule where percents <= actualPercents
-      expect(getGradeEffect(mockEffects, 0.95, 1)).toBe(5);  // 95% matches first rule (90%)
-      expect(getGradeEffect(mockEffects, 0.85, 1)).toBe(5);  // 85% matches first rule (90%)
-      expect(getGradeEffect(mockEffects, 0.75, 1)).toBe(5);  // 75% still matches first rule (90%)
-      expect(getGradeEffect(mockEffects, 0.65, 1)).toBe(5);  // 65% still matches first rule (90%)
+      expect(getGradeEffect(mockEffects, 0.95, 1)).toBe(5); // 95% matches first rule (90%)
+      expect(getGradeEffect(mockEffects, 0.85, 1)).toBe(5); // 85% matches first rule (90%)
+      expect(getGradeEffect(mockEffects, 0.75, 1)).toBe(5); // 75% still matches first rule (90%)
+      expect(getGradeEffect(mockEffects, 0.65, 1)).toBe(5); // 65% still matches first rule (90%)
     });
 
     it('should return correct effect based on absence count', () => {
       // Effects are returned for the first matching rule where count >= absCount
-      expect(getGradeEffect(mockEffects, 0.60, 1)).toBe(5);  // matches first rule (count 2)
-      expect(getGradeEffect(mockEffects, 0.60, 2)).toBe(5);  // exactly matches first rule count
-      expect(getGradeEffect(mockEffects, 0.60, 3)).toBe(0);  // matches second rule (count 3)
-      expect(getGradeEffect(mockEffects, 0.60, 4)).toBe(-5); // matches third rule (count 4)
+      expect(getGradeEffect(mockEffects, 0.6, 1)).toBe(5); // matches first rule (count 2)
+      expect(getGradeEffect(mockEffects, 0.6, 2)).toBe(5); // exactly matches first rule count
+      expect(getGradeEffect(mockEffects, 0.6, 3)).toBe(0); // matches second rule (count 3)
+      expect(getGradeEffect(mockEffects, 0.6, 4)).toBe(-5); // matches third rule (count 4)
     });
 
     it('should handle null or empty effects array', () => {

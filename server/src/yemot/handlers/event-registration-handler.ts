@@ -7,10 +7,7 @@ import { EventType } from 'src/db/entities/EventType.entity';
 import { Event } from 'src/db/entities/Event.entity';
 import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
-import {
-  DateSelectionHelper,
-  DateSelectionResult,
-} from './date-selection-helper';
+import { DateSelectionHelper, DateSelectionResult } from './date-selection-helper';
 import { FormatUtils } from '../utils/format-utils';
 import { VoucherSelectionHandler } from './voucher-selection-handler';
 import { Gift } from 'src/db/entities/Gift.entity';
@@ -73,9 +70,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       // Step 3: Check for existing events
       const eventExists = await this.checkExistingEvent();
       if (eventExists) {
-        this.call.logWarn(
-          'Event already exists, cannot continue with registration',
-        );
+        this.call.logWarn('Event already exists, cannot continue with registration');
         return null;
       }
 
@@ -132,12 +127,9 @@ export class EventRegistrationHandler extends BaseYemotHandler {
         return; // Return after hanging up
       }
 
-      const eventTypeOptions = this.eventTypes
-        .map((et, index) => `להקשת ${et.name} הקישי ${index + 1}`)
-        .join(', ');
+      const eventTypeOptions = this.eventTypes.map((et, index) => `להקשת ${et.name} הקישי ${index + 1}`).join(', ');
 
-      const selectionMessage =
-        MESSAGE_CONSTANTS.EVENT.TYPE_SELECTION_PROMPT(eventTypeOptions);
+      const selectionMessage = MESSAGE_CONSTANTS.EVENT.TYPE_SELECTION_PROMPT(eventTypeOptions);
 
       const selection = await this.withRetry(
         async () => {
@@ -148,14 +140,8 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
           const selectionIndex = parseInt(input) - 1;
 
-          if (
-            isNaN(selectionIndex) ||
-            selectionIndex < 0 ||
-            selectionIndex >= this.eventTypes.length
-          ) {
-            this.call.logWarn(
-              `Invalid event type selection index: ${selectionIndex} from input ${input}`,
-            );
+          if (isNaN(selectionIndex) || selectionIndex < 0 || selectionIndex >= this.eventTypes.length) {
+            this.call.logWarn(`Invalid event type selection index: ${selectionIndex} from input ${input}`);
             throw new Error('Invalid event type selection'); // Caught by withRetry for retry message
           }
 
@@ -173,9 +159,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
       this.selectedEventType = selection;
 
-      await this.call.playMessage(
-        MESSAGE_CONSTANTS.EVENT.TYPE_SELECTED(this.selectedEventType.name),
-      );
+      await this.call.playMessage(MESSAGE_CONSTANTS.EVENT.TYPE_SELECTED(this.selectedEventType.name));
 
       this.logComplete('selectEventType', {
         eventTypeId: this.selectedEventType.id,
@@ -193,10 +177,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     this.logStart('selectDate');
 
     try {
-      const dateSelectionHelper = new DateSelectionHelper(
-        this.call,
-        this.dataSource,
-      );
+      const dateSelectionHelper = new DateSelectionHelper(this.call, this.dataSource);
       const dateResult = await dateSelectionHelper.handleDateSelection();
 
       if (!dateResult) {
@@ -224,12 +205,8 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     this.logStart('checkExistingEvent');
 
     if (!this.selectedEventType || !this.selectedDate) {
-      this.call.logError(
-        'Cannot check existing events: event type or date is missing.',
-      );
-      throw new Error(
-        'Cannot check existing events: event type or date is missing.',
-      );
+      this.call.logError('Cannot check existing events: event type or date is missing.');
+      throw new Error('Cannot check existing events: event type or date is missing.');
     }
 
     try {
@@ -250,21 +227,14 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       if (foundEvent) {
         this.existingEvent = foundEvent;
         this.call.logWarn(
-          `Existing event found: ID ${foundEvent.id} for student ${
-            this.student.id
-          }, type ${
+          `Existing event found: ID ${foundEvent.id} for student ${this.student.id}, type ${
             this.selectedEventType.id
           }, date ${this.selectedDate.gregorianDate.toISOString()}`,
         );
 
-        const formattedDate = FormatUtils.formatHebrewDate(
-          foundEvent.eventDate,
-        );
+        const formattedDate = FormatUtils.formatHebrewDate(foundEvent.eventDate);
 
-        const message = MESSAGE_CONSTANTS.EVENT.ALREADY_EXISTS(
-          this.selectedEventType.name,
-          formattedDate,
-        );
+        const message = MESSAGE_CONSTANTS.EVENT.ALREADY_EXISTS(this.selectedEventType.name, formattedDate);
 
         await this.call.hangupWithMessage(message);
 
@@ -291,12 +261,8 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     this.logStart('createEvent');
 
     if (!this.selectedEventType || !this.selectedDate || !this.student) {
-      this.call.logError(
-        'Cannot create event: event type, date, or student is missing.',
-      );
-      throw new Error(
-        'Cannot create event: event type, date, or student is missing.',
-      );
+      this.call.logError('Cannot create event: event type, date, or student is missing.');
+      throw new Error('Cannot create event: event type, date, or student is missing.');
     }
 
     try {
@@ -309,9 +275,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
         studentReferenceId: this.student.id,
         eventTypeReferenceId: this.selectedEventType.id,
         eventDate: this.selectedDate.gregorianDate,
-        name: `אירוע ${this.selectedEventType.name} לתלמידה ${
-          this.student.name || this.student.tz
-        }`, // Example name
+        name: `אירוע ${this.selectedEventType.name} לתלמידה ${this.student.name || this.student.tz}`, // Example name
         userId: this.student.userId, // Ensure student object has userId
         // Other non-nullable fields from Event entity might need defaults here if not auto-set
       };
@@ -329,9 +293,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
         // Associate vouchers if any were selected
         if (this.selectedVouchers.length > 0) {
-          this.call.logInfo(
-            `Associating ${this.selectedVouchers.length} vouchers with event ${savedEvent.id}`,
-          );
+          this.call.logInfo(`Associating ${this.selectedVouchers.length} vouchers with event ${savedEvent.id}`);
 
           for (const voucher of this.selectedVouchers) {
             const eventGift = eventGiftRepository.create({
@@ -342,9 +304,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
             await queryRunner.manager.save(EventGift, eventGift);
           }
 
-          this.call.logInfo(
-            `Successfully associated vouchers with event ${savedEvent.id}`,
-          );
+          this.call.logInfo(`Successfully associated vouchers with event ${savedEvent.id}`);
         }
 
         // Commit the transaction
@@ -381,10 +341,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
     try {
       // Create and use the voucher selection handler
-      const voucherHandler = new VoucherSelectionHandler(
-        this.call,
-        this.dataSource,
-      );
+      const voucherHandler = new VoucherSelectionHandler(this.call, this.dataSource);
 
       // Handle the voucher selection - this is multi-selection
       await voucherHandler.handleMultiSelection();
@@ -394,9 +351,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       const selectionConfirmed = voucherHandler.isSelectionConfirmed();
 
       if (!selectionConfirmed && this.selectedVouchers.length > 0) {
-        this.call.logWarn(
-          'Voucher selection was not confirmed, clearing selection',
-        );
+        this.call.logWarn('Voucher selection was not confirmed, clearing selection');
         this.selectedVouchers = [];
       }
 

@@ -40,9 +40,7 @@ export class FormatUtils {
    * @returns Formatted event name string
    */
   static formatEventNameForSelection(event: Event): string {
-    const eventDate = event.eventDate
-      ? FormatUtils.formatHebrewDate(new Date(event.eventDate))
-      : 'תאריך לא ידוע';
+    const eventDate = event.eventDate ? FormatUtils.formatHebrewDate(new Date(event.eventDate)) : 'תאריך לא ידוע';
     // Ensure event.eventType is loaded for event.eventType.name
     const typeName = event.eventType?.name || event.name || 'אירוע';
     return `${typeName} מתאריך ${eventDate}`;

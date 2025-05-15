@@ -108,7 +108,7 @@ describe('teacherReportFile', () => {
         id: 1,
         name: 'Math',
         key: 123,
-        klassReferenceIds: ['1']
+        klassReferenceIds: ['1'],
       };
       const mockStudents = [
         {
@@ -117,14 +117,24 @@ describe('teacherReportFile', () => {
         },
       ];
 
-      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 1, name: 'User 1' });
-      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 2, name: 'Teacher 1', tz: '999' });
+      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 1,
+        name: 'User 1',
+      });
+      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 2,
+        name: 'Teacher 1',
+        tz: '999',
+      });
       (mockTeacherReportStatusRepo.findOneBy as jest.Mock).mockResolvedValue({
         notReportedLessons: ['1', '2'],
         year: 2025,
         reportMonthName: 'January',
       });
-      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 3, name: 'January' });
+      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 3,
+        name: 'January',
+      });
       (mockLessonRepo.findBy as jest.Mock).mockResolvedValue([mockLesson]);
       (mockStudentKlassRepo.find as jest.Mock).mockResolvedValue(mockStudents);
 
@@ -140,17 +150,27 @@ describe('teacherReportFile', () => {
         id: 1,
         name: 'Math',
         key: 123,
-        klassReferenceIds: null
+        klassReferenceIds: null,
       };
 
-      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 1, name: 'User 1' });
-      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 2, name: 'Teacher 1', tz: '999' });
+      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 1,
+        name: 'User 1',
+      });
+      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 2,
+        name: 'Teacher 1',
+        tz: '999',
+      });
       (mockTeacherReportStatusRepo.findOneBy as jest.Mock).mockResolvedValue({
         notReportedLessons: ['1'],
         year: 2025,
         reportMonthName: 'January',
       });
-      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 3, name: 'January' });
+      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 3,
+        name: 'January',
+      });
       (mockLessonRepo.findBy as jest.Mock).mockResolvedValue([mockLesson]);
 
       const result = await teacherReportFileModule.getReportData(params, mockDataSource as DataSource);
@@ -166,7 +186,7 @@ describe('teacherReportFile', () => {
         id: 1,
         name: 'Math',
         key: 123,
-        klassReferenceIds: ['1', '2']
+        klassReferenceIds: ['1', '2'],
       };
       const mockStudents = [
         {
@@ -179,14 +199,24 @@ describe('teacherReportFile', () => {
         },
       ];
 
-      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 1, name: 'User 1' });
-      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 2, name: 'Teacher 1', tz: '999' });
+      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 1,
+        name: 'User 1',
+      });
+      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 2,
+        name: 'Teacher 1',
+        tz: '999',
+      });
       (mockTeacherGradeReportStatusRepo.findOneBy as jest.Mock).mockResolvedValue({
         notReportedLessons: ['1'],
         year: 2025,
         reportMonthName: 'January',
       });
-      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 3, name: 'January' });
+      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 3,
+        name: 'January',
+      });
       (mockLessonRepo.findBy as jest.Mock).mockResolvedValue([mockLesson]);
       (mockStudentKlassRepo.find as jest.Mock).mockResolvedValue(mockStudents);
 
@@ -211,7 +241,7 @@ describe('teacherReportFile', () => {
         id: 1,
         name: 'Math',
         key: 123,
-        klassReferenceIds: ['1']
+        klassReferenceIds: ['1'],
       };
       const mockStudents = [
         {
@@ -220,14 +250,24 @@ describe('teacherReportFile', () => {
         },
       ];
 
-      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 1, name: 'User 1' });
-      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 2, name: 'Teacher 1', tz: '999' });
+      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 1,
+        name: 'User 1',
+      });
+      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 2,
+        name: 'Teacher 1',
+        tz: '999',
+      });
       (mockTeacherReportStatusRepo.findOneBy as jest.Mock).mockResolvedValue({
         notReportedLessons: ['1'],
         year: 2025,
         reportMonthName: 'January',
       });
-      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 3, name: 'January' });
+      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 3,
+        name: 'January',
+      });
       (mockLessonRepo.findBy as jest.Mock).mockResolvedValue([mockLesson]);
       (mockStudentKlassRepo.find as jest.Mock).mockResolvedValue(mockStudents);
 
@@ -237,9 +277,7 @@ describe('teacherReportFile', () => {
       expect(result[0]).toMatchObject({
         fileTitle: 'קובץ נוכחות',
         headerRow: ['קוד כיתה', 'ת.ז.', 'שם תלמידה', 'איחורים', 'חיסורים', 'הערות'],
-        formattedData: [
-          ['A1', '123', 'Student 1'],
-        ],
+        formattedData: [['A1', '123', 'Student 1']],
         sheetName: 'January',
       });
     });
@@ -250,17 +288,27 @@ describe('teacherReportFile', () => {
         id: 1,
         name: 'Math',
         key: 123,
-        klassReferenceIds: ['1']
+        klassReferenceIds: ['1'],
       };
 
-      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 1, name: 'User 1' });
-      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 2, name: 'Teacher 1', tz: '999' });
+      (mockUserRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 1,
+        name: 'User 1',
+      });
+      (mockTeacherRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 2,
+        name: 'Teacher 1',
+        tz: '999',
+      });
       (mockTeacherReportStatusRepo.findOneBy as jest.Mock).mockResolvedValue({
         notReportedLessons: ['1'],
         year: 2025,
         reportMonthName: null,
       });
-      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({ id: 3, name: 'January' });
+      (mockReportMonthRepo.findOneBy as jest.Mock).mockResolvedValue({
+        id: 3,
+        name: 'January',
+      });
       (mockLessonRepo.findBy as jest.Mock).mockResolvedValue([mockLesson]);
       (mockStudentKlassRepo.find as jest.Mock).mockResolvedValue([]);
 
@@ -278,10 +326,12 @@ describe('teacherReportFile', () => {
         lesson: { name: 'Math' } as Lesson,
         reportMonth: { name: 'January' } as ReportMonth,
         user: { id: 1 } as User,
-        teacherReportStatus: { reportMonthName: 'January' } as TeacherReportStatus,
+        teacherReportStatus: {
+          reportMonthName: 'January',
+        } as TeacherReportStatus,
         headerRow: [],
         formattedData: [],
-        specialFields: []
+        specialFields: [],
       };
 
       const result = teacherReportFileModule.getReportName(mockData);

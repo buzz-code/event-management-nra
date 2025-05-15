@@ -1,4 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 import { Event } from './Event.entity';
 import { User } from './User.entity';
 import { IsOptional, IsNumber } from 'class-validator';
@@ -30,7 +41,7 @@ export class EventNote implements IHasUserId {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
@@ -63,7 +74,7 @@ export class EventNote implements IHasUserId {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Event, event => event.notes, { nullable: false })
+  @ManyToOne(() => Event, (event) => event.notes, { nullable: false })
   @JoinColumn({ name: 'eventReferenceId' })
   event: Event;
 

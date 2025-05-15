@@ -99,13 +99,10 @@ export class UserInteractionHandler extends BaseYemotHandler {
       // Get the student ID with retry capability
       const student = await this.withRetry(
         async () => {
-          const tz = await this.call.readDigits(
-            MESSAGE_CONSTANTS.AUTHENTICATION.ID_PROMPT,
-            {
-              max_digits: SYSTEM_CONSTANTS.MAX_ID_DIGITS,
-              min_digits: 5, // Minimum reasonable ID length
-            },
-          );
+          const tz = await this.call.readDigits(MESSAGE_CONSTANTS.AUTHENTICATION.ID_PROMPT, {
+            max_digits: SYSTEM_CONSTANTS.MAX_ID_DIGITS,
+            min_digits: 5, // Minimum reasonable ID length
+          });
 
           // First, fetch just the student
           const student = await this.dataSource.getRepository(Student).findOne({
@@ -147,14 +144,10 @@ export class UserInteractionHandler extends BaseYemotHandler {
 
       // Student authenticated successfully
       this.authenticatedStudent = student;
-      this.call.logInfo(
-        `Student authenticated: ${student.id}, ${student.name}`,
-      );
+      this.call.logInfo(`Student authenticated: ${student.id}, ${student.name}`);
 
       // Greet the student by name
-      await this.call.playMessage(
-        MESSAGE_CONSTANTS.GENERAL.WELCOME(student.name),
-      );
+      await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.WELCOME(student.name));
 
       this.logComplete('authenticateStudent', { studentId: student.id });
       return true;
@@ -175,9 +168,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
     this.hasEventsForVoucherSelection = false;
 
     if (!this.authenticatedStudent) {
-      this.call.logWarn(
-        'Cannot check student events, student not authenticated.',
-      );
+      this.call.logWarn('Cannot check student events, student not authenticated.');
       this.logComplete('checkStudentEvents', {
         hasEventsForUpdate: this.hasEventsForUpdate,
         hasEventsForPathSelection: this.hasEventsForPathSelection,
@@ -190,9 +181,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
     const events = this.studentEvents;
 
     if (events.length === 0) {
-      this.call.logInfo(
-        `No events found for student ${this.authenticatedStudent.id} to check for menu options.`,
-      );
+      this.call.logInfo(`No events found for student ${this.authenticatedStudent.id} to check for menu options.`);
       this.logComplete('checkStudentEvents', {
         eventsChecked: 0,
         hasEventsForUpdate: false,
@@ -208,10 +197,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
 
     for (const event of events) {
       // Check for Post-Event Update eligibility
-      if (
-        event.completedPathReferenceId === null &&
-        event.eventDate < new Date()
-      ) {
+      if (event.completedPathReferenceId === null && event.eventDate < new Date()) {
         // Event is not yet marked as completed with a path and the event date is in the past
         this.hasEventsForUpdate = true;
       }
@@ -249,9 +235,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
   private validateIdFormat(id: string): boolean {
     // Check that the ID contains only digits
     if (!/^\d+$/.test(id)) {
-      this.call.logWarn(
-        `Invalid ID format: ${id} - contains non-digit characters`,
-      );
+      this.call.logWarn(`Invalid ID format: ${id} - contains non-digit characters`);
       return false;
     }
 
@@ -281,28 +265,20 @@ export class UserInteractionHandler extends BaseYemotHandler {
             // MenuOption.EXIT // Exit is usually handled by hangup or a generic "press 9 to exit"
           ];
 
-          menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.EVENT_REPORTING(
-            MenuOption.EVENT_REPORTING,
-          )}`;
+          menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.EVENT_REPORTING(MenuOption.EVENT_REPORTING)}`;
 
           if (this.hasEventsForPathSelection) {
-            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.PATH_SELECTION(
-              MenuOption.PATH_SELECTION,
-            )}`;
+            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.PATH_SELECTION(MenuOption.PATH_SELECTION)}`;
             allowedOptions.push(MenuOption.PATH_SELECTION);
           }
 
           if (this.hasEventsForVoucherSelection) {
-            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.VOUCHER_SELECTION(
-              MenuOption.VOUCHER_SELECTION,
-            )}`;
+            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.VOUCHER_SELECTION(MenuOption.VOUCHER_SELECTION)}`;
             allowedOptions.push(MenuOption.VOUCHER_SELECTION);
           }
 
           if (this.hasEventsForUpdate) {
-            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.POST_EVENT_UPDATE(
-              MenuOption.POST_EVENT_UPDATE,
-            )}`;
+            menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.POST_EVENT_UPDATE(MenuOption.POST_EVENT_UPDATE)}`;
             allowedOptions.push(MenuOption.POST_EVENT_UPDATE);
           }
           // menuPrompt += ` ${MESSAGE_CONSTANTS.MENU.MENU_OPTIONS.EXIT(MenuOption.EXIT)}`; // Consider if EXIT should always be an option here
@@ -316,9 +292,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
           // Validate menu selection
           if (!allowedOptions.includes(menuResponse as MenuOption)) {
             this.call.logWarn(`Invalid menu selection: ${menuResponse}`);
-            await this.call.playMessage(
-              MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT,
-            );
+            await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT);
             throw new Error('Invalid menu selection');
           }
 
@@ -330,9 +304,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
 
       if (!selection) {
         this.call.logWarn('Failed to get a valid menu selection');
-        await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
-        );
+        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED);
         throw new Error('No menu option selected');
       }
 
@@ -343,20 +315,16 @@ export class UserInteractionHandler extends BaseYemotHandler {
       let confirmationMessage = '';
       switch (this.selectedMenuOption) {
         case MenuOption.EVENT_REPORTING:
-          confirmationMessage =
-            MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.EVENT_REPORTING;
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.EVENT_REPORTING;
           break;
         case MenuOption.PATH_SELECTION:
-          confirmationMessage =
-            MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.PATH_SELECTION;
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.PATH_SELECTION;
           break;
         case MenuOption.VOUCHER_SELECTION:
-          confirmationMessage =
-            MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.VOUCHER_SELECTION;
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.VOUCHER_SELECTION;
           break;
         case MenuOption.POST_EVENT_UPDATE:
-          confirmationMessage =
-            MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.POST_EVENT_UPDATE;
+          confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.POST_EVENT_UPDATE;
           break;
         case MenuOption.EXIT:
           confirmationMessage = MESSAGE_CONSTANTS.MENU.MENU_CONFIRMATIONS.EXIT;

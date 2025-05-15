@@ -8,29 +8,28 @@ import {
   BeforeInsert,
   BeforeUpdate,
   DataSource,
-  Unique
-} from "typeorm";
-import { IsOptional, ValidateIf } from "class-validator";
-import { CrudValidationGroups } from "@dataui/crud";
-import { IsNotEmpty, IsUniqueCombination, MaxLength } from "@shared/utils/validation/class-validator-he";
-import { StringType } from "@shared/utils/entity/class-transformer";
-import { IHasUserId } from "@shared/base-entity/interface";
+  Unique,
+} from 'typeorm';
+import { IsOptional, ValidateIf } from 'class-validator';
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty, IsUniqueCombination, MaxLength } from '@shared/utils/validation/class-validator-he';
+import { StringType } from '@shared/utils/entity/class-transformer';
+import { IHasUserId } from '@shared/base-entity/interface';
 
-@Entity("students")
-@Index("students_user_id_idx", ["userId"], {})
-@Index("students_name_idx", ["name"], {})
-@Index("students_tz_idx", ["tz"], {})
+@Entity('students')
+@Index('students_user_id_idx', ['userId'], {})
+@Index('students_name_idx', ['name'], {})
+@Index('students_tz_idx', ['tz'], {})
 @Unique(['userId', 'tz'])
 export class Student implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
-  async fillFields() {
-  }
+  async fillFields() {}
 
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "user_id" })
+  @Column('int', { name: 'user_id' })
   userId: number;
 
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
@@ -51,7 +50,7 @@ export class Student implements IHasUserId {
   @IsOptional({ always: true })
   @StringType
   @MaxLength(1000, { always: true })
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   address: string;
 
   @IsOptional({ always: true })
