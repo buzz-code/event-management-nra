@@ -341,8 +341,8 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         return;
       }
 
-      postEventUpdateHandler.setStudent(this.student);
-      const flowCompletedSuccessfully = await postEventUpdateHandler.handlePostEventUpdate();
+      // Pass student and studentEvents to the handler
+      const flowCompletedSuccessfully = await postEventUpdateHandler.handlePostEventUpdate(this.student, this.studentEvents);
 
       if (flowCompletedSuccessfully) {
         this.call.logInfo('Post-event update flow completed successfully.');

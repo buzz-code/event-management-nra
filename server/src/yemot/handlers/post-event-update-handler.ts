@@ -3,6 +3,7 @@ import { Call } from 'yemot-router2';
 import { DataSource, IsNull } from 'typeorm';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { Student } from 'src/db/entities/Student.entity';
+import { Event as DBEvent } from 'src/db/entities/Event.entity'; // Added import for DBEvent
 // Event is now imported via EventForUpdateSelector
 // import { LevelType } from "src/db/entities/LevelType.entity"; // Not directly used here anymore for event selection
 // SelectionHelper is used by EventForUpdateSelector
@@ -11,14 +12,16 @@ import { PathSelectionHandler } from './path-selection-handler';
 import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 // FormatUtils is used by EventForUpdateSelector
-import { EventForUpdateSelector, SelectableEventItem } from './event-for-update-selector'; // Import the new selector
+// Remove import for EventForUpdateSelector
+import { ConfigurableEventSelector } from './configurable-event-selector'; // Added import for ConfigurableEventSelector
+import { EventEligibilityType } from '../utils/event-eligibility.util'; // Added import for EventEligibilityType
 
 /**
  * Handler for updating post-event completion status
  * Allows students to report which path they have completed after their celebration.
  */
 export class PostEventUpdateHandler extends BaseYemotHandler {
-  private student: Student | null = null;
+  // private student: Student | null = null; // Removed student property as it's passed as a parameter
   private eventPersistenceHandler: EventPersistenceHandler;
 
   constructor(call: Call, dataSource: DataSource) {
@@ -26,28 +29,29 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
     this.eventPersistenceHandler = new EventPersistenceHandler(call, dataSource);
   }
 
-  setStudent(student: Student): void {
-    this.student = student;
-  }
+  // setStudent(student: Student): void { // Removed setStudent method
+  //   this.student = student;
+  // }
 
-  async handlePostEventUpdate(): Promise<boolean> {
+  async handlePostEventUpdate(student: Student, studentEvents: DBEvent[]): Promise<boolean> { // Added student and studentEvents parameters
     this.logStart('handlePostEventUpdate');
 
     try {
-      if (!this.student) {
+      if (!student) { // Check the passed student parameter
         this.call.logError('Student not set for PostEventUpdateHandler');
         await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
         return false;
       }
 
-      // 1. Create an event selector using the new specialized class
-      if (!this.student) {
-        // This check is already present, but good to re-iterate dependency
-        this.call.logError('Student not set, cannot create EventForUpdateSelector');
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
-        return false;
-      }
-      const eventSelector = new EventForUpdateSelector(this.call, this.dataSource, this.student);
+      // 1. Create an event selector using ConfigurableEventSelector
+      const eventSelector = new ConfigurableEventSelector(
+        this.call,
+        this.dataSource,
+        student, // Use the passed student parameter
+        studentEvents, // Use the passed studentEvents parameter
+        EventEligibilityType.POST_UPDATE,
+        true // autoSelectSingleItem
+      );
 
       const selectedEventItem = await eventSelector.handleSingleSelection();
 

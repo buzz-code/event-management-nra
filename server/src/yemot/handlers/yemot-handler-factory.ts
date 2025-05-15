@@ -13,7 +13,6 @@ import { VoucherSelectionHandler } from './voucher-selection-handler';
 import { EventPersistenceHandler } from './event-persistence-handler';
 import { PostEventUpdateHandler } from './post-event-update-handler';
 import { DateSelectionHelper } from './date-selection-helper';
-import { EventForUpdateSelector } from './event-for-update-selector';
 import { ConfigurableEventSelector } from './configurable-event-selector'; // Changed import
 
 /**
@@ -81,15 +80,6 @@ export class YemotHandlerFactory {
    */
   createPostEventUpdateHandler(): PostEventUpdateHandler {
     return new PostEventUpdateHandler(this.call, this.dataSource);
-  }
-
-  /**
-   * Creates an EventForUpdateSelector instance
-   * @param student Authenticated student
-   * @returns An EventForUpdateSelector instance
-   */
-  createEventForUpdateSelector(student: Student): EventForUpdateSelector {
-    return new EventForUpdateSelector(this.call, this.dataSource, student);
   }
 
   /**
