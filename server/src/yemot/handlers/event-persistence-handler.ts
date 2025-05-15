@@ -89,6 +89,7 @@ export class EventPersistenceHandler {
     try {
       const event = existingEvent || new DBEvent();
 
+      event.userId = this.call.userId;
       event.studentReferenceId = student.id;
 
       if (eventType) {
@@ -170,6 +171,7 @@ export class EventPersistenceHandler {
     this.logStart('addEventNote');
 
     const eventNote = new EventNote();
+    eventNote.userId = this.call.userId;
     eventNote.eventReferenceId = event.id;
     eventNote.noteText = note;
 

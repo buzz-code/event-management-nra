@@ -106,7 +106,10 @@ export class UserInteractionHandler extends BaseYemotHandler {
 
           // First, fetch just the student
           const student = await this.dataSource.getRepository(Student).findOne({
-            where: { tz },
+            where: {
+              userId: this.call.userId,
+              tz,
+            },
           });
 
           if (student) {
@@ -115,7 +118,10 @@ export class UserInteractionHandler extends BaseYemotHandler {
             // DO NOT fetch student events here as per the new requirement
             // this.studentEvents = await this.dataSource.getRepository(DBEvent)
             //   .find({
-            //     where: { studentReferenceId: student.id },
+            //     where: {
+            //       userId: this.call.userId,
+            //       studentReferenceId: student.id,
+            //     },
             //     relations: [
             //       'eventType',
             //       'eventGifts',

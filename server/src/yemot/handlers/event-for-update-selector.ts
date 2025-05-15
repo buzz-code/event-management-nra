@@ -26,6 +26,7 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
     const eventRepository = this.dataSource.getRepository(Event);
     const eligibleEvents = await eventRepository.find({
       where: {
+        userId: this.call.userId,
         studentReferenceId: this.student.id,
         completedPathReferenceId: IsNull(), // Event not yet marked as completed with a path
         eventDate: LessThan(new Date()), // Event date is in the past
@@ -42,6 +43,7 @@ export class EventForUpdateSelector extends SelectionHelper<SelectableEventItem>
         const eventName = FormatUtils.formatEventNameForSelection(event);
         return {
           id: event.id,
+          userId: event.userId,
           key: index + 1,
           name: eventName,
           originalEvent: event,

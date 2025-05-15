@@ -66,6 +66,7 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
         const eventName = FormatUtils.formatEventNameForSelection(event);
         return {
           id: event.id,
+          userId: event.userId,
           key: index + 1,
           name: eventName,
           originalEvent: event,

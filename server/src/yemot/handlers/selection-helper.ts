@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource, FindOptionsOrder, Repository } from 'typeorm';
+import { DataSource, FindOptionsOrder, FindOptionsWhere, FindOptionsWhereProperty, Repository } from 'typeorm';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { CallUtils } from '../utils/call-utils';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
@@ -11,6 +11,7 @@ import { SYSTEM_CONSTANTS } from '../constants/system-constants';
  */
 export interface SelectableEntity {
   id: number;
+  userId: number;
   name: string;
   key: number;
 }
@@ -351,6 +352,9 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     // Basic implementation - fetch all items ordered by key
     try {
       this.items = await this.entityRepository.find({
+        where: {
+          userId: this.call.userId,
+        } as FindOptionsWhere<T>,
         order: { key: 'ASC' } as FindOptionsOrder<T>, // Type assertion for order
       });
 

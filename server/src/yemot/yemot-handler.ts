@@ -70,11 +70,28 @@ export class CallHandler {
   }
 
   /**
+   * Finds the user based on the phone number
+   */
+  async findUser(): Promise<void> {
+    this.logger.log(`Finding user for phone number: ${this.call.did}`);
+    const userRepository = this.dataSource.getRepository(User);
+    const user = await userRepository.findOneBy({ phoneNumber: this.call.did });
+    if (!user) {
+      this.logger.error(`User not found for phone number: ${this.call.did}`);
+      throw new Error(`User not found for phone number: ${this.call.did}`);
+    }
+    this.logger.log(`User found: ${user.id}`);
+    this.call.userId = user.id;
+  }
+
+  /**
    * Executes the call flow
    */
   async execute(): Promise<void> {
     try {
       await this.initializeDataSource();
+
+      await this.findUser();
 
       // Execute the main flow using the orchestrator
       await this.flowOrchestrator.execute();

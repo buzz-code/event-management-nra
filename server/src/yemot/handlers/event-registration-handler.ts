@@ -117,6 +117,9 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       // EventType entity does not have 'isActive'. Assuming all are usable.
       // EventType entity does not have 'displayOrder'. Using 'key' for ordering.
       this.eventTypes = await this.dataSource.getRepository(EventType).find({
+        where: {
+          userId: this.call.userId,
+        },
         order: { key: 'ASC' },
       });
 
@@ -218,6 +221,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
       const foundEvent = await this.dataSource.getRepository(Event).findOne({
         where: {
+          userId: this.call.userId,
           studentReferenceId: this.student.id,
           eventTypeReferenceId: this.selectedEventType.id,
           eventDate: Between(startDate, endDate),
@@ -276,7 +280,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
         eventTypeReferenceId: this.selectedEventType.id,
         eventDate: this.selectedDate.gregorianDate,
         name: `אירוע ${this.selectedEventType.name} לתלמידה ${this.student.name || this.student.tz}`, // Example name
-        userId: this.student.userId, // Ensure student object has userId
+        userId: this.call.userId, // Ensure call object has userId
         // Other non-nullable fields from Event entity might need defaults here if not auto-set
       };
 
@@ -299,7 +303,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
             const eventGift = eventGiftRepository.create({
               eventReferenceId: savedEvent.id,
               giftReferenceId: voucher.id,
-              userId: this.student.userId,
+              userId: this.call.userId,
             });
             await queryRunner.manager.save(EventGift, eventGift);
           }

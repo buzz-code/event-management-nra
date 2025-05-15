@@ -6,6 +6,7 @@ import { CallUtils } from './call-utils';
 
 declare module 'yemot-router2' {
   interface Call {
+    userId?: number;
     getRepository<T>(entityClass: EntityTarget<T>): Repository<T>;
     logInfo(message: string): void;
     logDebug(message: string): void;
