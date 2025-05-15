@@ -31,8 +31,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
 
   /**
    * Constructor for the SelectionHelper
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    * @param entityName The name of the entity type (for logging and messages)
    * @param entityRepository The repository to use for fetching entities
    * @param autoSelectSingleItem Whether to automatically select if there's only one item
@@ -40,13 +39,12 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   constructor(
     call: Call,
-    dataSource: DataSource,
     entityName: string,
     entityRepository?: Repository<T>, // Made optional
     autoSelectSingleItem = false,
     maxSelections = 1,
   ) {
-    super(call, dataSource);
+    super(call);
     this.entityName = entityName;
     if (entityRepository) {
       this.entityRepository = entityRepository;

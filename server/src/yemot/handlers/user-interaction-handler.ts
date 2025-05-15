@@ -33,11 +33,10 @@ export class UserInteractionHandler extends BaseYemotHandler {
 
   /**
    * Constructor for the UserInteractionHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    */
-  constructor(call: Call, dataSource: DataSource) {
-    super(call, dataSource);
+  constructor(call: Call) {
+    super(call);
   }
 
   /**
@@ -60,6 +59,10 @@ export class UserInteractionHandler extends BaseYemotHandler {
       }
 
       // // Step 2: Check student events (to tailor the menu)
+      // // First, we need to fetch the student's events
+      // if (this.authenticatedStudent) {
+      //   this.studentEvents = await this.call.getStudentEvents(this.authenticatedStudent.id);
+      // }
       // await this.checkStudentEvents();
 
       // // Step 3: Present the main menu and get selection
@@ -103,37 +106,19 @@ export class UserInteractionHandler extends BaseYemotHandler {
             min_digits: 5, // Minimum reasonable ID length
           });
 
-          // First, fetch just the student
-          const student = await this.dataSource.getRepository(Student).findOne({
-            where: {
-              userId: this.call.userId,
-              tz,
-            },
-          });
+          // Use the enhanced ExtendedCall method to find student by both userId and TZ
+          const student = await this.call.findStudentByTzAndUserId(tz);
 
           if (student) {
             // Store the student
             this.authenticatedStudent = student;
-            // DO NOT fetch student events here as per the new requirement
-            // this.studentEvents = await this.dataSource.getRepository(DBEvent)
-            //   .find({
-            //     where: {
-            //       userId: this.call.userId,
-            //       studentReferenceId: student.id,
-            //     },
-            //     relations: [
-            //       'eventType',
-            //       'eventGifts',
-            //       'eventGifts.gift',
-            //       'levelType'
-            //     ]
-            //   });
-            this.studentEvents = []; // Empty array as per new requirement
+            // Initialize with empty array - events will be fetched later when needed
+            this.studentEvents = [];
           }
 
           if (!student) {
-            this.call.logWarn(`Student with ID ${tz} not found`);
-            throw new Error('Student not found');
+            this.call.logWarn(`Student with TZ ${tz} not found for user ${this.call.userId}`);
+            throw new Error('Student not found with the given TZ');
           }
 
           return student;
@@ -182,7 +167,7 @@ export class UserInteractionHandler extends BaseYemotHandler {
       return;
     }
 
-    // Use the events we fetched separately
+    // We've already fetched events in handleUserInteraction
     const events = this.studentEvents;
 
     if (events.length === 0) {
@@ -362,13 +347,5 @@ export class UserInteractionHandler extends BaseYemotHandler {
    */
   getSelectedMenuOption(): MenuOption | null {
     return this.selectedMenuOption;
-  }
-
-  /**
-   * Gets the student's events that were loaded during authentication
-   * @returns Array of student's events
-   */
-  getStudentEvents(): DBEvent[] {
-    return this.studentEvents;
   }
 }

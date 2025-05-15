@@ -24,13 +24,12 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
 
   /**
    * Constructor for the BaseSelectionHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    * @param entityName The name of the entity type (for logging and messages)
    * @param entityRepository The repository to use for fetching entities
    */
-  constructor(call: Call, dataSource: DataSource, entityName: string, entityRepository: Repository<T>) {
-    super(call, dataSource);
+  constructor(call: Call, entityName: string, entityRepository: Repository<T>) {
+    super(call);
     this.entityName = entityName;
     this.repository = entityRepository;
   }
@@ -53,7 +52,7 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
       this.call.logInfo(`Found ${this.items.length} ${this.entityName} options`);
     }
 
-    this.logComplete('fetchItems');
+    this.logComplete('fetchItems', { itemCount: this.items.length });
   }
 
   /**
@@ -103,7 +102,7 @@ export abstract class BaseSelectionHandler<T extends SelectableEntity> extends B
       return;
     }
 
-    this.logComplete('handleSelection');
+    this.logComplete('handleSelection', { success: true });
   }
 
   /**

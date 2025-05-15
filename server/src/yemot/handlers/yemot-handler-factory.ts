@@ -1,5 +1,4 @@
 import { Call } from 'yemot-router2';
-import { DataSource } from 'typeorm';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 
 import { EventEligibilityType } from '../utils/event-eligibility.util';
@@ -22,16 +21,16 @@ import { ConfigurableEventSelector } from './configurable-event-selector'; // Ch
 export class YemotHandlerFactory {
   /**
    * Constructor for YemotHandlerFactory
-   * @param dataSource The initialized data source
+   * @param call The enhanced ExtendedCall instance with centralized data access
    */
-  constructor(private dataSource: DataSource, private call: Call) {}
+  constructor(private call: Call) {}
 
   /**
    * Creates a UserInteractionHandler instance
    * Replaces AuthenticationHandler and MenuHandler
    */
   createUserInteractionHandler(): UserInteractionHandler {
-    return new UserInteractionHandler(this.call, this.dataSource);
+    return new UserInteractionHandler(this.call);
   }
 
   /**
@@ -40,14 +39,14 @@ export class YemotHandlerFactory {
    * @param student The authenticated student
    */
   createEventRegistrationHandler(student: Student): EventRegistrationHandler {
-    return new EventRegistrationHandler(this.call, this.dataSource, student);
+    return new EventRegistrationHandler(this.call, student);
   }
 
   /**
    * Creates a PathSelectionHandler instance
    */
   createPathHandler(): PathSelectionHandler {
-    return new PathSelectionHandler(this.call, this.dataSource);
+    return new PathSelectionHandler(this.call);
   }
 
   /**
@@ -55,7 +54,7 @@ export class YemotHandlerFactory {
    * @param maxVouchers Maximum number of vouchers (optional)
    */
   createVoucherHandler(maxVouchers?: number): VoucherSelectionHandler {
-    return new VoucherSelectionHandler(this.call, this.dataSource, maxVouchers);
+    return new VoucherSelectionHandler(this.call, maxVouchers);
   }
 
   /**
@@ -63,7 +62,7 @@ export class YemotHandlerFactory {
    * Replaces EventSaverHandler with extended functionality
    */
   createEventPersistenceHandler(): EventPersistenceHandler {
-    return new EventPersistenceHandler(this.call, this.dataSource);
+    return new EventPersistenceHandler(this.call);
   }
 
   /**
@@ -71,7 +70,7 @@ export class YemotHandlerFactory {
    * @returns A DateSelectionHelper instance
    */
   createDateSelectionHelper(): DateSelectionHelper {
-    return new DateSelectionHelper(this.call, this.dataSource);
+    return new DateSelectionHelper(this.call);
   }
 
   /**
@@ -79,7 +78,7 @@ export class YemotHandlerFactory {
    * @returns A PostEventUpdateHandler instance
    */
   createPostEventUpdateHandler(): PostEventUpdateHandler {
-    return new PostEventUpdateHandler(this.call, this.dataSource);
+    return new PostEventUpdateHandler(this.call);
   }
 
   /**
@@ -88,7 +87,7 @@ export class YemotHandlerFactory {
    * @returns An EventForPathAssignmentSelector instance
    */
   createEventForPathAssignmentSelector(student: Student, events: DBEvent[]): ConfigurableEventSelector {
-    return new ConfigurableEventSelector(this.call, this.dataSource, student, events, EventEligibilityType.PATH, true);
+    return new ConfigurableEventSelector(this.call, student, events, EventEligibilityType.PATH, true);
   }
 
   /**
@@ -100,7 +99,6 @@ export class YemotHandlerFactory {
   createEventForVoucherAssignmentSelector(student: Student, events: DBEvent[]): ConfigurableEventSelector {
     return new ConfigurableEventSelector(
       this.call,
-      this.dataSource,
       student,
       events,
       EventEligibilityType.VOUCHER,
@@ -117,7 +115,6 @@ export class YemotHandlerFactory {
   createEventForPostUpdateSelector(student: Student, events: DBEvent[]): ConfigurableEventSelector {
     return new ConfigurableEventSelector(
       this.call,
-      this.dataSource,
       student,
       events,
       EventEligibilityType.POST_UPDATE,

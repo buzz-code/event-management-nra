@@ -14,19 +14,33 @@ import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 export class VoucherSelectionHandler extends SelectionHelper<Gift> {
   /**
    * Constructor for the VoucherSelectionHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    * @param maxVouchers Maximum number of vouchers that can be selected
    */
-  constructor(call: Call, dataSource: DataSource, maxVouchers: number = SYSTEM_CONSTANTS.MAX_VOUCHERS) {
+  constructor(call: Call, maxVouchers: number = SYSTEM_CONSTANTS.MAX_VOUCHERS) {
     super(
       call,
-      dataSource,
       'שובר',
-      dataSource.getRepository(Gift),
+      undefined, // Don't pass repository, we'll override fetchItems
       false, // Don't auto-select
       maxVouchers,
     );
+  }
+  
+  /**
+   * Override fetchItems to use ExtendedCall's getGifts method
+   */
+  protected async fetchItems(): Promise<void> {
+    this.logStart('fetchItems');
+    
+    try {
+      this.items = await this.call.getGifts();
+      this.call.logInfo(`Fetched ${this.items.length} ${this.entityName} options`);
+      this.logComplete('fetchItems', { count: this.items.length });
+    } catch (error) {
+      this.logError('fetchItems', error as Error);
+      throw error;
+    }
   }
 
   /**

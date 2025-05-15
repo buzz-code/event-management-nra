@@ -18,6 +18,7 @@ import { Class } from 'src/db/entities/Class.entity';
 import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
 import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
 import { createExtendedCall } from './utils/extended-call';
+import { MESSAGE_CONSTANTS } from './constants/message-constants';
 
 /**
  * The main Yemot call handler class
@@ -61,27 +62,27 @@ export class CallHandler {
 
     this.logger.log('Data source initialized successfully');
 
-    // Create the handler factory and flow orchestrator
-    this.logger.log('Using refactored components');
-
-    this.handlerFactory = new YemotHandlerFactory(this.dataSource, this.call);
+    // Create an extended call with enhanced datasource access and context management
     const extendedCall = createExtendedCall(this.call, this.logger, this.dataSource);
+
+    // Create handlers using the enhanced extended call
+    this.logger.log('Using enhanced ExtendedCall with centralized data access');
+    this.handlerFactory = new YemotHandlerFactory(extendedCall);
     this.flowOrchestrator = new YemotFlowOrchestrator(extendedCall, this.handlerFactory);
   }
 
   /**
-   * Finds the user based on the phone number
+   * Finds the user based on the phone number using the enhanced ExtendedCall
    */
   async findUser(): Promise<void> {
-    this.logger.log(`Finding user for phone number: ${this.call.did}`);
-    const userRepository = this.dataSource.getRepository(User);
-    const user = await userRepository.findOneBy({ phoneNumber: this.call.did });
+    // Use the centralized data access method directly
+    const user = await this.call.findUserByPhone();
     if (!user) {
       this.logger.error(`User not found for phone number: ${this.call.did}`);
       throw new Error(`User not found for phone number: ${this.call.did}`);
     }
-    this.logger.log(`User found: ${user.id}`);
-    this.call.userId = user.id;
+
+    // Note that user ID and context are already set by findUserByPhone
   }
 
   /**
@@ -89,15 +90,18 @@ export class CallHandler {
    */
   async execute(): Promise<void> {
     try {
+      // Initialize the data source and create the enhanced ExtendedCall
       await this.initializeDataSource();
 
+      // Find and verify the user
       await this.findUser();
 
-      // Execute the main flow using the orchestrator
+      // Execute the main flow using the orchestrator with our enhanced ExtendedCall
       await this.flowOrchestrator.execute();
     } catch (error) {
       this.logger.error(`Error executing call flow: ${error.message}`);
-      // Any unhandled exceptions - flow orchestrator should handle most errors
+
+      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
     }
   }
 }

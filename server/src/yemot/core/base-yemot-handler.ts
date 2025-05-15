@@ -15,24 +15,19 @@ export interface ReadDigitsOptions {
 
 /**
  * Abstract base class for all Yemot handlers
- * Provides common functionality for call handling, logging, and database operations
+ * Updated to work with the enhanced ExtendedCall for centralized data access
+ * Provides common functionality for call handling and flow logic
  */
 export abstract class BaseYemotHandler {
   protected call: Call;
-  protected dataSource: DataSource;
   protected maxRetries = 3; // Default retry count, can be overridden
 
   /**
    * Constructor for the BaseYemotHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source (optional)
+   * @param call The enhanced Yemot call object with data access capabilities
    */
-  constructor(call: Call, dataSource?: DataSource) {
+  constructor(call: Call) {
     this.call = call;
-
-    if (dataSource) {
-      this.dataSource = dataSource;
-    }
   }
 
   /**
@@ -78,9 +73,11 @@ export abstract class BaseYemotHandler {
 
   /**
    * Executes an operation with retry logic
+   * Uses the enhanced ExtendedCall's withRetry method directly
+   * 
    * @param operation Function to execute
-   * @param errorMessage Message to display on failure
    * @param retryMessage Message to display when retrying
+   * @param errorMessage Message to display on failure
    * @param maxAttempts Maximum number of attempts (default: this.maxRetries)
    * @returns The result of the operation
    * @throws Error if the operation fails after all retries
@@ -91,56 +88,38 @@ export abstract class BaseYemotHandler {
     errorMessage: string,
     maxAttempts: number = this.maxRetries,
   ): Promise<T> {
-    let attempts = 0;
-    let lastError: Error | null = null;
-
-    while (attempts < maxAttempts) {
-      try {
-        return await operation();
-      } catch (error) {
-        attempts++;
-        lastError = error;
-        this.call.logWarn(`Operation failed (attempt ${attempts}/${maxAttempts}): ${error.message}`);
-
-        if (attempts >= maxAttempts) {
-          break;
-        }
-
-        await this.playMessage(retryMessage);
-      }
-    }
-
-    this.call.logError(`Operation failed after ${maxAttempts} attempts: ${lastError?.message}`);
-    await this.hangupWithMessage(errorMessage);
+    // Directly use the enhanced ExtendedCall's withRetry method
+    return await this.call.withRetry(operation, {
+      retryMessage,
+      errorMessage,
+      maxAttempts
+    });
   }
 
   /**
-   * Logs the start of a handler operation
-   * @param operation Name of the operation
+   * Helper for logging that an operation is starting
+   * @param methodName The name of the method that is starting
    */
-  protected logStart(operation: string): void {
-    this.call.logInfo(`Starting ${this.constructor.name}.${operation}`);
+  protected logStart(methodName: string): void {
+    this.call.logDebug(`Starting ${this.constructor.name}.${methodName}`);
   }
 
   /**
-   * Logs the completion of a handler operation
-   * @param operation Name of the operation
-   * @param result Optional result information
+   * Helper for logging that an operation has completed
+   * @param methodName The name of the method that has completed
+   * @param result Optional result or status message to include in the log
    */
-  protected logComplete(operation: string, result?: any): void {
-    if (result) {
-      this.call.logInfo(`Completed ${this.constructor.name}.${operation}: ${JSON.stringify(result)}`);
-    } else {
-      this.call.logInfo(`Completed ${this.constructor.name}.${operation}`);
-    }
+  protected logComplete(methodName: string, result?: any): void {
+    const resultMsg = result ? ` with result: ${JSON.stringify(result)}` : '';
+    this.call.logDebug(`Completed ${this.constructor.name}.${methodName}${resultMsg}`);
   }
 
   /**
-   * Logs an error that occurred during a handler operation
-   * @param operation Name of the operation
+   * Helper for logging errors
+   * @param methodName The name of the method where the error occurred
    * @param error The error that occurred
    */
-  protected logError(operation: string, error: Error): void {
-    this.call.logError(`Error in ${this.constructor.name}.${operation}: ${error.message}`, error.stack);
+  protected logError(methodName: string, error: Error): void {
+    this.call.logError(`Error in ${this.constructor.name}.${methodName}: ${error.message}`, error.stack);
   }
 }

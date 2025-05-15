@@ -31,33 +31,36 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
   /**
    * Executes the main call flow
    * Authenticates the student and presents the main menu
+   * Uses the enhanced ExtendedCall for centralized data access and context management
    */
   async execute(): Promise<void> {
-    this.logStart('execute');
+    this.call.logInfo('Starting call flow execution');
 
     try {
-      // Step 0: Find user by phone number
-      const user = await this.findUser();
+      // Step 0: Get user from context (should already be loaded)
+      const user = this.call.getContext<User>('user');
+      if (!user) {
+        this.call.logWarn('User not found in context, attempting to find user');
+        const foundUser = await this.call.findUserByPhone();
+        if (!foundUser) {
+          await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.USER_NOT_FOUND);
+          return;
+        }
+      }
 
       // Step 1: Handle student identification and menu interaction
-      // This consolidates the previous authentication and menu presentation steps
       const userInteractionHandler = this.handlerFactory.createUserInteractionHandler();
-
       const interactionResult = await userInteractionHandler.handleUserInteraction();
-
-      if (interactionResult) {
-        this.student = interactionResult.student;
-        // Get the student's events using the proper method
-        this.studentEvents = userInteractionHandler.getStudentEvents();
-      }
 
       if (!interactionResult) {
         this.call.logWarn('User interaction failed (authentication or menu selection), ending call flow.');
-        // Specific messages and hangup should be handled within UserInteractionHandler
         return;
       }
 
-      this.student = interactionResult.student;
+      // Get student and events from context instead of storing locally
+      // This allows other handlers to access the same data
+      this.student = this.call.getContext<Student>('student');
+      this.studentEvents = this.call.getContext<DBEvent[]>('events');
       const menuOption = interactionResult.menuOption;
 
       this.call.logInfo(`Student ${this.student.id} selected menu option: ${menuOption}`);
@@ -91,20 +94,6 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       this.logError('execute', error as Error);
       // The error handling would have been done in the specific flow
     }
-  }
-
-  async findUser(): Promise<User | null> {
-    const userFilter = {
-      phoneNumber: this.call.ApiDID,
-    };
-    const user = await this.dataSource.getRepository(User).findOneBy(userFilter);
-    if (!user) {
-      this.call.logError(`User not found for phone number: ${this.call.ApiDID}`);
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
-      return;
-    }
-    this.call.logInfo(`User found: ${user.phoneNumber} (ID: ${user.id})`);
-    return user;
   }
 
   /**

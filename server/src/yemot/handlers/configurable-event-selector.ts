@@ -1,6 +1,5 @@
 import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource } from 'typeorm';
 import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 import { SelectionHelper, SelectableEntity } from './selection-helper';
@@ -20,13 +19,12 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
 
   constructor(
     call: Call,
-    dataSource: DataSource,
     student: Student,
     events: DBEvent[],
     eligibilityType: EventEligibilityType = EventEligibilityType.NONE,
     autoSelectSingleItem = true,
   ) {
-    super(call, dataSource, 'אירוע', undefined, autoSelectSingleItem);
+    super(call, 'אירוע', undefined, autoSelectSingleItem);
 
     this.student = student;
     this.studentEvents = events;
@@ -73,7 +71,7 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
       });
       this.call.logInfo(`Found ${this.items.length} eligible events for student ${this.student.id}`);
     }
-    this.logComplete(`fetchItems (ConfigurableEventSelector)`);
+    this.logComplete(`fetchItems (ConfigurableEventSelector)`, { itemCount: this.items.length });
   }
 
   protected async announceAutoSelectionResult(): Promise<void> {

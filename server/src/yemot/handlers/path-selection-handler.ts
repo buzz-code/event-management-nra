@@ -12,18 +12,32 @@ import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 export class PathSelectionHandler extends SelectionHelper<LevelType> {
   /**
    * Constructor for the PathSelectionHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    */
-  constructor(call: Call, dataSource: DataSource) {
+  constructor(call: Call) {
     super(
       call,
-      dataSource,
       'מסלול',
-      dataSource.getRepository(LevelType),
+      undefined, // Don't pass repository, we'll override fetchItems
       false, // autoSelectSingleItem: Auto-selection is NOT required for Path selection (only for Event entities). User must explicitly select.
       1, // Single selection
     );
+  }
+  
+  /**
+   * Override fetchItems to use ExtendedCall's getLevelTypes method
+   */
+  protected async fetchItems(): Promise<void> {
+    this.logStart('fetchItems');
+    
+    try {
+      this.items = await this.call.getLevelTypes();
+      this.call.logInfo(`Fetched ${this.items.length} ${this.entityName} options`);
+      this.logComplete('fetchItems', { count: this.items.length });
+    } catch (error) {
+      this.logError('fetchItems', error as Error);
+      throw error;
+    }
   }
 
   /**

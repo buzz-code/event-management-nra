@@ -1,6 +1,5 @@
 import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource, Between } from 'typeorm'; // Removed unused MoreThanOrEqual, LessThanOrEqual, And
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -35,12 +34,11 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
   /**
    * Constructor for the EventRegistrationHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    * @param student The authenticated student
    */
-  constructor(call: Call, dataSource: DataSource, student: Student) {
-    super(call, dataSource);
+  constructor(call: Call, student: Student) {
+    super(call);
     this.student = student;
   }
 
@@ -112,15 +110,10 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     this.logStart('selectEventType');
 
     try {
-      // Load all available event types
+      // Load all available event types using ExtendedCall's getEventTypes method
       // EventType entity does not have 'isActive'. Assuming all are usable.
       // EventType entity does not have 'displayOrder'. Using 'key' for ordering.
-      this.eventTypes = await this.dataSource.getRepository(EventType).find({
-        where: {
-          userId: this.call.userId,
-        },
-        order: { key: 'ASC' },
-      });
+      this.eventTypes = await this.call.getEventTypes();
 
       if (this.eventTypes.length === 0) {
         this.call.logWarn('No event types found in the database.');
@@ -179,7 +172,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     this.logStart('selectDate');
 
     try {
-      const dateSelectionHelper = new DateSelectionHelper(this.call, this.dataSource);
+      const dateSelectionHelper = new DateSelectionHelper(this.call);
       const dateResult = await dateSelectionHelper.handleDateSelection();
 
       if (!dateResult) {
@@ -214,24 +207,20 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     try {
       const startDate = new Date(this.selectedDate.gregorianDate);
       startDate.setHours(0, 0, 0, 0);
-
       const endDate = new Date(this.selectedDate.gregorianDate);
       endDate.setHours(23, 59, 59, 999);
 
-      const foundEvent = await this.dataSource.getRepository(Event).findOne({
-        where: {
-          userId: this.call.userId,
-          studentReferenceId: this.student.id,
-          eventTypeReferenceId: this.selectedEventType.id,
-          eventDate: Between(startDate, endDate),
-        },
-      });
+      const foundEvent = await this.call.findEventByDateRange(
+        this.student.id,
+        this.selectedEventType.id,
+        startDate,
+        endDate
+      );
 
       if (foundEvent) {
         this.existingEvent = foundEvent;
         this.call.logWarn(
-          `Existing event found: ID ${foundEvent.id} for student ${this.student.id}, type ${
-            this.selectedEventType.id
+          `Existing event found: ID ${foundEvent.id} for student ${this.student.id}, type ${this.selectedEventType.id
           }, date ${this.selectedDate.gregorianDate.toISOString()}`,
         );
 
@@ -269,8 +258,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
     }
 
     try {
-      const eventRepository = this.dataSource.getRepository(Event);
-      const eventGiftRepository = this.dataSource.getRepository(EventGift);
+      // No need for repositories, we'll use ExtendedCall methods directly
 
       // Event entity does not have 'hebrewDate' or 'creationDate' (it has 'createdAt' auto-field)
       // A 'name' and 'userId' are required by the Event entity.
@@ -284,14 +272,10 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       };
 
       // Start a transaction to ensure both event and vouchers are saved together
-      const queryRunner = this.dataSource.createQueryRunner();
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-
-      try {
+      // Use ExtendedCall's withTransaction method
+      return await this.call.withTransaction(async (queryRunner) => {
         // Create and save event within transaction
-        const newEvent = eventRepository.create(newEventData);
-        const savedEvent = await queryRunner.manager.save(newEvent);
+        const savedEvent = await this.call.saveEvent(newEventData);
         this.call.logInfo(`New event created: ${savedEvent.id}`);
 
         // Associate vouchers if any were selected
@@ -299,40 +283,32 @@ export class EventRegistrationHandler extends BaseYemotHandler {
           this.call.logInfo(`Associating ${this.selectedVouchers.length} vouchers with event ${savedEvent.id}`);
 
           for (const voucher of this.selectedVouchers) {
-            const eventGift = eventGiftRepository.create({
+            const eventGift = {
               eventReferenceId: savedEvent.id,
               giftReferenceId: voucher.id,
               userId: this.call.userId,
-            });
-            await queryRunner.manager.save(EventGift, eventGift);
+            };
+            await this.call.saveEventGift(eventGift);
           }
 
           this.call.logInfo(`Successfully associated vouchers with event ${savedEvent.id}`);
         }
-
-        // Commit the transaction
-        await queryRunner.commitTransaction();
-
-        // // SAVE_SUCCESS message is played here.
-        // await this.call.playMessage(MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS);
 
         this.logComplete('createEvent', {
           eventId: savedEvent.id,
           voucherCount: this.selectedVouchers.length,
         });
         return savedEvent;
-      } catch (error) {
-        // Rollback the transaction on error
-        await queryRunner.rollbackTransaction();
-        throw error;
-      } finally {
-        // Release the query runner
-        await queryRunner.release();
-      }
+      });
+
+      // // SAVE_SUCCESS message is played here.
+      // await this.call.playMessage(MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS);
+
+      // withTransaction handles the commit/rollback/release automatically
     } catch (error) {
       this.logError('createEvent', error as Error);
       // Do not play generic error here, let it bubble up to handleEventRegistration
-      throw error;
+      throw error; // Rethrow to handleEventRegistration
     }
   }
 
@@ -344,7 +320,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
     try {
       // Create and use the voucher selection handler
-      const voucherHandler = new VoucherSelectionHandler(this.call, this.dataSource);
+      const voucherHandler = new VoucherSelectionHandler(this.call);
 
       // Handle the voucher selection - this is multi-selection
       await voucherHandler.handleMultiSelection();

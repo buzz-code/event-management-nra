@@ -38,11 +38,10 @@ export class DateSelectionHelper extends BaseYemotHandler {
 
   /**
    * Constructor for the DateSelectionHelper
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    */
-  constructor(call: Call, dataSource: DataSource) {
-    super(call, dataSource);
+  constructor(call: Call) {
+    super(call);
 
     // Initialize with the current Jewish year and next year
     const today = toJewishDate(new Date());

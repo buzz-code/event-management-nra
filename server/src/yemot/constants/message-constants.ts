@@ -25,6 +25,11 @@ export const MESSAGE_CONSTANTS = {
      * Maximum attempts reached message
      */
     MAX_ATTEMPTS_REACHED: 'מספר נסיונות הבחירה הגיע למקסימום. אנא נסי להתקשר שנית מאוחר יותר.',
+    
+    /**
+     * User not found message
+     */
+    USER_NOT_FOUND: 'תקלה, המערכת לא מחוברת.',
 
     /**
      * Welcome message with student name

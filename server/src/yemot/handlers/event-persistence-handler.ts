@@ -1,5 +1,4 @@
 import { Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -7,7 +6,6 @@ import { LevelType } from 'src/db/entities/LevelType.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { EventGift } from 'src/db/entities/EventGift.entity';
 import { EventNote } from 'src/db/entities/EventNote.entity';
-import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { Call } from 'yemot-router2';
 
 /**
@@ -16,17 +14,14 @@ import { Call } from 'yemot-router2';
  */
 export class EventPersistenceHandler {
   private call: Call;
-  private dataSource: DataSource;
   private savedEvent: DBEvent | null = null;
 
   /**
    * Constructor for the EventPersistenceHandler
-   * @param call The Yemot call object
-   * @param dataSource The initialized data source
+   * @param call The enhanced Yemot call object with data access capabilities
    */
-  constructor(call: Call, dataSource: DataSource) {
+  constructor(call: Call) {
     this.call = call;
-    this.dataSource = dataSource;
   }
 
   /**
@@ -82,82 +77,68 @@ export class EventPersistenceHandler {
     if (eventType) this.call.logInfo(`Event type: ${eventType.id} - ${eventType.name}`);
     if (eventDate) this.call.logInfo(`Event date: ${eventDate}`);
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      const event = existingEvent || new DBEvent();
+      // Use withTransaction method from ExtendedCall
+      return await this.call.withTransaction(async (queryRunner) => {
+        const event = existingEvent || new DBEvent();
 
-      event.userId = this.call.userId;
-      event.studentReferenceId = student.id;
+        event.userId = this.call.userId;
+        event.studentReferenceId = student.id;
 
-      if (eventType) {
-        event.eventTypeReferenceId = eventType.id;
-      }
-
-      if (eventDate) {
-        event.eventDate = eventDate;
-      }
-
-      if (path) {
-        event.levelTypeReferenceId = path.id;
-        this.call.logInfo(`Setting path: ${path.id} - ${path.name}`);
-      }
-
-      if (!existingEvent) {
-        this.savedEvent = await queryRunner.manager.save(DBEvent, event);
-        this.call.logInfo(`Created new event with ID: ${this.savedEvent.id}`);
-      } else {
-        this.savedEvent = await queryRunner.manager.save(DBEvent, event);
-        this.call.logInfo(`Updated event with ID: ${this.savedEvent.id}`);
-
-        if (vouchers && vouchers.length > 0) {
-          await queryRunner.manager.delete(EventGift, {
-            eventReferenceId: this.savedEvent.id,
-          });
-          this.call.logInfo(`Removed existing vouchers for event ${this.savedEvent.id}`);
+        if (eventType) {
+          event.eventTypeReferenceId = eventType.id;
         }
-      }
 
-      if (vouchers && vouchers.length > 0 && this.savedEvent) {
-        const eventVouchers = vouchers.map((voucher) => {
-          const eventGift = new EventGift();
-          eventGift.userId = voucher.userId;
-          eventGift.eventReferenceId = this.savedEvent!.id;
-          eventGift.giftReferenceId = voucher.id;
-          return eventGift;
-        });
+        if (eventDate) {
+          event.eventDate = eventDate;
+        }
 
-        await queryRunner.manager.save(EventGift, eventVouchers);
-        this.call.logInfo(`Added ${eventVouchers.length} vouchers to event ${this.savedEvent.id}`);
-      }
+        if (path) {
+          event.levelTypeReferenceId = path.id;
+          this.call.logInfo(`Setting path: ${path.id} - ${path.name}`);
+        }
 
-      await queryRunner.commitTransaction();
-      this.call.logInfo(`Event ${this.savedEvent.id} saved successfully`);
+        if (!existingEvent) {
+          this.savedEvent = await this.call.saveEvent(event);
+          this.call.logInfo(`Created new event with ID: ${this.savedEvent.id}`);
+        } else {
+          this.savedEvent = await this.call.updateEvent(event);
+          this.call.logInfo(`Updated event with ID: ${this.savedEvent.id}`);
 
-      // Fetch the updated event with all relations
-      // Load fresh copy of the saved event with all relations
-      const updatedEvent = await queryRunner.manager.getRepository(DBEvent).findOne({
-        where: {
-          id: this.savedEvent!.id,
-        },
-        relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift'],
+          if (vouchers && vouchers.length > 0) {
+            await queryRunner.manager.delete(EventGift, {
+              eventReferenceId: this.savedEvent.id,
+            });
+            this.call.logInfo(`Removed existing vouchers for event ${this.savedEvent.id}`);
+          }
+        }
+
+        if (vouchers && vouchers.length > 0 && this.savedEvent) {
+          for (const voucher of vouchers) {
+            const eventGift = new EventGift();
+            eventGift.userId = voucher.userId;
+            eventGift.eventReferenceId = this.savedEvent.id;
+            eventGift.giftReferenceId = voucher.id;
+            
+            await this.call.saveEventGift(eventGift);
+          }
+          this.call.logInfo(`Added ${vouchers.length} vouchers to event ${this.savedEvent.id}`);
+        }
+
+        // Get the updated event with all relations
+        const updatedEvent = await this.call.getEventById(this.savedEvent!.id);
+
+        if (!updatedEvent) {
+          throw new Error(`Could not fetch updated event with ID ${this.savedEvent!.id}`);
+        }
+
+        this.savedEvent = updatedEvent;
+        this.logComplete('saveEvent', { eventId: this.savedEvent.id });
+        return this.savedEvent;
       });
-
-      if (!updatedEvent) {
-        throw new Error(`Could not fetch updated event with ID ${this.savedEvent.id}`);
-      }
-
-      this.savedEvent = updatedEvent;
-      this.logComplete('saveEvent', { eventId: this.savedEvent.id });
-      return this.savedEvent;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
       this.logError('saveEvent', error as Error);
       throw error;
-    } finally {
-      await queryRunner.release();
     }
   }
 
@@ -176,7 +157,7 @@ export class EventPersistenceHandler {
     eventNote.noteText = note;
 
     try {
-      const savedNote = await this.dataSource.getRepository(EventNote).save(eventNote);
+      const savedNote = await this.call.saveEventNote(eventNote);
       this.logComplete('addEventNote', {
         eventId: event.id,
         noteId: savedNote.id,
@@ -200,14 +181,11 @@ export class EventPersistenceHandler {
     event.completed = completed;
 
     try {
-      // Save the update
-      await this.dataSource.getRepository(DBEvent).save(event);
+      // Use ExtendedCall's updateEvent method
+      await this.call.updateEvent(event);
 
       // Load fresh copy with relations
-      const updatedEvent = await this.dataSource.getRepository(DBEvent).findOne({
-        where: { id: event.id },
-        relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift'],
-      });
+      const updatedEvent = await this.call.getEventById(event.id);
 
       if (!updatedEvent) {
         throw new Error(`Could not fetch updated event with ID ${event.id}`);
@@ -234,28 +212,16 @@ export class EventPersistenceHandler {
     this.logStart('findStudentEvents');
 
     try {
-      let queryBuilder = this.dataSource
-        .getRepository(DBEvent)
-        .createQueryBuilder('event')
-        .leftJoinAndSelect('event.eventType', 'eventType')
-        .leftJoinAndSelect('event.levelType', 'levelType')
-        .leftJoinAndSelect('event.eventGifts', 'eventGift')
-        .leftJoinAndSelect('eventGift.gift', 'gift')
-        .where('event.studentReferenceId = :studentId', {
-          studentId: student.id,
-        });
-
+      // Use ExtendedCall's getStudentEvents method directly
+      const allEvents = await this.call.getStudentEvents(student.id);
+      
+      let events = allEvents;
       if (includeCompleted === false) {
-        queryBuilder = queryBuilder.andWhere('event.completed = :completed', {
-          completed: false,
-        });
+        events = allEvents.filter(event => !event.completed);
       } else if (includeCompleted === true) {
-        queryBuilder = queryBuilder.andWhere('event.completed = :completed', {
-          completed: true,
-        });
+        events = allEvents.filter(event => event.completed);
       }
 
-      const events = await queryBuilder.getMany();
       this.logComplete('findStudentEvents', {
         studentId: student.id,
         count: events.length,
@@ -276,10 +242,8 @@ export class EventPersistenceHandler {
     this.logStart('findEventById');
 
     try {
-      const event = await this.dataSource.getRepository(DBEvent).findOne({
-        where: { id: eventId },
-        relations: ['eventType', 'levelType', 'eventGifts', 'eventGifts.gift', 'student'],
-      });
+      // Use ExtendedCall's getEventById method
+      const event = await this.call.getEventById(eventId);
 
       this.logComplete('findEventById', { eventId, found: !!event });
       return event;
@@ -298,38 +262,32 @@ export class EventPersistenceHandler {
   async recordEventCompletion(eventToUpdate: DBEvent, completedPath: LevelType): Promise<DBEvent> {
     this.logStart('recordEventCompletion');
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      const event = await queryRunner.manager.findOneBy(DBEvent, {
-        id: eventToUpdate.id,
+      // Use withTransaction method from ExtendedCall
+      return await this.call.withTransaction(async () => {
+        const event = await this.call.getEventById(eventToUpdate.id);
+        
+        if (!event) {
+          throw new Error(`Event with ID ${eventToUpdate.id} not found for completion update.`);
+        }
+
+        event.completedPathReferenceId = completedPath.id;
+        event.completedPathKey = completedPath.key; // Assuming LevelType has a 'key' property
+        event.completionReportDate = new Date();
+        // event.completed = true; // Consider if this should also be set here explicitly
+
+        this.savedEvent = await this.call.updateEvent(event);
+
+        this.logComplete('recordEventCompletion', {
+          eventId: this.savedEvent.id,
+          pathId: completedPath.id,
+          pathName: completedPath.name,
+        });
+        return this.savedEvent;
       });
-      if (!event) {
-        throw new Error(`Event with ID ${eventToUpdate.id} not found for completion update.`);
-      }
-
-      event.completedPathReferenceId = completedPath.id;
-      event.completedPathKey = completedPath.key; // Assuming LevelType has a 'key' property
-      event.completionReportDate = new Date();
-      // event.completed = true; // Consider if this should also be set here explicitly
-
-      this.savedEvent = await queryRunner.manager.save(DBEvent, event);
-      await queryRunner.commitTransaction();
-
-      this.logComplete('recordEventCompletion', {
-        eventId: this.savedEvent.id,
-        pathId: completedPath.id,
-        pathName: completedPath.name,
-      });
-      return this.savedEvent;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
       this.logError('recordEventCompletion', error as Error);
       throw error;
-    } finally {
-      await queryRunner.release();
     }
   }
 

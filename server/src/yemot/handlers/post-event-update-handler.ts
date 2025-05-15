@@ -23,9 +23,9 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
   // private student: Student | null = null; // Removed student property as it's passed as a parameter
   private eventPersistenceHandler: EventPersistenceHandler;
 
-  constructor(call: Call, dataSource: DataSource) {
-    super(call, dataSource);
-    this.eventPersistenceHandler = new EventPersistenceHandler(call, dataSource);
+  constructor(call: Call) {
+    super(call);
+    this.eventPersistenceHandler = new EventPersistenceHandler(call);
   }
 
   // setStudent(student: Student): void { // Removed setStudent method
@@ -45,7 +45,6 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
       // 1. Create an event selector using ConfigurableEventSelector
       const eventSelector = new ConfigurableEventSelector(
         this.call,
-        this.dataSource,
         student, // Use the passed student parameter
         studentEvents, // Use the passed studentEvents parameter
         EventEligibilityType.POST_UPDATE,
@@ -64,7 +63,7 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
 
       // 2. Select Completed Path
       // PathSelectionHandler is a SelectionHelper<LevelType>
-      const pathSelector = new PathSelectionHandler(this.call, this.dataSource);
+      const pathSelector = new PathSelectionHandler(this.call);
       const selectedPath = await pathSelector.handleSingleSelection();
 
       if (!selectedPath) {
