@@ -19,13 +19,30 @@ import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
 import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
 import { createExtendedCall } from './utils/extended-call';
 
+async function createDataSource() {
+  // Get a data source with all required entities
+  const dataSource = await getDataSource([
+    Student,
+    EventType,
+    Event,
+    Teacher,
+    User,
+    LevelType,
+    EventNote,
+    EventGift,
+    Gift,
+    Class,
+  ]);
+
+  return dataSource;
+}
+
 /**
  * The main Yemot call handler class
  */
 export class CallHandler {
   private logger: Logger;
   private call: Call;
-  private dataSource: DataSource;
 
   private handlerFactory: YemotHandlerFactory;
   private flowOrchestrator: YemotFlowOrchestrator;
@@ -42,27 +59,14 @@ export class CallHandler {
   }
 
   /**
-   * Initializes the data source and required components
+   * Initializes required components
    */
-  async initializeDataSource(): Promise<void> {
-    // Get a data source with all required entities
-    this.dataSource = await getDataSource([
-      Student,
-      EventType,
-      Event,
-      Teacher,
-      User,
-      LevelType,
-      EventNote,
-      EventGift,
-      Gift,
-      Class,
-    ]);
-
-    this.logger.log('Data source initialized successfully');
+  async initializeRequiredComponents() {
+    const dataSource = await createDataSource();
+    this.logger.log('Data source initialized');
 
     // Create an extended call with enhanced datasource access and context management
-    const extendedCall = createExtendedCall(this.call, this.logger, this.dataSource);
+    const extendedCall = createExtendedCall(this.call, this.logger, dataSource);
 
     // Create handlers using the enhanced extended call
     this.logger.log('Using enhanced ExtendedCall with centralized data access');
@@ -90,7 +94,7 @@ export class CallHandler {
   async execute(): Promise<void> {
     try {
       // Initialize the data source and create the enhanced ExtendedCall
-      await this.initializeDataSource();
+      await this.initializeRequiredComponents();
 
       // Find and verify the user
       await this.findUser();
