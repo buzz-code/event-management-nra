@@ -1,10 +1,7 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { YemotHandlerFactory } from './yemot-handler-factory';
 import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { MenuOption } from './user-interaction-handler';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { User } from '@shared/entities/User.entity';
@@ -43,7 +40,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         this.call.logWarn('User not found in context, attempting to find user');
         const foundUser = await this.call.findUserByPhone();
         if (!foundUser) {
-          await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.USER_NOT_FOUND);
+          await this.call.hangupWithMessage(this.call.getText('GENERAL.USER_NOT_FOUND'));
           return;
         }
       }
@@ -88,7 +85,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         //   break;
         default:
           this.call.logError(`Invalid menu choice: ${menuOption}`);
-          await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+          await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
       }
     } catch (error) {
       this.logError('execute', error as Error);
@@ -109,7 +106,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       if (!this.student) {
         // Check student before creating handler that requires it
         this.call.logError('Student is null, cannot proceed with event registration.');
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
         return;
       }
 
@@ -139,10 +136,10 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
       // The EventRegistrationHandler.createEvent() method already plays SAVE_SUCCESS.
       // Orchestrator is responsible for final success message and hangup.
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS);
+      await this.call.hangupWithMessage(this.call.getText('EVENT.SAVE_SUCCESS'));
     } catch (error) {
       this.logError('executeReportCelebrationFlow', error as Error);
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.EVENT.REPORT_ERROR);
+      await this.call.hangupWithMessage(this.call.getText('EVENT.REPORT_ERROR'));
     }
   }
 
@@ -156,7 +153,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
     try {
       if (!this.student) {
         this.call.logError('Student is null, cannot proceed with path selection flow.');
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
         return;
       }
 
@@ -169,7 +166,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         // The selector itself should handle user messages and hangup if needed.
         // Orchestrator is responsible for final error message and hangup if selector doesn't.
         await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.PATH.SELECTION_ERROR, // Use a more specific error message
+          this.call.getText('PATH.SELECTION_ERROR'), // Use a more specific error message
         );
         return;
       }
@@ -186,7 +183,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       if (!selectedPath) {
         this.call.logWarn('No path selected by user.');
         await this.call.hangupWithMessage(
-          MESSAGE_CONSTANTS.PATH.NO_PATH_SELECTED, // Use a more specific error message
+          this.call.getText('PATH.NO_PATH_SELECTED'), // Use a more specific error message
         );
         return;
       }
@@ -207,17 +204,17 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
       }
 
       // Option to continue to voucher selection or finish
-      const continueToVouchers = await this.call.getConfirmation(MESSAGE_CONSTANTS.PATH.CONTINUE_TO_VOUCHERS);
+      const continueToVouchers = await this.call.getConfirmation(this.call.getText('PATH.CONTINUE_TO_VOUCHERS'));
 
       if (continueToVouchers) {
         await this.executeVoucherSelectionFlow(updatedEvent);
       } else {
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.PATH.SELECTION_SUCCESS);
+        await this.call.hangupWithMessage(this.call.getText('PATH.SELECTION_SUCCESS'));
       }
     } catch (error) {
       this.logError('executePathSelectionFlow', error as Error);
       // Generic error message for unexpected errors
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.PATH.SELECTION_ERROR);
+      await this.call.hangupWithMessage(this.call.getText('PATH.SELECTION_ERROR'));
     }
   }
 
@@ -232,7 +229,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
     try {
       if (!this.student) {
         this.call.logError('Student is null, cannot proceed with voucher selection flow.');
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
         return;
       }
 
@@ -257,7 +254,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
           // Selector should handle messages.
           // Orchestrator is responsible for final error message and hangup if selector doesn't.
           await this.call.hangupWithMessage(
-            MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR, // Use a more specific error message
+            this.call.getText('VOUCHER.SELECTION_ERROR'), // Use a more specific error message
           );
           return;
         }
@@ -298,17 +295,17 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         }
 
         // 4. Orchestrator plays final success message and hangs up
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.VOUCHER.SELECTION_SUCCESS);
+        await this.call.hangupWithMessage(this.call.getText('VOUCHER.SELECTION_SUCCESS'));
       } else {
         this.call.logWarn('Voucher selection was not confirmed by user');
         // Handler should have played the "retry selection" message.
         // Orchestrator plays the final "not confirmed" message and hangs up.
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.VOUCHER.SELECTION_NOT_CONFIRMED);
+        await this.call.hangupWithMessage(this.call.getText('VOUCHER.SELECTION_NOT_CONFIRMED'));
       }
     } catch (error) {
       this.logError('executeVoucherSelectionFlow', error as Error);
       // Generic error message for unexpected errors
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.VOUCHER.SELECTION_ERROR);
+      await this.call.hangupWithMessage(this.call.getText('VOUCHER.SELECTION_ERROR'));
     }
   }
 
@@ -325,7 +322,7 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
 
       if (!this.student) {
         this.call.logError('Student is null, cannot proceed with post-celebration update.');
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
         return;
       }
 
@@ -336,17 +333,17 @@ export class YemotFlowOrchestrator extends BaseYemotHandler {
         this.call.logInfo('Post-event update flow completed successfully.');
         // The handler itself plays success/error messages and can hang up.
         // Orchestrator plays the final success message and hangs up.
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS);
+        await this.call.hangupWithMessage(this.call.getText('POST_EVENT.UPDATE_SUCCESS'));
       } else {
         this.call.logInfo('Post-event update flow did not complete successfully or was aborted by user.');
         // Handler should have played appropriate messages.
         // Orchestrator plays the final error message and hangs up if the handler didn't.
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR);
+        await this.call.hangupWithMessage(this.call.getText('POST_EVENT.UPDATE_ERROR'));
       }
     } catch (error) {
       this.logError('executePostCelebrationUpdateFlow', error as Error);
       // Generic error message for unexpected errors
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR);
+      await this.call.hangupWithMessage(this.call.getText('POST_EVENT.UPDATE_ERROR'));
     }
   }
 }

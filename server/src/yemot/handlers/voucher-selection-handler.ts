@@ -5,7 +5,6 @@ import { SelectionHelper } from './selection-helper';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { EventGift } from 'src/db/entities/EventGift.entity';
 import { SYSTEM_CONSTANTS } from '../constants/system-constants';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
  * Specialized handler for selecting vouchers
@@ -66,13 +65,13 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
 
       const voucherNames = existingVouchers.map((v) => v.name).join(', ');
       this.call.logInfo(`Found existing vouchers: ${voucherNames}`);
-      await this.call.playMessage(MESSAGE_CONSTANTS.VOUCHER.CURRENT_VOUCHERS(voucherNames));
+      await this.call.playMessage(this.call.getText('VOUCHER.CURRENT_VOUCHERS', { voucherNames }));
 
       // Ask if they want to change
       const changeSelection = await this.call.getConfirmation(
-        MESSAGE_CONSTANTS.VOUCHER.CHANGE_PROMPT,
-        MESSAGE_CONSTANTS.VOUCHER.CHANGE_OPTION,
-        MESSAGE_CONSTANTS.VOUCHER.KEEP_OPTION,
+        this.call.getText('VOUCHER.CHANGE_PROMPT'),
+        this.call.getText('VOUCHER.CHANGE_OPTION'),
+        this.call.getText('VOUCHER.KEEP_OPTION'),
       );
 
       if (!changeSelection) {
@@ -101,7 +100,7 @@ export class VoucherSelectionHandler extends SelectionHelper<Gift> {
    */
   protected createSelectionPrompt(): string {
     const options = this.items.map((item) => `להקשת ${item.key} עבור שובר ${item.name}`).join(' ');
-    return MESSAGE_CONSTANTS.VOUCHER.SELECTION_PROMPT(options);
+    return this.call.getText('VOUCHER.SELECTION_PROMPT', { options });
   }
 
   /**

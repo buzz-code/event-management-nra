@@ -1,6 +1,4 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource, IsNull } from 'typeorm';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity'; // Added import for DBEvent
@@ -9,7 +7,6 @@ import { Event as DBEvent } from 'src/db/entities/Event.entity'; // Added import
 // SelectionHelper is used by EventForUpdateSelector
 import { EventPersistenceHandler } from './event-persistence-handler';
 import { PathSelectionHandler } from './path-selection-handler';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 // FormatUtils is used by EventForUpdateSelector
 // Remove import for EventForUpdateSelector
 import { ConfigurableEventSelector } from './configurable-event-selector'; // Added import for ConfigurableEventSelector
@@ -38,7 +35,7 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
     try {
       if (!student) { // Check the passed student parameter
         this.call.logError('Student not set for PostEventUpdateHandler');
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
         return false;
       }
 
@@ -69,13 +66,13 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
       if (!selectedPath) {
         this.call.logInfo('No path selected by the user or selection process failed.');
         // PathSelectionHandler (via SelectionHelper) would handle messages.
-        await this.call.playMessage(MESSAGE_CONSTANTS.PATH.NO_PATH_SELECTED);
+        await this.call.playMessage(this.call.getText('PATH.NO_PATH_SELECTED'));
         return false;
       }
 
       // 3. Update Event Completion Status
       await this.eventPersistenceHandler.recordEventCompletion(eventToUpdate, selectedPath);
-      await this.call.playMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_SUCCESS);
+      await this.call.playMessage(this.call.getText('POST_EVENT.UPDATE_SUCCESS'));
       this.logComplete('handlePostEventUpdate', {
         eventId: eventToUpdate.id,
         pathId: selectedPath.id,
@@ -83,7 +80,7 @@ export class PostEventUpdateHandler extends BaseYemotHandler {
       return true;
     } catch (error) {
       this.logError('handlePostEventUpdate', error as Error);
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.POST_EVENT.UPDATE_ERROR);
+      await this.call.hangupWithMessage(this.call.getText('POST_EVENT.UPDATE_ERROR'));
       return false;
     }
   }

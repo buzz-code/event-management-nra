@@ -1,7 +1,4 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource } from 'typeorm';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 /**
  * Interface for options when reading digits from the call
@@ -65,8 +62,8 @@ export abstract class BaseYemotHandler {
    */
   protected async getConfirmation(
     prompt: string,
-    yesOption: string = MESSAGE_CONSTANTS.GENERAL.YES_OPTION,
-    noOption: string = MESSAGE_CONSTANTS.GENERAL.NO_OPTION,
+    yesOption: string = this.call.getText('GENERAL.YES_OPTION'),
+    noOption: string = this.call.getText('GENERAL.NO_OPTION'),
   ): Promise<boolean> {
     return await this.call.getConfirmation(prompt, yesOption, noOption);
   }

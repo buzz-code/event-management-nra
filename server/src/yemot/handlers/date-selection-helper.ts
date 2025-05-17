@@ -11,7 +11,6 @@ import {
   toGregorianDate,
   toJewishDate,
 } from 'jewish-date';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { FormatUtils } from '../utils/format-utils';
 
 /**
@@ -81,7 +80,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
           return true;
         },
         '',
-        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED,
+        this.call.getText('GENERAL.MAX_ATTEMPTS_REACHED'),
       );
 
       if (!success || !this.gregorianDate) {
@@ -100,7 +99,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
       return result;
     } catch (error) {
       this.logError('handleDateSelection', error as Error);
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+      await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
       return null;
     }
   }
@@ -112,7 +111,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
   private async collectDay(): Promise<number> {
     this.logStart('collectDay');
 
-    const day = await this.call.readDigits(MESSAGE_CONSTANTS.DATE.DAY_PROMPT, {
+    const day = await this.call.readDigits(this.call.getText('DATE.DAY_PROMPT'), {
       max_digits: 2,
       min_digits: 1,
     });
@@ -120,7 +119,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     const dayNumber = parseInt(day);
 
     if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 30) {
-      throw new Error(MESSAGE_CONSTANTS.DATE.INVALID_DAY);
+      throw new Error(this.call.getText('DATE.INVALID_DAY'));
     }
 
     this.call.logInfo(`User entered day: ${dayNumber}`);
@@ -138,7 +137,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     const months = this.getHebrewMonthsList();
     const monthNames = months.map(({ hebrewName }, index) => `${index + 1} - ${hebrewName}`);
 
-    const monthMessage = MESSAGE_CONSTANTS.DATE.MONTH_PROMPT(monthNames.join(', '));
+    const monthMessage = this.call.getText('DATE.MONTH_PROMPT', { options: monthNames.join(', ') });
 
     const month = await this.call.readDigits(monthMessage, {
       max_digits: 2,
@@ -149,7 +148,7 @@ export class DateSelectionHelper extends BaseYemotHandler {
     const selectedMonth = months[monthNumber - 1];
 
     if (!selectedMonth) {
-      throw new Error(MESSAGE_CONSTANTS.DATE.INVALID_MONTH(months.length));
+      throw new Error(this.call.getText('DATE.INVALID_MONTH', { maxMonth: months.length.toString() }));
     }
 
     this.call.logInfo(
@@ -225,9 +224,9 @@ export class DateSelectionHelper extends BaseYemotHandler {
     }
 
     return await this.call.getConfirmation(
-      MESSAGE_CONSTANTS.DATE.CONFIRM_DATE(this.fullHebrewDate),
-      MESSAGE_CONSTANTS.DATE.CONFIRM_YES,
-      MESSAGE_CONSTANTS.DATE.CONFIRM_NO,
+      this.call.getText('DATE.CONFIRM_DATE', { date: this.fullHebrewDate }),
+      this.call.getText('DATE.CONFIRM_YES'),
+      this.call.getText('DATE.CONFIRM_NO'),
     );
   }
 

@@ -18,7 +18,6 @@ import { Class } from 'src/db/entities/Class.entity';
 import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
 import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
 import { createExtendedCall } from './utils/extended-call';
-import { MESSAGE_CONSTANTS } from './constants/message-constants';
 
 /**
  * The main Yemot call handler class
@@ -101,7 +100,7 @@ export class CallHandler {
     } catch (error) {
       this.logger.error(`Error executing call flow: ${error.message}`);
 
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+      await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
     }
   }
 }

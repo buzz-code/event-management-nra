@@ -1,15 +1,13 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { Event } from 'src/db/entities/Event.entity';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { DateSelectionHelper, DateSelectionResult } from './date-selection-helper';
 import { FormatUtils } from '../utils/format-utils';
 import { VoucherSelectionHandler } from './voucher-selection-handler';
 import { Gift } from 'src/db/entities/Gift.entity';
-import { EventGift } from 'src/db/entities/EventGift.entity';
+import { SYSTEM_CONSTANTS } from '../constants/system-constants';
 
 /**
  * Interface for event registration results
@@ -97,7 +95,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       };
     } catch (error) {
       this.logError('handleEventRegistration', error as Error);
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.EVENT.REPORT_ERROR);
+      await this.call.hangupWithMessage(this.call.getText('EVENT.REPORT_ERROR'));
       return null;
     }
   }
@@ -118,13 +116,13 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       if (this.eventTypes.length === 0) {
         this.call.logWarn('No event types found in the database.');
         // Inform the user and hang up, then return to stop further execution in this flow.
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.ERROR); // Or a more specific message
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR')); // Or a more specific message
         return; // Return after hanging up
       }
 
       const eventTypeOptions = this.eventTypes.map((et, index) => `להקשת ${et.name} הקישי ${index + 1}`).join(', ');
 
-      const selectionMessage = MESSAGE_CONSTANTS.EVENT.TYPE_SELECTION_PROMPT(eventTypeOptions);
+      const selectionMessage = this.call.getText('EVENT.TYPE_SELECTION_PROMPT', { options: eventTypeOptions });
 
       const selection = await this.withRetry(
         async () => {
@@ -142,8 +140,8 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
           return this.eventTypes[selectionIndex];
         },
-        MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT,
-        MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED, // Message for final failure of withRetry
+        this.call.getText('GENERAL.INVALID_INPUT'),
+        this.call.getText('GENERAL.MAX_ATTEMPTS_REACHED') // Message for final failure of withRetry
       );
 
       if (!selection) {
@@ -154,7 +152,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
       this.selectedEventType = selection;
 
-      await this.call.playMessage(MESSAGE_CONSTANTS.EVENT.TYPE_SELECTED(this.selectedEventType.name));
+      await this.call.playMessage(this.call.getText('EVENT.TYPE_SELECTED', { eventTypeName: this.selectedEventType.name }));
 
       this.logComplete('selectEventType', {
         eventTypeId: this.selectedEventType.id,
@@ -226,7 +224,11 @@ export class EventRegistrationHandler extends BaseYemotHandler {
 
         const formattedDate = FormatUtils.formatHebrewDate(foundEvent.eventDate);
 
-        const message = MESSAGE_CONSTANTS.EVENT.ALREADY_EXISTS(this.selectedEventType.name, formattedDate);
+        const message = this.call.getText('EVENT.ALREADY_EXISTS', { 
+          eventType: this.selectedEventType.name, 
+          date: formattedDate,
+          supportPhone: SYSTEM_CONSTANTS.SUPPORT_PHONE,
+        });
 
         await this.call.hangupWithMessage(message);
 
@@ -302,7 +304,7 @@ export class EventRegistrationHandler extends BaseYemotHandler {
       });
 
       // // SAVE_SUCCESS message is played here.
-      // await this.call.playMessage(MESSAGE_CONSTANTS.EVENT.SAVE_SUCCESS);
+      // await this.call.playMessage(this.call.getText('EVENT.SAVE_SUCCESS'));
 
       // withTransaction handles the commit/rollback/release automatically
     } catch (error) {

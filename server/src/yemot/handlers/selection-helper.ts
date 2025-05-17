@@ -1,8 +1,6 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource, FindOptionsOrder, FindOptionsWhere, FindOptionsWhereProperty, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { SYSTEM_CONSTANTS } from '../constants/system-constants';
 
 /**
@@ -64,7 +62,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName));
+      await this.call.hangupWithMessage(this.call.getText('SELECTION.NO_OPTIONS', { entityName: this.entityName }));
       this.logComplete('handleSingleSelection', { status: 'no-items' });
       return null;
     }
@@ -99,21 +97,21 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
           // Selection wasn't successful, increment attempts
           attempts++;
           if (attempts < SYSTEM_CONSTANTS.MAX_RETRIES) {
-            await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT);
+            await this.call.playMessage(this.call.getText('GENERAL.INVALID_INPUT'));
           }
         }
       } catch (error) {
         this.logError('handleSingleSelection', error as Error);
         attempts++;
         if (attempts < SYSTEM_CONSTANTS.MAX_RETRIES) {
-          await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+          await this.call.playMessage(this.call.getText('GENERAL.ERROR'));
         }
       }
     }
 
     if (!selectionComplete) {
       this.call.logError(`Maximum ${this.entityName} selection attempts reached`);
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED);
+      await this.call.hangupWithMessage(this.call.getText('GENERAL.MAX_ATTEMPTS_REACHED'));
       this.logComplete('handleSingleSelection', {
         status: 'max-attempts-reached',
       });
@@ -135,7 +133,7 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     await this.fetchItems();
 
     if (this.items.length === 0) {
-      await this.call.hangupWithMessage(MESSAGE_CONSTANTS.SELECTION.NO_OPTIONS(this.entityName));
+      await this.call.hangupWithMessage(this.call.getText('SELECTION.NO_OPTIONS', { entityName: this.entityName }));
       this.logComplete('handleMultiSelection', { status: 'no-items' });
       return [];
     }
@@ -172,14 +170,14 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
     while (continueSelection && this.selectedItems.length < this.maxSelections) {
       if (selectionAttempts >= SYSTEM_CONSTANTS.MAX_RETRIES) {
         this.call.logError(`Maximum ${this.entityName} selection attempts reached`);
-        await this.call.hangupWithMessage(MESSAGE_CONSTANTS.GENERAL.MAX_ATTEMPTS_REACHED);
+        await this.call.hangupWithMessage(this.call.getText('GENERAL.MAX_ATTEMPTS_REACHED'));
         return;
       }
 
       // Show current selection status
       if (this.selectedItems.length > 0) {
         const selectedNames = this.selectedItems.map((item) => item.name).join(', ');
-        await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames));
+        await this.call.playMessage(this.call.getText('SELECTION.SELECTION_SUMMARY', { selectedNames }));
       }
 
       try {
@@ -192,25 +190,25 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
           // Check if we should continue selecting more items
           if (this.selectedItems.length < this.maxSelections) {
             continueSelection = await this.call.getConfirmation(
-              MESSAGE_CONSTANTS.SELECTION.LAST_SELECTION(
-                this.entityName,
-                this.selectedItems[this.selectedItems.length - 1].name,
-              ),
-              MESSAGE_CONSTANTS.SELECTION.CONTINUE_OPTION,
-              MESSAGE_CONSTANTS.SELECTION.FINISH_OPTION,
+              this.call.getText('SELECTION.LAST_SELECTION', {
+                entityName: this.entityName,
+                itemName: this.selectedItems[this.selectedItems.length - 1].name
+              }),
+              this.call.getText('SELECTION.CONTINUE_OPTION'),
+              this.call.getText('SELECTION.FINISH_OPTION'),
             );
           } else {
-            await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.MAX_SELECTIONS_REACHED(this.maxSelections));
+            await this.call.playMessage(this.call.getText('SELECTION.MAX_SELECTIONS_REACHED', { maxSelections: this.maxSelections.toString() }));
             continueSelection = false;
           }
         } else {
           selectionAttempts++;
-          await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.INVALID_INPUT);
+          await this.call.playMessage(this.call.getText('GENERAL.INVALID_INPUT'));
         }
       } catch (error) {
         this.logError('executeMultiSelectionFlow', error as Error);
         selectionAttempts++;
-        await this.call.playMessage(MESSAGE_CONSTANTS.GENERAL.ERROR);
+        await this.call.playMessage(this.call.getText('GENERAL.ERROR'));
       }
     }
 
@@ -226,25 +224,25 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
   protected async finalizeMultiSelection(): Promise<void> {
     // List all selected items
     const selectedNames = this.selectedItems.map((item) => item.name).join(', ');
-    await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.SELECTION_SUMMARY(selectedNames));
+    await this.call.playMessage(this.call.getText('SELECTION.SELECTION_SUMMARY', { selectedNames }));
 
     // Warning about final selection
     if (this.entityName === 'שובר' || this.entityName === 'שוברים') {
-      await this.call.playMessage(MESSAGE_CONSTANTS.VOUCHER.FINAL_WARNING);
+      await this.call.playMessage(this.call.getText('VOUCHER.FINAL_WARNING'));
     }
 
     // Confirm selection
     this.selectionConfirmed = await this.call.getConfirmation(
       '',
-      MESSAGE_CONSTANTS.SELECTION.CONFIRM_OPTION,
-      MESSAGE_CONSTANTS.SELECTION.RESTART_OPTION,
+      this.call.getText('SELECTION.CONFIRM_OPTION'),
+      this.call.getText('SELECTION.RESTART_OPTION'),
     );
 
     if (!this.selectionConfirmed) {
       await this.call.playMessage(
         this.entityName === 'שובר' || this.entityName === 'שוברים'
-          ? MESSAGE_CONSTANTS.VOUCHER.RETRY_SELECTION
-          : MESSAGE_CONSTANTS.SELECTION.RESTART_MESSAGE(this.entityName),
+          ? this.call.getText('VOUCHER.RETRY_SELECTION')
+          : this.call.getText('SELECTION.RESTART_MESSAGE', { entityName: this.entityName }),
       );
 
       // Clear selection to start over
@@ -279,12 +277,14 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
 
     const selectedKey = parseInt(selection);
     const selectedItem = this.findItemByKey(selectedKey);
-
     if (selectedItem !== null) {
       // For multi-selection, check if item is already selected
       if (this.maxSelections > 1) {
         if (this.isItemSelected(selectedItem)) {
-          await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.ALREADY_SELECTED(this.entityName, selectedItem.name));
+          await this.call.playMessage(this.call.getText('SELECTION.ALREADY_SELECTED', {
+            entityName: this.entityName,
+            itemName: selectedItem.name
+          }));
           return false;
         }
 
@@ -309,7 +309,10 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
    */
   protected createSelectionPrompt(): string {
     const options = this.items.map((item) => `להקשת ${item.key} עבור ${item.name}`).join(', ');
-    return MESSAGE_CONSTANTS.SELECTION.PROMPT(this.entityName, options);
+    return this.call.getText('SELECTION.PROMPT', {
+      entityName: this.entityName,
+      options
+    });
   }
 
   /**
@@ -387,7 +390,10 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
   protected async announceAutoSelectionResult(): Promise<void> {
     if (this.selectedItems.length === 1) {
       await this.call.playMessage(
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED(this.entityName, this.selectedItems[0].name),
+        this.call.getText('SELECTION.AUTO_SELECTED', {
+          entityName: this.entityName,
+          itemName: this.selectedItems[0].name
+        }),
       );
     }
   }
@@ -399,13 +405,16 @@ export class SelectionHelper<T extends SelectableEntity> extends BaseYemotHandle
   async handleSelectionWithExisting(existingItem: T): Promise<T | null> {
     if (existingItem) {
       this.call.logInfo(`Found existing ${this.entityName}: ${existingItem.name}`);
-      await this.call.playMessage(MESSAGE_CONSTANTS.SELECTION.CURRENT_ITEM(this.entityName, existingItem.name));
+      await this.call.playMessage(this.call.getText('SELECTION.CURRENT_ITEM', {
+        entityName: this.entityName,
+        itemName: existingItem.name
+      }));
 
       // Ask if they want to change it
       const changeSelection = await this.call.getConfirmation(
-        MESSAGE_CONSTANTS.SELECTION.CHANGE_PROMPT(this.entityName),
-        MESSAGE_CONSTANTS.SELECTION.CHANGE_OPTION,
-        MESSAGE_CONSTANTS.SELECTION.KEEP_OPTION,
+        this.call.getText('SELECTION.CHANGE_PROMPT', { entityName: this.entityName }),
+        this.call.getText('SELECTION.CHANGE_OPTION'),
+        this.call.getText('SELECTION.KEEP_OPTION'),
       );
 
       if (!changeSelection) {

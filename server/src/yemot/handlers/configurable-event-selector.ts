@@ -1,11 +1,9 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
 import { Student } from 'src/db/entities/Student.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 import { SelectionHelper, SelectableEntity } from './selection-helper';
 import { EventEligibilityUtil, EventEligibilityType } from '../utils/event-eligibility.util';
 import { FormatUtils } from '../utils/format-utils';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 export interface SelectableEventItem extends SelectableEntity {
   originalEvent: DBEvent;
@@ -79,7 +77,10 @@ export class ConfigurableEventSelector extends SelectionHelper<SelectableEventIt
     if (selectedItem) {
       // Uses this.entityName ('אירוע') for a general term.
       await this.call.playMessage(
-        MESSAGE_CONSTANTS.SELECTION.AUTO_SELECTED_FOR_SELECTION(this.entityName, selectedItem.name),
+        this.call.getText('SELECTION.AUTO_SELECTED_FOR_SELECTION', {
+          entityName: this.entityName,
+          itemName: selectedItem.name,
+        }),
       );
     }
   }

@@ -21,6 +21,8 @@ declare module 'yemot-router2' {
     logDebug(message: string): void;
     logWarn(message: string): void;
     logError(message: string, stack?: string): void;
+
+    // Call interaction methods
     getConfirmation(message: string, yesOption?: string, noOption?: string): Promise<boolean>;
     readDigits(promptText: string, options: TapOptions): Promise<string>;
     playMessage(message: string): Promise<void>;
@@ -29,6 +31,19 @@ declare module 'yemot-router2' {
     // New context management methods
     setContext<T>(key: string, value: T): void;
     getContext<T>(key: string): T | undefined;
+
+    // New message retrieval method    
+    getText(key: string, values?: Record<string, string>): string;
+
+    // New retry capability
+    withRetry<T>(
+      operation: () => Promise<T>,
+      options?: {
+        retryMessage?: string,
+        errorMessage?: string,
+        maxAttempts?: number
+      }
+    ): Promise<T>;
 
     // New data access methods
     findUserByPhone(): Promise<User | null>;
@@ -45,16 +60,6 @@ declare module 'yemot-router2' {
     saveEventGift(eventGift: Partial<EventGift>): Promise<EventGift>;
     saveEventNote(eventNote: Partial<EventNote>): Promise<EventNote>;
     withTransaction<T>(fn: (queryRunner: QueryRunner) => Promise<T>): Promise<T>;
-
-    // New retry capability
-    withRetry<T>(
-      operation: () => Promise<T>,
-      options?: {
-        retryMessage?: string,
-        errorMessage?: string,
-        maxAttempts?: number
-      }
-    ): Promise<T>;
   }
 }
 
@@ -128,6 +133,29 @@ export function createExtendedCall(call: Call, logger: Logger, dataSource: DataS
   extendedCall.hangupWithMessage = async function (message: string): Promise<void> {
     extendedCall.logDebug(`Hanging up with message: ${message}`);
     await id_list_message_with_hangup(extendedCall, message);
+  };
+
+  // Message retrieval method
+  extendedCall.getText = function (key: string, values?: Record<string, string>): string {
+    const keyParts = key.split('.');
+    let message: any = MESSAGE_CONSTANTS;
+    for (const part of keyParts) {
+      if (message[part] === undefined) {
+        extendedCall.logError(`Message key not found: ${key}`);
+        return key;
+      }
+      message = message[part];
+    }
+    if (typeof message !== 'string') {
+      extendedCall.logError(`Message key is not a string: ${key}`);
+      return key;
+    }
+    if (values) {
+      for (const [placeholder, value] of Object.entries(values)) {
+        message = (message as string).replace(new RegExp(`{${placeholder}}`, 'g'), value);
+      }
+    }
+    return message;
   };
 
   // Entity data access methods
@@ -209,7 +237,7 @@ export function createExtendedCall(call: Call, logger: Logger, dataSource: DataS
     extendedCall.setContext('eventTypes', eventTypes);
     return eventTypes;
   };
-  
+
   extendedCall.getLevelTypes = async function (): Promise<LevelType[]> {
     extendedCall.logInfo('Getting level types (paths)');
     const levelTypeRepository = dataSource.getRepository(LevelType);
@@ -235,7 +263,7 @@ export function createExtendedCall(call: Call, logger: Logger, dataSource: DataS
 
     return event;
   };
-  
+
   extendedCall.findEventByDateRange = async function (
     studentId: number,
     eventTypeId: number,
