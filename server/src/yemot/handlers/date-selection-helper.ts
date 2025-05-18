@@ -1,18 +1,13 @@
-import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import {
-  getIndexByJewishMonth,
   getJewishMonthByIndex,
-  getJewishMonthInHebrew,
-  getJewishMonthsInOrder,
-  JewishMonth,
   JewishMonthType,
   toGregorianDate,
   toJewishDate,
 } from 'jewish-date';
 import { FormatUtils } from '../utils/format-utils';
-import * as gematriya from "gematriya";
+import { gematriyaLetters, getHebrewMonthsList, pointedMonths } from '@shared/utils/formatting/hebrew.util';
 
 /**
  * Interface for date selection results
@@ -22,56 +17,6 @@ export interface DateSelectionResult {
   month: number;
   hebrewDate: string;
   gregorianDate: Date;
-}
-
-const pointedMonths = {
-  [JewishMonth.Nisan]: 'נִיסָן',
-  [JewishMonth.Iyyar]: 'אִיָּר',
-  [JewishMonth.Sivan]: 'סִיוָן',
-  [JewishMonth.Tammuz]: 'תַּמּוּז',
-  [JewishMonth.Av]: 'אָב',
-  [JewishMonth.Elul]: 'אֱלוּל',
-  [JewishMonth.Tishri]: 'תִּשְׁרֵי',
-  [JewishMonth.Cheshvan]: 'חֶשְׁוָן',
-  [JewishMonth.Kislev]: 'כִּסְלֵו',
-  [JewishMonth.Tevet]: 'טֵבֵת',
-  [JewishMonth.Shevat]: 'שְׁבָט',
-  [JewishMonth.Adar]: 'אֲדָר',
-  [JewishMonth.AdarI]: 'אֲדָר א׳',
-  [JewishMonth.AdarII]: 'אֲדָר ב׳',
-};
-
-const hebrewLettersNames = {
-  'א': 'אָלֶף',
-  'ב': 'בֵּית',
-  'ג': 'גִּימֵל',
-  'ד': 'דָּלֶת',
-  'ה': 'הֵא',
-  'ו': 'וָו',
-  'ז': 'זַיִן',
-  'ח': 'חֵית',
-  'ט': 'טֵית',
-  'י': 'יוּד',
-  'כ': 'כַּף',
-  'ל': 'לָמֶד',
-  'מ': 'מֵם',
-  'נ': 'נוּן',
-  'ס': 'סָמֶךְ',
-  'ע': 'עַיִן',
-  'פ': 'פֵּא',
-  'צ': 'צָדִי',
-  'ק': 'קוֹף',
-  'ר': 'רֵישׁ',
-  'ש': 'שִׁין',
-  'ת': 'תָּו',
-};
-
-function gematriyaLetters(number: number): string {
-  const letters = gematriya(number);
-  return letters.replace(/["'״׳]/g, '')
-    .split('')
-    .map(letter => hebrewLettersNames[letter] || letter)
-    .join(' ');
 }
 
 /**
@@ -217,14 +162,11 @@ export class DateSelectionHelper extends BaseYemotHandler {
     index: number;
     hebrewName: string;
   }> {
-    return getJewishMonthsInOrder(this.currentJewishYear)
-      .map((month) => month as JewishMonthType)
-      .map((month) => ({ month, index: getIndexByJewishMonth(month) }))
-      .filter(({ index }) => index !== 0)
-      .map(({ month, index }) => ({
+    return getHebrewMonthsList(this.currentJewishYear)
+      .map(({ month, index, name }) => ({
         month,
         index,
-        hebrewName: getJewishMonthInHebrew(month),
+        hebrewName: name,
       }));
   }
 

@@ -13,7 +13,8 @@ import { EntitiesModule } from './entities.module';
 import { getPinoConfig } from '@shared/config/pino.config';
 import { UserInitModule } from './user-init.module';
 import { UserInitializationService } from './user-initialization.service';
-import { YemotModule } from './yemot/yemot.module';
+import { YemotModule } from '@shared/utils/yemot/v2/yemot.module';
+import { YemotHandlerService } from './yemot-handler.service';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { YemotModule } from './yemot/yemot.module';
     TypeOrmModule.forRoot(typeOrmModuleConfig),
     MailSendModule,
     EntitiesModule,
-    YemotModule,
+    YemotModule.register(YemotHandlerService),
     AuthModule.forRootAsync({
       imports: [UserInitModule],
       userInitServiceType: UserInitializationService,
@@ -38,4 +39,4 @@ import { YemotModule } from './yemot/yemot.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
