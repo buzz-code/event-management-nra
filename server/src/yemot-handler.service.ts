@@ -7,7 +7,7 @@ import { Event } from 'src/db/entities/Event.entity';
 import { EventGift } from 'src/db/entities/EventGift.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { getJewishMonthByIndex, toGregorianDate } from 'jewish-date';
-import { getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
+import { formatHebrewDateForIVR, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
 
 @Injectable()
 export class YemotHandlerService extends BaseYemotHandlerService {
@@ -20,7 +20,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.loadEventTypes();
     this.loadGifts();
 
-    const tz = await this.askForInput(await this.getTextByUserId('AUTHENTICATION.ID_PROMPT'), {
+    const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
       min_digits: 1,
       max_digits: 9
     });
@@ -59,7 +59,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Getting student by TZ: ${tz}`);
     const student = await this.dataSource.getRepository(Student).findOneBy({ userId: this.user.id, tz });
     if (!student) {
-      this.hangupWithMessage(await this.getTextByUserId('AUTHENTICATION.STUDENT_NOT_FOUND'));
+      this.hangupWithMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
     }
     return student;
   }
@@ -92,7 +92,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
   private async getEventType(): Promise<EventType> {
     this.logger.log(`Getting event type`);
-    const eventType = await this.askForMenu('EVENT.TYPE_SELECTION_PROMPT', this.eventTypes);
+    const eventType = await this.askForMenu('EVENT.TYPE_SELECTION', this.eventTypes);
 
     if (!eventType) {
       this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
@@ -103,7 +103,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
   private async getGift(): Promise<Gift> {
     this.logger.log(`Getting gift`);
-    const gift = await this.askForMenu('VOUCHER.SELECTION_PROMPT', this.gifts);
+    const gift = await this.askForMenu('EVENT.GIFT_SELECTION', this.gifts);
 
     if (!gift) {
       this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
@@ -116,14 +116,14 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Getting event date`);
 
     const year = getCurrentHebrewYear();
-    const day = await this.askForInput(await this.getTextByUserId('DATE.DAY_PROMPT'), {
+    const day = await this.askForInput(await this.getTextByUserId('DATE.DAY_SELECTION'), {
       min_digits: 1,
       max_digits: 2,
     });
     const dayNumber = parseInt(day);
 
     const months = getHebrewMonthsList(year);
-    const month = await this.askForMenu('DATE.MONTH_PROMPT', months);
+    const month = await this.askForMenu('DATE.MONTH_SELECTION', months);
     if (!month) {
       this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
     }
@@ -135,6 +135,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     });
 
     this.logger.log(`Event date selected: ${eventDate.toISOString()}`);
+
+    const hebrewDate = formatHebrewDateForIVR(eventDate);
+    const isConfirmed = await this.askConfirmation(
+      'DATE.CONFIRM_DATE',
+      { date: hebrewDate },
+    );
+
+    if (!isConfirmed) {
+      return this.getEventDate();
+    }
+
     return eventDate;
   }
 }
