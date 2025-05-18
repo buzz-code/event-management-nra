@@ -12,7 +12,7 @@ import {
   toJewishDate,
 } from 'jewish-date';
 import { FormatUtils } from '../utils/format-utils';
-import gematriya from "gematriya";
+import * as gematriya from "gematriya";
 
 /**
  * Interface for date selection results

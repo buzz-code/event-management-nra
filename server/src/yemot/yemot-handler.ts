@@ -15,6 +15,7 @@ import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
 import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
 import { createExtendedCall } from './utils/extended-call';
 import { MESSAGE_CONSTANTS } from './constants/message-constants';
+import { User } from 'src/db/entities/User.entity';
 
 /**
  * The main Yemot call handler class
@@ -56,7 +57,7 @@ export class CallHandler {
     const user = await this.call.findUserByPhone();
     if (!user) {
       this.call.logError(`User not found for phone number: ${this.call.did}`);
-      throw new Error(`User not found for phone number: ${this.call.did}`);
+      this.call.hangupWithMessage(this.call.getText('GENERAL.USER_NOT_FOUND'));
     }
 
     // Note that user ID and context are already set by findUserByPhone
@@ -100,6 +101,7 @@ export const yemotProcessor: YemotCallProcessor = async (call) => {
 };
 
 export const yemotEntities = [
+  User,
   Student,
   EventType,
   Event,
