@@ -30,7 +30,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const eventType = await this.getEventType();
     const eventDate = await this.getEventDate();
-    const gift = await this.getGift();
+    const gifts = await this.getGifts();
 
     const eventRepo = this.dataSource.getRepository(Event);
     const event = eventRepo.create({
@@ -44,13 +44,20 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Event created: ${savedEvent.id}`);
 
     const eventGiftRepo = this.dataSource.getRepository(EventGift);
-    const eventGift = eventGiftRepo.create({
-      userId: this.user.id,
-      eventReferenceId: savedEvent.id,
-      giftReferenceId: gift.id,
-    });
-    const savedEventGift = await eventGiftRepo.save(eventGift);
-    this.logger.log(`Event gift created: ${savedEventGift.id}`);
+    const savedEventGifts = [];
+    
+    for (const gift of gifts) {
+      const eventGift = eventGiftRepo.create({
+        userId: this.user.id,
+        eventReferenceId: savedEvent.id,
+        giftReferenceId: gift.id,
+      });
+      const savedEventGift = await eventGiftRepo.save(eventGift);
+      savedEventGifts.push(savedEventGift);
+      this.logger.log(`Event gift created: ${savedEventGift.id}`);
+    }
+    
+    this.sendMessage(await this.getTextByUserId('EVENT.GIFTS_ADDED', { count: savedEventGifts.length }));
 
     this.hangupWithMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
   }
@@ -101,15 +108,44 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return eventType;
   }
 
-  private async getGift(): Promise<Gift> {
-    this.logger.log(`Getting gift`);
-    const gift = await this.askForMenu('EVENT.GIFT_SELECTION', this.gifts);
-
-    if (!gift) {
-      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+  private async getGifts(): Promise<Gift[]> {
+    this.logger.log(`Getting gifts - up to 3 allowed`);
+    const selectedGifts: Gift[] = [];
+    let continueSelection = true;
+    
+    while (continueSelection && selectedGifts.length < 3) {
+      // Filter out already selected gifts to prevent duplicate selection
+      const availableGifts = this.gifts.filter(g => !selectedGifts.some(sg => sg.id === g.id));
+      
+      // Show appropriate message based on whether this is the first gift or additional gifts
+      const promptKey = selectedGifts.length === 0 ? 'EVENT.GIFT_SELECTION' : 'EVENT.ADDITIONAL_GIFT_SELECTION';
+      const gift = await this.askForMenu(promptKey, availableGifts);
+      
+      if (!gift) {
+        this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+      }
+      
+      selectedGifts.push(gift);
+      this.logger.log(`Gift selected: ${gift.name} (${selectedGifts.length} of 3)`);
+      
+      // Ask if user wants to select another gift if they haven't reached the limit
+      if (selectedGifts.length < 3) {
+        this.logger.log(`Asking if user wants to select another gift`);
+        continueSelection = await this.askConfirmation('EVENT.SELECT_ANOTHER_GIFT');
+      }
     }
-    this.logger.log(`Gift selected: ${gift.name}`);
-    return gift;
+    
+    // Confirm the gift selection
+    const giftNames = selectedGifts.map(g => g.name).join(', ');
+    this.logger.log(`Gifts selected: ${giftNames}`);
+    const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_GIFTS', { gifts: giftNames, count: selectedGifts.length });
+    
+    if (!isConfirmed) {
+      this.logger.log(`Gift selection not confirmed, starting over`);
+      return this.getGifts(); // Start over if not confirmed
+    }
+    
+    return selectedGifts;
   }
 
   private async getEventDate(): Promise<Date> {
