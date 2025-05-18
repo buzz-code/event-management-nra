@@ -41,9 +41,37 @@ const pointedMonths = {
   [JewishMonth.AdarII]: 'אֲדָר ב׳',
 };
 
+const hebrewLettersNames = {
+  'א': 'אָלֶף',
+  'ב': 'בֵּית',
+  'ג': 'גִּימֵל',
+  'ד': 'דָּלֶת',
+  'ה': 'הֵא',
+  'ו': 'וָו',
+  'ז': 'זַיִן',
+  'ח': 'חֵית',
+  'ט': 'טֵית',
+  'י': 'יוּד',
+  'כ': 'כַּף',
+  'ל': 'לָמֶד',
+  'מ': 'מֵם',
+  'נ': 'נוּן',
+  'ס': 'סָמֶךְ',
+  'ע': 'עַיִן',
+  'פ': 'פֵּא',
+  'צ': 'צָדִי',
+  'ק': 'קוֹף',
+  'ר': 'רֵישׁ',
+  'ש': 'שִׁין',
+  'ת': 'תָּו',
+};
+
 function gematriyaLetters(number: number): string {
   const letters = gematriya(number);
-  return letters.replace(/["'״׳]/g, '').split('').join(' ');
+  return letters.replace(/["'״׳]/g, '')
+    .split('')
+    .map(letter => hebrewLettersNames[letter] || letter)
+    .join(' ');
 }
 
 /**
