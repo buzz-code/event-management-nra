@@ -34,9 +34,11 @@ declare module 'yemot-router2' {
  * Factory function that creates an ExtendedCall with domain-specific functionality
  * This builds on top of the base extended call
  */
-export function createExtendedCall(call: Call, logger: Logger, dataSource: DataSource): Call {
-  // First apply all shared utilities from base extended call
-  const extendedCall = createBaseExtendedCall(call, logger, dataSource, MESSAGE_CONSTANTS);
+export function createExtendedCall(call: Call): Call {
+  // The call should already have base functionality from the router
+  // Just use it directly and add domain-specific functionality on top
+  const extendedCall = call;
+  const dataSource = call.getDataSource();
 
   // Entity data access methods specific to the event management domain
   extendedCall.findStudentByTzAndUserId = async function (tz: string): Promise<Student | null> {

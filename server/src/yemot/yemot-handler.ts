@@ -1,12 +1,9 @@
-import { Logger } from '@nestjs/common';
 import { YemotCallHandler, YemotCallProcessor } from '@shared/utils/yemot/yemot-router';
 import { Call } from 'yemot-router2';
-import { getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { Event } from 'src/db/entities/Event.entity';
 import { Teacher } from 'src/db/entities/Teacher.entity';
-import { User } from 'src/db/entities/User.entity';
 import { LevelType } from 'src/db/entities/LevelType.entity';
 import { EventNote } from 'src/db/entities/EventNote.entity';
 import { EventGift } from 'src/db/entities/EventGift.entity';
@@ -17,30 +14,12 @@ import { Class } from 'src/db/entities/Class.entity';
 import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
 import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
 import { createExtendedCall } from './utils/extended-call';
-
-async function createDataSource() {
-  // Get a data source with all required entities
-  const dataSource = await getDataSource([
-    Student,
-    EventType,
-    Event,
-    Teacher,
-    User,
-    LevelType,
-    EventNote,
-    EventGift,
-    Gift,
-    Class,
-  ]);
-
-  return dataSource;
-}
+import { MESSAGE_CONSTANTS } from './constants/message-constants';
 
 /**
  * The main Yemot call handler class
  */
 export class CallHandler {
-  private logger: Logger;
   private call: Call;
 
   private handlerFactory: YemotHandlerFactory;
@@ -48,29 +27,25 @@ export class CallHandler {
 
   /**
    * Constructor for the CallHandler class
-   * @param logger Logger instance for logging call-related information
-   * @param call The Yemot call object
+   * @param call The Yemot call object (already extended with base functionality)
    */
-  constructor(logger: Logger, call: Call) {
-    this.logger = logger;
+  constructor(call: Call) {
     this.call = call;
-    this.logger.log(`Handling call from ${this.call.phone}`);
+    this.call.logInfo(`Handling call from ${this.call.phone}`);
   }
 
   /**
    * Initializes required components
    */
   async initializeRequiredComponents() {
-    const dataSource = await createDataSource();
-    this.logger.log('Data source initialized');
 
-    // Create an extended call with enhanced datasource access and context management
-    const extendedCall = createExtendedCall(this.call, this.logger, dataSource);
+    // Create application-specific extended call with additional functionality
+    this.call = createExtendedCall(this.call);
 
     // Create handlers using the enhanced extended call
-    this.logger.log('Using enhanced ExtendedCall with centralized data access');
-    this.handlerFactory = new YemotHandlerFactory(extendedCall);
-    this.flowOrchestrator = new YemotFlowOrchestrator(extendedCall, this.handlerFactory);
+    this.call.logInfo('Using enhanced ExtendedCall with centralized data access');
+    this.handlerFactory = new YemotHandlerFactory(this.call);
+    this.flowOrchestrator = new YemotFlowOrchestrator(this.call, this.handlerFactory);
   }
 
   /**
@@ -80,7 +55,7 @@ export class CallHandler {
     // Use the centralized data access method directly
     const user = await this.call.findUserByPhone();
     if (!user) {
-      this.logger.error(`User not found for phone number: ${this.call.did}`);
+      this.call.logError(`User not found for phone number: ${this.call.did}`);
       throw new Error(`User not found for phone number: ${this.call.did}`);
     }
 
@@ -101,7 +76,7 @@ export class CallHandler {
       // Execute the main flow using the orchestrator with our enhanced ExtendedCall
       await this.flowOrchestrator.execute();
     } catch (error) {
-      this.logger.error(`Error executing call flow: ${error.message}`);
+      this.call.logError(`Error executing call flow: ${error.message}`);
 
       await this.call.hangupWithMessage(this.call.getText('GENERAL.ERROR'));
     }
@@ -111,15 +86,29 @@ export class CallHandler {
 /**
  * The exported Yemot call handler function
  */
-export const yemotHandler: YemotCallHandler = (logger) => async (call) => {
-  const handler = new CallHandler(logger, call);
+export const yemotHandler: YemotCallHandler = async (call) => {
+  const handler = new CallHandler(call);
   return handler.execute();
 };
 
 /**
  * The exported Yemot call processor function
  */
-export const yemotProcessor: YemotCallProcessor = async (call, logger) => {
-  logger.log(`Processing call ${call.callId} from ${call.phone}`);
+export const yemotProcessor: YemotCallProcessor = async (call) => {
+  call.logInfo(`Processing call ${call.callId} from ${call.phone}`);
   // Here you can add any additional processing logic you need
 };
+
+export const yemotEntities = [
+  Student,
+  EventType,
+  Event,
+  Teacher,
+  LevelType,
+  EventNote,
+  EventGift,
+  Gift,
+  Class,
+];
+
+export const messageConstants = MESSAGE_CONSTANTS;
