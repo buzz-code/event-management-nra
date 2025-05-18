@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { YemotCallHandler, YemotCallProcessor } from '@shared/utils/yemot/yemot-router';
 import { Call } from 'yemot-router2';
-import { DataSource } from 'typeorm';
 import { getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';

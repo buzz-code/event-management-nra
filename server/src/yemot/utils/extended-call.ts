@@ -4,7 +4,7 @@ import { Logger } from '@nestjs/common';
 import { id_list_message, id_list_message_with_hangup } from '@shared/utils/yemot/yemot-router';
 import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 import { Student } from 'src/db/entities/Student.entity';
-import { User } from 'src/db/entities/User.entity';
+import { User } from '@shared/entities/User.entity';
 import { Event as DBEvent } from 'src/db/entities/Event.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { EventNote } from 'src/db/entities/EventNote.entity';

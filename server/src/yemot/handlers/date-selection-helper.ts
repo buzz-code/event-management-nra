@@ -1,17 +1,18 @@
 import { Logger } from '@nestjs/common';
 import { Call } from 'yemot-router2';
-import { DataSource } from 'typeorm';
 import { BaseYemotHandler } from '../core/base-yemot-handler';
 import {
   getIndexByJewishMonth,
   getJewishMonthByIndex,
   getJewishMonthInHebrew,
   getJewishMonthsInOrder,
+  JewishMonth,
   JewishMonthType,
   toGregorianDate,
   toJewishDate,
 } from 'jewish-date';
 import { FormatUtils } from '../utils/format-utils';
+import gematriya from "gematriya";
 
 /**
  * Interface for date selection results
@@ -21,6 +22,28 @@ export interface DateSelectionResult {
   month: number;
   hebrewDate: string;
   gregorianDate: Date;
+}
+
+const pointedMonths = {
+  [JewishMonth.Nisan]: 'נִיסָן',
+  [JewishMonth.Iyyar]: 'אִיָּר',
+  [JewishMonth.Sivan]: 'סִיוָן',
+  [JewishMonth.Tammuz]: 'תַּמּוּז',
+  [JewishMonth.Av]: 'אָב',
+  [JewishMonth.Elul]: 'אֱלוּל',
+  [JewishMonth.Tishri]: 'תִּשְׁרֵי',
+  [JewishMonth.Cheshvan]: 'חֶשְׁוָן',
+  [JewishMonth.Kislev]: 'כִּסְלֵו',
+  [JewishMonth.Tevet]: 'טֵבֵת',
+  [JewishMonth.Shevat]: 'שְׁבָט',
+  [JewishMonth.Adar]: 'אֲדָר',
+  [JewishMonth.AdarI]: 'אֲדָר א׳',
+  [JewishMonth.AdarII]: 'אֲדָר ב׳',
+};
+
+function gematriyaLetters(number: number): string {
+  const letters = gematriya(number);
+  return letters.replace(/["'״׳]/g, '').split('').join(' ');
 }
 
 /**
@@ -223,8 +246,14 @@ export class DateSelectionHelper extends BaseYemotHandler {
       throw new Error('Hebrew date is missing');
     }
 
+    const hebrewDateObj = toJewishDate(this.gregorianDate!);
+    const datePart = gematriyaLetters(hebrewDateObj.day);
+    const monthPart = pointedMonths[hebrewDateObj.monthName];
+    const yearPart = gematriyaLetters(hebrewDateObj.year % 1000);
+    const fullDate = `${datePart} ${monthPart} ${yearPart}`;
+
     return await this.call.getConfirmation(
-      this.call.getText('DATE.CONFIRM_DATE', { date: this.fullHebrewDate }),
+      this.call.getText('DATE.CONFIRM_DATE', { date: fullDate }),
       this.call.getText('DATE.CONFIRM_YES'),
       this.call.getText('DATE.CONFIRM_NO'),
     );
