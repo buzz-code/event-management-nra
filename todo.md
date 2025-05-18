@@ -7,4 +7,7 @@
 * add voucher selection right after event type and date, before saving the event
 
 # todo
+* move yemot router to be a nestjs service, that exports getRouter function, and on main.ts: 
+  const legacySvc = app.get(LegacyService);
+  app.use('/legacy', legacySvc.getRouter());
 * 

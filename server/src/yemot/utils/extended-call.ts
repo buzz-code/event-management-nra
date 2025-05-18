@@ -8,8 +8,6 @@ import { EventNote } from 'src/db/entities/EventNote.entity';
 import { EventGift } from 'src/db/entities/EventGift.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { LevelType } from 'src/db/entities/LevelType.entity';
-import { createBaseExtendedCall } from '@shared/utils/yemot/base-extended-call';
-import { MESSAGE_CONSTANTS } from '../constants/message-constants';
 
 // Domain-specific extended Call interface
 declare module 'yemot-router2' {
@@ -154,7 +152,8 @@ export function createExtendedCall(call: Call): Call {
   extendedCall.saveEvent = async function (event: Partial<DBEvent>): Promise<DBEvent> {
     extendedCall.logInfo(`Saving event: ${JSON.stringify(event)}`);
     const eventRepository = dataSource.getRepository(DBEvent);
-    const savedEvent = await eventRepository.save(event);
+    const eventObj = eventRepository.create(event);
+    const savedEvent = await eventRepository.save(eventObj);
     return savedEvent;
   };
 
@@ -165,7 +164,8 @@ export function createExtendedCall(call: Call): Call {
 
     extendedCall.logInfo(`Updating event: ${event.id}`);
     const eventRepository = dataSource.getRepository(DBEvent);
-    const updatedEvent = await eventRepository.save(event);
+    const existingEvent = await eventRepository.findOneBy({ id: event.id });
+    const updatedEvent = await eventRepository.save(existingEvent);
     return updatedEvent;
   };
 
@@ -190,14 +190,16 @@ export function createExtendedCall(call: Call): Call {
   extendedCall.saveEventGift = async function (eventGift: Partial<EventGift>): Promise<EventGift> {
     extendedCall.logInfo(`Saving event gift: ${JSON.stringify(eventGift)}`);
     const eventGiftRepository = dataSource.getRepository(EventGift);
-    const savedEventGift = await eventGiftRepository.save(eventGift);
+    const eventGiftObj = eventGiftRepository.create(eventGift);
+    const savedEventGift = await eventGiftRepository.save(eventGiftObj);
     return savedEventGift;
   };
 
   extendedCall.saveEventNote = async function (eventNote: Partial<EventNote>): Promise<EventNote> {
     extendedCall.logInfo(`Saving event note: ${JSON.stringify(eventNote)}`);
     const eventNoteRepository = dataSource.getRepository(EventNote);
-    const savedEventNote = await eventNoteRepository.save(eventNote);
+    const eventNoteObj = eventNoteRepository.create(eventNote);
+    const savedEventNote = await eventNoteRepository.save(eventNoteObj);
     return savedEventNote;
   };
   

@@ -1,21 +1,11 @@
 import { YemotCallHandler, YemotCallProcessor } from '@shared/utils/yemot/yemot-router';
 import { Call } from 'yemot-router2';
-import { Student } from 'src/db/entities/Student.entity';
-import { EventType } from 'src/db/entities/EventType.entity';
-import { Event } from 'src/db/entities/Event.entity';
-import { Teacher } from 'src/db/entities/Teacher.entity';
-import { LevelType } from 'src/db/entities/LevelType.entity';
-import { EventNote } from 'src/db/entities/EventNote.entity';
-import { EventGift } from 'src/db/entities/EventGift.entity';
-import { Gift } from 'src/db/entities/Gift.entity';
-import { Class } from 'src/db/entities/Class.entity';
 
 // Import refactored components
 import { YemotHandlerFactory } from './handlers/yemot-handler-factory';
 import { YemotFlowOrchestrator } from './handlers/yemot-flow-orchestrator';
 import { createExtendedCall } from './utils/extended-call';
 import { MESSAGE_CONSTANTS } from './constants/message-constants';
-import { User } from 'src/db/entities/User.entity';
 
 /**
  * The main Yemot call handler class
@@ -99,18 +89,5 @@ export const yemotProcessor: YemotCallProcessor = async (call) => {
   call.logInfo(`Processing call ${call.callId} from ${call.phone}`);
   // Here you can add any additional processing logic you need
 };
-
-export const yemotEntities = [
-  User,
-  Student,
-  EventType,
-  Event,
-  Teacher,
-  LevelType,
-  EventNote,
-  EventGift,
-  Gift,
-  Class,
-];
 
 export const messageConstants = MESSAGE_CONSTANTS;
