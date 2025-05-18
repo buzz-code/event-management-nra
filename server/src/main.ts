@@ -6,9 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
-import { setupYemotRouter } from '@shared/utils/yemot/yemot-router';
-import { messageConstants, yemotHandler, yemotProcessor } from './yemot/yemot-handler';
-import { getDataSourceToken } from '@nestjs/typeorm';
+import { YemotRouterService } from './yemot/yemot-router.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -37,9 +35,8 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.use(cookieParser());
 
-  const dataSource = app.get(getDataSourceToken());
-  const yemotRouter = setupYemotRouter(yemotHandler, yemotProcessor, dataSource, messageConstants);
-  app.use('/yemot/handle-call', yemotRouter);
+  const yemotRouterSvc = app.get(YemotRouterService);
+  app.use('/yemot/handle-call', yemotRouterSvc.getRouter());
 
   await app.listen(3000);
   console.log(`Application is running on port ${3000}`);

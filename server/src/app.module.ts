@@ -8,13 +8,12 @@ import { RequestContextModule } from 'nestjs-request-context';
 import { LoggerModule } from 'nestjs-pino';
 import { typeOrmModuleConfig } from '@shared/config/typeorm.config';
 import { AuthModule } from '@shared/auth/auth.module';
-import { YemotModule } from '@shared/utils/yemot/yemot.module';
-// import { yemotProcessorProvider } from 'src/yemot.processor';
 import { MailSendModule } from '@shared/utils/mail/mail-send.module';
 import { EntitiesModule } from './entities.module';
 import { getPinoConfig } from '@shared/config/pino.config';
 import { UserInitModule } from './user-init.module';
 import { UserInitializationService } from './user-initialization.service';
+import { YemotModule } from './yemot/yemot.module';
 
 @Module({
   imports: [
@@ -24,6 +23,7 @@ import { UserInitializationService } from './user-initialization.service';
     TypeOrmModule.forRoot(typeOrmModuleConfig),
     MailSendModule,
     EntitiesModule,
+    YemotModule,
     AuthModule.forRootAsync({
       imports: [UserInitModule],
       userInitServiceType: UserInitializationService,
