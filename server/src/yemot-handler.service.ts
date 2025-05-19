@@ -20,11 +20,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.loadEventTypes();
     this.loadGifts();
 
-    const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
-      min_digits: 1,
-      max_digits: 9
-    });
-    const student = await this.getStudentByTz(tz);
+    const student = await this.getStudentByTz();
     this.logger.log(`Student found: ${student.name}`);
     this.sendMessage(await this.getTextByUserId('GENERAL.WELCOME', { name: student.name }));
 
@@ -62,12 +58,22 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.hangupWithMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
   }
 
-  private async getStudentByTz(tz: string) {
-    this.logger.log(`Getting student by TZ: ${tz}`);
+  private async getStudentByTz(): Promise<Student> {
+    this.logger.log(`Getting student by TZ`);
+    
+    const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
+      min_digits: 1,
+      max_digits: 9
+    });
+    
     const student = await this.dataSource.getRepository(Student).findOneBy({ userId: this.user.id, tz });
+    
     if (!student) {
-      this.hangupWithMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
+      this.logger.log(`No student found with TZ: ${tz}`);
+      this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
+      return this.getStudentByTz();
     }
+    
     return student;
   }
 
@@ -105,6 +111,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
     }
     this.logger.log(`Event type selected: ${eventType.name}`);
+    
+    const isConfirmed = await this.askConfirmation(
+      'EVENT.CONFIRM_TYPE',
+      { name: eventType.name }
+    );
+    
+    if (!isConfirmed) {
+      this.logger.log(`Event type not confirmed, selecting again`);
+      return this.getEventType();
+    }
+    
     return eventType;
   }
 
