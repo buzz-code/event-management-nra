@@ -62,13 +62,16 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Getting student by TZ`);
 
     if (this.call.ApiEnterID) {
-      this.logger.log(`Using ApiEnterID: ${this.call.ApiEnterID}`);
-      const student = await this.fetchStudentByTz(this.call.ApiEnterID);
+      const matches = this.call.ApiEnterID.match(/\d+$/);
+      if (matches && matches[0]) {
+        const idNumber = matches[0];
+        this.logger.log(`Extracted ID from ApiEnterID: ${idNumber}`);
+        const student = await this.fetchStudentByTz(idNumber);
 
-      if (student) {
-        return student;
+        if (student) {
+          return student;
+        }
       }
-
       this.logger.log(`No student found with ApiEnterID: ${this.call.ApiEnterID}`);
     }
 
