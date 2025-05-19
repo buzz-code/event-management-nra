@@ -41,7 +41,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const eventGiftRepo = this.dataSource.getRepository(EventGift);
     const savedEventGifts = [];
-    
+
     for (const gift of gifts) {
       const eventGift = eventGiftRepo.create({
         userId: this.user.id,
@@ -52,7 +52,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       savedEventGifts.push(savedEventGift);
       this.logger.log(`Event gift created: ${savedEventGift.id}`);
     }
-    
+
     this.sendMessage(await this.getTextByUserId('EVENT.GIFTS_ADDED', { count: savedEventGifts.length }));
 
     this.hangupWithMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
@@ -60,20 +60,41 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
   private async getStudentByTz(): Promise<Student> {
     this.logger.log(`Getting student by TZ`);
-    
+
+    if (this.call.ApiEnterID) {
+      this.logger.log(`Using ApiEnterID: ${this.call.ApiEnterID}`);
+      const student = await this.fetchStudentByTz(this.call.ApiEnterID);
+
+      if (student) {
+        return student;
+      }
+
+      this.logger.log(`No student found with ApiEnterID: ${this.call.ApiEnterID}`);
+    }
+
     const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
       min_digits: 1,
       max_digits: 9
     });
-    
-    const student = await this.dataSource.getRepository(Student).findOneBy({ userId: this.user.id, tz });
-    
+    const student = await this.fetchStudentByTz(tz);
+
+    if (student) {
+      return student;
+    }
+
+    this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
+    return this.getStudentByTz();
+  }
+
+  private async fetchStudentByTz(tz: string): Promise<Student | null> {
+    this.logger.log(`Fetching student by TZ: ${tz}`);
+    const student = await this.dataSource.getRepository(Student).findOneBy({
+      userId: this.user.id,
+      tz
+    });
     if (!student) {
       this.logger.log(`No student found with TZ: ${tz}`);
-      this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
-      return this.getStudentByTz();
     }
-    
     return student;
   }
 
@@ -111,17 +132,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
     }
     this.logger.log(`Event type selected: ${eventType.name}`);
-    
+
     const isConfirmed = await this.askConfirmation(
       'EVENT.CONFIRM_TYPE',
       { name: eventType.name }
     );
-    
+
     if (!isConfirmed) {
       this.logger.log(`Event type not confirmed, selecting again`);
       return this.getEventType();
     }
-    
+
     return eventType;
   }
 
@@ -129,39 +150,39 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Getting gifts - up to 3 allowed`);
     const selectedGifts: Gift[] = [];
     let continueSelection = true;
-    
+
     while (continueSelection && selectedGifts.length < 3) {
       // Filter out already selected gifts to prevent duplicate selection
       const availableGifts = this.gifts.filter(g => !selectedGifts.some(sg => sg.id === g.id));
-      
+
       // Show appropriate message based on whether this is the first gift or additional gifts
       const promptKey = selectedGifts.length === 0 ? 'EVENT.GIFT_SELECTION' : 'EVENT.ADDITIONAL_GIFT_SELECTION';
       const gift = await this.askForMenu(promptKey, availableGifts);
-      
+
       if (!gift) {
         this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
       }
-      
+
       selectedGifts.push(gift);
       this.logger.log(`Gift selected: ${gift.name} (${selectedGifts.length} of 3)`);
-      
+
       // Ask if user wants to select another gift if they haven't reached the limit
       if (selectedGifts.length < 3) {
         this.logger.log(`Asking if user wants to select another gift`);
         continueSelection = await this.askConfirmation('EVENT.SELECT_ANOTHER_GIFT');
       }
     }
-    
+
     // Confirm the gift selection
     const giftNames = selectedGifts.map(g => g.name).join(', ');
     this.logger.log(`Gifts selected: ${giftNames}`);
     const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_GIFTS', { gifts: giftNames, count: selectedGifts.length });
-    
+
     if (!isConfirmed) {
       this.logger.log(`Gift selection not confirmed, starting over`);
       return this.getGifts(); // Start over if not confirmed
     }
-    
+
     return selectedGifts;
   }
 
