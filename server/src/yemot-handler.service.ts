@@ -152,10 +152,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     let continueSelection = true;
 
     while (continueSelection && selectedGifts.length < 3) {
-      // Filter out already selected gifts to prevent duplicate selection
       const availableGifts = this.gifts.filter(g => !selectedGifts.some(sg => sg.id === g.id));
 
-      // Show appropriate message based on whether this is the first gift or additional gifts
       const promptKey = selectedGifts.length === 0 ? 'EVENT.GIFT_SELECTION' : 'EVENT.ADDITIONAL_GIFT_SELECTION';
       const gift = await this.askForMenu(promptKey, availableGifts);
 
@@ -166,21 +164,19 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       selectedGifts.push(gift);
       this.logger.log(`Gift selected: ${gift.name} (${selectedGifts.length} of 3)`);
 
-      // Ask if user wants to select another gift if they haven't reached the limit
       if (selectedGifts.length < 3) {
         this.logger.log(`Asking if user wants to select another gift`);
         continueSelection = await this.askConfirmation('EVENT.SELECT_ANOTHER_GIFT');
       }
     }
 
-    // Confirm the gift selection
     const giftNames = selectedGifts.map(g => g.name).join(', ');
     this.logger.log(`Gifts selected: ${giftNames}`);
     const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_GIFTS', { gifts: giftNames, count: selectedGifts.length });
 
     if (!isConfirmed) {
       this.logger.log(`Gift selection not confirmed, starting over`);
-      return this.getGifts(); // Start over if not confirmed
+      return this.getGifts();
     }
 
     return selectedGifts;
