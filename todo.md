@@ -5,9 +5,7 @@
 * add student class reference table
 * make tz field on student table unique, the same way the imageTarget is unique for image entity (both on frontend and backend)
 * add voucher selection right after event type and date, before saving the event
+* move yemot router to be a nestjs service, that exports getRouter function
 
 # todo
-* move yemot router to be a nestjs service, that exports getRouter function, and on main.ts: 
-  const legacySvc = app.get(LegacyService);
-  app.use('/legacy', legacySvc.getRouter());
 * 
