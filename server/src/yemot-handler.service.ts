@@ -35,27 +35,16 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       eventTypeReferenceId: eventType.id,
       eventDate: eventDate,
       name: `${student.name} - ${eventType.name}`,
+      eventGifts: gifts.map(gift => ({
+        userId: this.user.id,
+        giftReferenceId: gift.id,
+      })),
     });
     const savedEvent = await eventRepo.save(event);
     this.logger.log(`Event created: ${savedEvent.id}`);
 
-    const eventGiftRepo = this.dataSource.getRepository(EventGift);
-    const savedEventGifts = [];
-
-    for (const gift of gifts) {
-      const eventGift = eventGiftRepo.create({
-        userId: this.user.id,
-        eventReferenceId: savedEvent.id,
-        giftReferenceId: gift.id,
-      });
-      const savedEventGift = await eventGiftRepo.save(eventGift);
-      savedEventGifts.push(savedEventGift);
-      this.logger.log(`Event gift created: ${savedEventGift.id}`);
-    }
-
-    this.sendMessage(await this.getTextByUserId('EVENT.GIFTS_ADDED', { count: savedEventGifts.length }));
-
-    this.hangupWithMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
+    this.sendMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
+    this.hangupWithMessage(await this.getTextByUserId('EVENT.GIFTS_ADDED', { count: gifts.length }));
   }
 
   private async getStudentByTz(): Promise<Student> {

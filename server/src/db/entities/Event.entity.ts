@@ -263,9 +263,9 @@ export class Event implements IHasUserId {
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: User;
 
-  @OneToMany(() => EventNote, (note) => note.event)
+  @OneToMany(() => EventNote, (note) => note.event, { onDelete: 'CASCADE', cascade: true })
   notes: EventNote[];
 
-  @OneToMany(() => EventGift, (eventGift) => eventGift.event)
+  @OneToMany(() => EventGift, (eventGift) => eventGift.event, { onDelete: 'CASCADE', cascade: true })
   eventGifts: EventGift[];
 }

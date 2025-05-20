@@ -74,7 +74,10 @@ export class EventNote implements IHasUserId {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Event, (event) => event.notes, { nullable: false })
+  @ManyToOne(() => Event, (event) => event.eventGifts, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'eventReferenceId' })
   event: Event;
 
