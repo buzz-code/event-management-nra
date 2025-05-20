@@ -22,30 +22,17 @@ FROM node:16-alpine AS builder
 
 RUN  apk add curl bash
 
-# install node-prune (https://github.com/tj/node-prune)
-RUN curl -sfL https://gobinaries.com/tj/node-prune | bash -s -- -b /usr/local/bin
-
 WORKDIR /app
 
 COPY package*.json /app/
 COPY yarn.lock /app/
 COPY .yarnclean /app/
 
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
 RUN yarn build
-
-# run node prune
-RUN /usr/local/bin/node-prune
-
-# remove unused dependencies
-RUN rm -rf node_modules/rxjs/src/
-RUN rm -rf node_modules/rxjs/bundles/
-RUN rm -rf node_modules/rxjs/_esm5/
-RUN rm -rf node_modules/rxjs/_esm2015/
-RUN rm -rf node_modules/swagger-ui-dist/*.map
 
 
 FROM node:16-alpine as production
@@ -63,9 +50,10 @@ WORKDIR /app2
 COPY --from=builder /app/package*.json .
 COPY --from=builder /app/yarn.lock .
 COPY --from=builder /app/dist/ ./dist/
-COPY --from=builder /app/node_modules/ ./node_modules/
-COPY docker-entrypoint.sh /docker-entrypoint.sh
 
+RUN yarn install --production --frozen-lockfile
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
