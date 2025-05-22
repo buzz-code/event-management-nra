@@ -48,7 +48,7 @@ export class StudentClass implements IHasUserId {
       this.classReferenceId = await findOneAndAssignReferenceId(
         dataSource,
         Class,
-        { key: this.classKey, year: this.year },
+        { key: this.classKey },
         this.userId,
         this.classReferenceId,
         this.classKey,
