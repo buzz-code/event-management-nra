@@ -3,7 +3,7 @@ import { Card, CardContent } from '@mui/material';
 import { SimpleForm, Title, useNotify, useGetIdentity, useDataProvider, SaveButton, Toolbar, useAuthProvider, ResourceContextProvider } from 'react-admin';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultPageSize } from '@shared/utils/settingsUtil';
-import { getDashboardItems } from './settingsUtil';
+import { getDashboardItems, getMaintainanceMessage } from './settingsUtil';
 import { DashboardItemsInput } from './DashboardItemsInput';
 import { GeneralSettingsInput } from './GeneralSettingsInput';
 
@@ -23,6 +23,7 @@ export default function Settings() {
     const defaultValues = {
         defaultPageSize: getDefaultPageSize(identity),
         dashboardItems: getDashboardItems(identity),
+        maintainanceMessage: getMaintainanceMessage(identity),
     };
 
     const handleSave = async (values) => {

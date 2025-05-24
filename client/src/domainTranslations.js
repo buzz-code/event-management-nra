@@ -141,6 +141,7 @@ export default {
                 'dashboardItems.yearFilterType': 'סוג סינון שנה',
                 'dashboardItems.filter': 'פילטר נוסף בפורמט JSON (אופציונלי, ללא שנה)',
                 'dashboardItems.title': 'כותרת',
+                maintainanceMessage: 'הודעה לסגירת המערכת הטלפונית',
             }
         },
 

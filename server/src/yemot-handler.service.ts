@@ -17,6 +17,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   override async processCall(): Promise<void> {
     this.logger.log(`Processing call with ID: ${this.call.callId}`);
     await this.getUserByDidPhone();
+
+    if (this.user.additionalData?.maintainanceMessage) {
+      return this.hangupWithMessage(this.user.additionalData.maintainanceMessage);
+    }
+
     this.loadEventTypes();
     this.loadGifts();
 

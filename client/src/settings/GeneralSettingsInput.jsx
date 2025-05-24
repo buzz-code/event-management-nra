@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { NumberInput, required } from 'react-admin';
+import { NumberInput, required, TextInput } from 'react-admin';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { PAGE_SIZE_OPTIONS } from '@shared/config/settings';
 
@@ -24,6 +24,11 @@ export function GeneralSettingsInput() {
           fullWidth
           disableClearable
           validate={required()}
+        />
+        <TextInput
+          source="maintainanceMessage"
+          fullWidth
+          helperText="הודעה שתוצג למתקשרים בזמן תחזוקה. השאר ריק כדי לאפשר שיחות רגילות."
         />
       </AccordionDetails>
     </Accordion >

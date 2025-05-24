@@ -41,3 +41,12 @@ export function getDefaultDashboardItems() {
       }
   ];
 }
+
+export const useMaintainanceMessage = () => {
+  const { identity } = useGetIdentity();
+  return getMaintainanceMessage(identity);
+}
+
+export function getMaintainanceMessage(identity) {
+  return identity?.additionalData?.maintainanceMessage || '';
+}
