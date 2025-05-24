@@ -1,7 +1,8 @@
 import { DeepPartial } from 'typeorm';
 import { CrudRequest } from '@dataui/crud';
 import { CrudAuthCustomFilter, getUserIdFilter } from '@shared/auth/crud-auth.filter';
-import { BaseEntityModuleOptions } from '@shared/base-entity/interface';
+import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
+import { BaseEntityService } from '@shared/base-entity/base-entity.service';
 import { IHeader } from '@shared/utils/exporter/types';
 import { Event } from 'src/db/entities/Event.entity';
 
@@ -52,7 +53,29 @@ function getConfig(): BaseEntityModuleOptions {
         ];
       },
     },
+    service: EventService,
   };
+}
+
+class EventService<T extends Entity | Event> extends BaseEntityService<T> {
+  async doAction(req: CrudRequest<any, any>, body: any): Promise<any> {
+    switch (req.parsed.extra.action) {
+      case 'teacherAssociation': {
+        const teacherIds = req.parsed.extra.teacherReferenceIds?.toString()?.split(',') || [];
+        const eventIds = req.parsed.extra.ids?.toString()?.split(',') || [];
+        for (const eventId of eventIds) {
+          const event = await this.dataSource.getRepository(Event).findOneBy({ id: parseInt(eventId) });
+          if (event) {
+            const randomTeacherId = teacherIds[Math.floor(Math.random() * teacherIds.length)];
+            event.teacherReferenceId = parseInt(randomTeacherId);
+            await this.dataSource.getRepository(Event).save(event);
+          }
+        }
+        return 'האירועים עודכנו בהצלחה';
+      }
+    }
+    return super.doAction(req, body);
+  }
 }
 
 export default getConfig();

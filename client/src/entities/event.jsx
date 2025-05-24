@@ -17,6 +17,7 @@ import {
     ChipField,
     SelectField
 } from 'react-admin';
+import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -27,6 +28,8 @@ import { commonAdminFilters, notPermissionFilter } from '@shared/components/fiel
 import { isTeacher } from '../utils/appPermissions';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
+import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
 
 const filters = [
     ...commonAdminFilters,
@@ -46,8 +49,14 @@ const filterDefaultValues = {
 };
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
+      const additionalBulkButtons = [
+        <BulkActionButton label='שיוך למורה' icon={<SupervisedUserCircleIcon />} name='teacherAssociation' >
+            <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
+        </BulkActionButton>,
+    ];
+
     return (
-        <CommonDatagrid {...props}>
+        <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
