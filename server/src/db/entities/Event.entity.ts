@@ -18,6 +18,8 @@ import { Student } from './Student.entity';
 import { EventNote } from './EventNote.entity';
 import { EventGift } from './EventGift.entity';
 import { LevelType } from './LevelType.entity';
+import { StudentClass } from './StudentClass.entity';
+import { Class } from './Class.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsDate, IsNumber, Min } from '@shared/utils/validation/class-validator-he';
@@ -27,7 +29,7 @@ import { User } from './User.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
 import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
-import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
+import { fillDefaultYearValue, getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 
 @Entity('events')
 @Index('events_user_id_idx', ['userId'], {})
@@ -37,6 +39,7 @@ import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 @Index('events_level_type_id_idx', ['levelTypeReferenceId'], {})
 @Index('events_event_date_idx', ['eventDate'], {})
 @Index('events_event_hebrew_month_idx', ['eventHebrewMonth'], {})
+@Index('events_student_class_reference_id_idx', ['studentClassReferenceId'], {})
 export class Event implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
@@ -46,7 +49,7 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType]);
+      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -74,6 +77,23 @@ export class Event implements IHasUserId {
         this.studentReferenceId,
         this.studentTz,
       );
+
+      if (this.studentReferenceId && !this.studentClassReferenceId) {
+        const studentClassRepository = dataSource.getRepository(StudentClass);
+        
+        const studentClass = await studentClassRepository.findOne({
+          where: { 
+            studentReferenceId: this.studentReferenceId,
+            year: this.year ?? getCurrentHebrewYear(),
+            userId: this.userId
+          },
+          order: { id: 'ASC' } // Get the first class (oldest entry)
+        });
+
+        if (studentClass && studentClass.classReferenceId) {
+          this.studentClassReferenceId = studentClass.classReferenceId;
+        }
+      }
 
       this.levelTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -233,6 +253,12 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   year: number;
 
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  studentClassReferenceId: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -250,6 +276,10 @@ export class Event implements IHasUserId {
   // @ManyToOne(() => Student, { nullable: true })
   // @JoinColumn({ name: 'studentReferenceId' })
   // student: Student;
+
+  @ManyToOne(() => Class, { nullable: true })
+  @JoinColumn({ name: 'studentClassReferenceId' })
+  studentClass: Class;
 
   @ManyToOne(() => LevelType, { nullable: true })
   @JoinColumn({ name: 'levelTypeReferenceId' })

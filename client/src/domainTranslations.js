@@ -21,6 +21,7 @@ export default {
                 eventTypeId: 'סוג האירוע',
                 levelTypeReferenceId: 'סוג רמה',
                 levelTypeId: 'סוג רמה',
+                studentClassReferenceId: 'כיתה',
                 description: 'תיאור',
                 eventDate: 'תאריך האירוע',
                 'eventDate:$gte': 'תאריך האירוע מ-',

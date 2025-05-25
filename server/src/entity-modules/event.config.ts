@@ -21,6 +21,7 @@ function getConfig(): BaseEntityModuleOptions {
         eventType: { eager: false },
         teacher: { eager: true },
         student: { eager: false },
+        studentClass: { eager: false },
         levelType: { eager: false },
         notes: { eager: false },
         eventGifts: { eager: false },
@@ -32,6 +33,7 @@ function getConfig(): BaseEntityModuleOptions {
           eventType: { eager: true },
           teacher: { eager: true },
           student: { eager: true },
+          studentClass: { eager: true },
           levelType: { eager: true },
         };
         return innerFunc(req);
@@ -48,6 +50,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'eventType.name', label: 'סוג אירוע' },
           { value: 'teacher.name', label: 'שם מורה' },
           { value: 'student.name', label: 'שם תלמיד' },
+          { value: 'studentClass.name', label: 'שם כיתה' },
           { value: 'levelType.name', label: 'סוג רמה' },
           { value: 'year', label: 'שנה' },
         ];

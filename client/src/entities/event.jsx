@@ -38,6 +38,8 @@ const filters = [
     <CommonReferenceInputFilter source="studentReferenceId" reference="student" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" dynamicFilter={filterByUserIdAndYear} />,
     <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" dynamicFilter={filterByUserIdAndYear} />,
+    <CommonReferenceInputFilter source="studentClassReferenceId" reference="class" dynamicFilter={filterByUserId} />,
+    <TextInput source="studentClass.gradeLevel:$eq" label="שכבה" />,
     <DateInput source="eventDate:$gte" />,
     <DateInput source="eventDate:$lte" />,
     <TextInput source="eventHebrewMonth:$cont" alwaysOn />,
@@ -49,7 +51,7 @@ const filterDefaultValues = {
 };
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
-      const additionalBulkButtons = [
+    const additionalBulkButtons = [
         <BulkActionButton label='שיוך למורה' icon={<SupervisedUserCircleIcon />} name='teacherAssociation' >
             <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
         </BulkActionButton>,
@@ -80,6 +82,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                 </SingleFieldList>
             </ReferenceManyField>
             <SelectField source="year" choices={yearChoices} />
+            <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
             <NumberField source="grade" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
