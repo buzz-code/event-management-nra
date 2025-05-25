@@ -4,10 +4,11 @@ import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { Event } from 'src/db/entities/Event.entity';
-import { EventGift } from 'src/db/entities/EventGift.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { getJewishMonthByIndex, toGregorianDate } from 'jewish-date';
 import { formatHebrewDateForIVR, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
+
+const MAX_GIFTS = 5;
 
 @Injectable()
 export class YemotHandlerService extends BaseYemotHandlerService {
@@ -144,11 +145,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async getGifts(): Promise<Gift[]> {
-    this.logger.log(`Getting gifts - up to 3 allowed`);
+    this.logger.log(`Getting gifts - up to ${MAX_GIFTS} allowed`);
     const selectedGifts: Gift[] = [];
     let continueSelection = true;
 
-    while (continueSelection && selectedGifts.length < 3) {
+    while (continueSelection && selectedGifts.length < MAX_GIFTS) {
       const availableGifts = this.gifts.filter(g => !selectedGifts.some(sg => sg.id === g.id));
 
       const promptKey = selectedGifts.length === 0 ? 'EVENT.GIFT_SELECTION' : 'EVENT.ADDITIONAL_GIFT_SELECTION';
@@ -159,9 +160,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       }
 
       selectedGifts.push(gift);
-      this.logger.log(`Gift selected: ${gift.name} (${selectedGifts.length} of 3)`);
+      this.logger.log(`Gift selected: ${gift.name} (${selectedGifts.length} of ${MAX_GIFTS})`);
 
-      if (selectedGifts.length < 3) {
+      if (selectedGifts.length < MAX_GIFTS) {
         this.logger.log(`Asking if user wants to select another gift`);
         continueSelection = await this.askConfirmation('EVENT.SELECT_ANOTHER_GIFT');
       }
