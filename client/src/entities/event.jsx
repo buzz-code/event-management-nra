@@ -50,7 +50,7 @@ const filterDefaultValues = {
     ...defaultYearFilter,
 };
 
-const Datagrid = ({ isAdmin, children, ...props }) => {
+const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
     const additionalBulkButtons = [
         <BulkActionButton label='שיוך למורה' icon={<SupervisedUserCircleIcon />} name='teacherAssociation' >
             <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
@@ -71,20 +71,21 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <DateField source="eventDate" />
             <TextField source="eventHebrewDate" />
             <TextField source="eventHebrewMonth" />
-            <ReferenceManyField label="הערות" reference="event_note" target="eventReferenceId">
+            {!isPreview && <ReferenceManyField label="הערות" reference="event_note" target="eventReferenceId">
                 <SingleFieldList>
                     <ChipField source="noteText" />
                 </SingleFieldList>
-            </ReferenceManyField>
-            <ReferenceManyField label="מתנות" reference="event_gift" target="eventReferenceId">
+            </ReferenceManyField>}
+            {!isPreview && <ReferenceManyField label="מתנות" reference="event_gift" target="eventReferenceId">
                 <SingleFieldList>
                     <ChipField source="gift.name" />
                 </SingleFieldList>
-            </ReferenceManyField>
+            </ReferenceManyField>}
             <SelectField source="year" choices={yearChoices} />
             <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
             <NumberField source="grade" />
+            {isPreview && <TextField source="newNote" />}
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -130,6 +131,7 @@ const Representation = CommonRepresentation;
 
 const importer = {
     fields: ['studentTz', 'eventTypeId', 'levelTypeId', 'teacherTz', 'name', 'description', 'eventDate', 'completed', 'grade', 'year'],
+    updateFields: ['id', 'name', 'description', 'eventDate', 'eventHebrewDate', 'eventHebrewMonth', 'completed', 'grade', '', 'eventTypeId', '', 'teacherTz', '', 'studentTz', '', '', 'levelTypeId', 'year', 'newNote'],
 }
 
 const entity = {

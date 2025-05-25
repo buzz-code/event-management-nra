@@ -5,6 +5,7 @@ import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { BaseEntityService } from '@shared/base-entity/base-entity.service';
 import { IHeader } from '@shared/utils/exporter/types';
 import { Event } from 'src/db/entities/Event.entity';
+import { getISODateFormatter } from '@shared/utils/formatting/formatter.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -40,19 +41,25 @@ function getConfig(): BaseEntityModuleOptions {
       },
       getExportHeaders(): IHeader[] {
         return [
+          { value: 'id', label: 'מזהה' },
           { value: 'name', label: 'כותרת' },
           { value: 'description', label: 'תיאור' },
-          { value: 'eventDate', label: 'תאריך אירוע' },
+          { value: getISODateFormatter('eventDate'), label: 'תאריך אירוע' },
           { value: 'eventHebrewDate', label: 'תאריך עברי' },
           { value: 'eventHebrewMonth', label: 'חודש עברי' },
           { value: 'completed', label: 'הושלם' },
           { value: 'grade', label: 'ציון' },
           { value: 'eventType.name', label: 'סוג אירוע' },
+          { value: 'eventType.key', label: 'מפתח סוג אירוע' },
           { value: 'teacher.name', label: 'שם מורה' },
+          { value: 'teacher.tz', label: 'תעודת זהות מורה' },
           { value: 'student.name', label: 'שם תלמיד' },
+          { value: 'student.tz', label: 'תעודת זהות תלמיד' },
           { value: 'studentClass.name', label: 'שם כיתה' },
           { value: 'levelType.name', label: 'סוג רמה' },
+          { value: 'levelType.key', label: 'מפתח סוג רמה' },
           { value: 'year', label: 'שנה' },
+          { value: (row) => '', label: 'הערה חדשה' },
         ];
       },
     },

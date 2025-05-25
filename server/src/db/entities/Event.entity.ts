@@ -30,6 +30,8 @@ import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity
 import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
 import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
 import { fillDefaultYearValue, getCurrentHebrewYear } from '@shared/utils/entity/year.util';
+import { Gift } from './Gift.entity';
+import { getCurrentUser } from '@shared/utils/validation/current-user.util';
 
 @Entity('events')
 @Index('events_user_id_idx', ['userId'], {})
@@ -49,7 +51,7 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class]);
+      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -80,9 +82,9 @@ export class Event implements IHasUserId {
 
       if (this.studentReferenceId && !this.studentClassReferenceId) {
         const studentClassRepository = dataSource.getRepository(StudentClass);
-        
+
         const studentClass = await studentClassRepository.findOne({
-          where: { 
+          where: {
             studentReferenceId: this.studentReferenceId,
             year: this.year ?? getCurrentHebrewYear(),
             userId: this.userId
@@ -116,6 +118,16 @@ export class Event implements IHasUserId {
       if (this.eventDate) {
         this.eventHebrewDate = formatHebrewDate(this.eventDate);
         this.eventHebrewMonth = this.eventHebrewDate.split(' ')[1];
+      }
+
+      if (this.id && this.newNote) {
+        const note = new EventNote();
+        note.eventReferenceId = this.id;
+        note.noteText = this.newNote;
+        const currentUser = getCurrentUser();
+        note.userId = currentUser?.id || this.userId;
+        const eventNoteRepository = dataSource.getRepository(EventNote);
+        await eventNoteRepository.save(note);
       }
     } finally {
       dataSource?.destroy();
@@ -298,4 +310,6 @@ export class Event implements IHasUserId {
 
   @OneToMany(() => EventGift, (eventGift) => eventGift.event, { onDelete: 'CASCADE', cascade: true })
   eventGifts: EventGift[];
+
+  newNote: string;
 }

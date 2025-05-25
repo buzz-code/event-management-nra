@@ -31,6 +31,7 @@ export default {
                 'eventHebrewMonth:$cont': 'חודש עברי',
                 completed: 'הושלם?',
                 grade: 'ציון',
+                newNote: 'הערה חדשה',
             }
         },
         event_type: {
