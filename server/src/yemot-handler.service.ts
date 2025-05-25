@@ -6,7 +6,9 @@ import { Gift } from 'src/db/entities/Gift.entity';
 import { Event } from 'src/db/entities/Event.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { getJewishMonthByIndex, toGregorianDate } from 'jewish-date';
-import { formatHebrewDateForIVR, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
+import { formatHebrewDateForIVR, gematriyaLetters, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
+import { Class } from 'src/db/entities/Class.entity';
+import { StudentClass } from 'src/db/entities/StudentClass.entity';
 
 const MAX_GIFTS = 5;
 
@@ -21,6 +23,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     if (this.user.additionalData?.maintainanceMessage) {
       return this.hangupWithMessage(this.user.additionalData.maintainanceMessage);
+    }
+
+    // TODO: should student enter with 99999, or type it here?
+    if (this.call.ApiEnterID && this.call.ApiEnterID.includes('999999')) {
+      this.logger.log(`User requested to listen to class celebrations`);
+      return this.processClassCelebrationsListener();
     }
 
     this.loadEventTypes();
@@ -215,5 +223,154 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     return eventDate;
+  }
+
+  private async processClassCelebrationsListener(): Promise<void> {
+    this.logger.log(`Processing class celebrations listener`);
+
+    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.WELCOME'));
+
+    const grade = await this.getGradeForCelebrations();
+    const classEntity = await this.getClassNumber(grade);
+
+    const currentYear = getCurrentHebrewYear();
+    const month = await this.getMonthForCelebrations(currentYear);
+
+    await this.readClassCelebrations(classEntity, currentYear, month.name);
+
+    this.hangupWithMessage(await this.getTextByUserId('CELEBRATIONS.GOODBYE'));
+  }
+
+  private async getGradeForCelebrations(): Promise<string> {
+    this.logger.log(`Getting grade for celebrations`);
+
+    const gradeInput = await this.askForInput(
+      await this.getTextByUserId('CELEBRATIONS.GRADE_PROMPT'),
+      {
+        min_digits: 1,
+        max_digits: 2
+      }
+    );
+
+    const grade = parseInt(gradeInput);
+
+    if (grade < 9 || grade > 14) {
+      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.INVALID_GRADE'));
+      return this.getGradeForCelebrations();
+    }
+
+    const gradeName = gematriyaLetters(grade, false);
+    this.logger.log(`Grade selected: ${gradeName} (${grade})`);
+    return gradeName;
+  }
+
+  private async getClassNumber(grade: string): Promise<Class> {
+    this.logger.log(`Getting class number for grade ${grade}`);
+
+    const classNumberInput = await this.askForInput(
+      await this.getTextByUserId('CELEBRATIONS.CLASS_PROMPT'),
+      {
+        min_digits: 1,
+        max_digits: 2
+      }
+    );
+
+    const classNumber = parseInt(classNumberInput);
+    const expectedClassName = `${grade}${classNumber}`;
+
+    const classEntity = await this.dataSource.getRepository(Class).findOne({
+      where: {
+        userId: this.user.id,
+        name: expectedClassName,
+        gradeLevel: grade
+      }
+    });
+
+    if (!classEntity) {
+      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.INVALID_CLASS'));
+      return this.getClassNumber(grade);
+    }
+
+    this.logger.log(`Class selected: ${expectedClassName}`);
+    return classEntity;
+  }
+
+  private async getMonthForCelebrations(currentYear: number) {
+    this.logger.log(`Getting month for celebrations`);
+
+    const months = getHebrewMonthsList(currentYear);
+    const month = await this.askForMenu('DATE.MONTH_SELECTION', months);
+    if (!month) {
+      this.sendMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+      return this.getMonthForCelebrations(currentYear);
+    }
+
+    this.logger.log(`Month selected: ${month.name} (${month.index})`);
+    return month;
+  }
+
+  private async readClassCelebrations(classEntity: Class, currentYear: number, monthName: string): Promise<void> {
+    this.logger.log(`Reading celebrations for class ${classEntity.name} month ${monthName}`);
+
+    const events = await this.dataSource.getRepository(Event)
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.eventType', 'eventType')
+      .innerJoin(Student, 'student', 'student.id = event.studentReferenceId')
+      .innerJoin(StudentClass, 'studentClass', 'studentClass.studentReferenceId = student.id')
+      .where('event.userId = :userId', { userId: this.user.id })
+      .andWhere('studentClass.classReferenceId = :classId', { classId: classEntity.id })
+      .andWhere('studentClass.year = :year', { year: currentYear })
+      .andWhere('event.eventHebrewMonth = :monthName', { monthName })
+      .orderBy('student.name', 'ASC')
+      .addOrderBy('event.eventDate', 'ASC')
+      .getMany();
+
+    if (events.length === 0) {
+      this.hangupWithMessage(await this.getTextByUserId('CELEBRATIONS.NO_CELEBRATIONS_FOUND', {
+        className: classEntity.name,
+        month: monthName
+      }));
+      return;
+    }
+
+    const studentsWithEvents = await this.dataSource.getRepository(Student)
+      .createQueryBuilder('student')
+      .where('student.id IN (:...studentIds)', {
+        studentIds: events.map(e => e.studentReferenceId)
+      })
+      .getMany();
+
+    const studentMap = new Map(studentsWithEvents.map(s => [s.id, s]));
+
+    const eventsByStudent = events.reduce((acc, event) => {
+      const student = studentMap.get(event.studentReferenceId);
+      if (student) {
+        const studentName = student.name;
+        if (!acc[studentName]) {
+          acc[studentName] = [];
+        }
+        acc[studentName].push(event);
+      }
+      return acc;
+    }, {} as Record<string, Event[]>);
+
+    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_START', {
+      className: classEntity.name,
+      month: monthName,
+      count: events.length.toString()
+    }));
+
+    for (const [studentName, studentEvents] of Object.entries(eventsByStudent)) {
+      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.STUDENT_NAME', { name: studentName }));
+
+      for (const event of studentEvents) {
+        this.sendMessage(await this.getTextByUserId('CELEBRATIONS.EVENT_DETAIL', {
+          eventType: event.eventType.name,
+          date: formatHebrewDateForIVR(event.eventDate)
+        }));
+      }
+    }
+
+    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_COMPLETE'));
   }
 }
