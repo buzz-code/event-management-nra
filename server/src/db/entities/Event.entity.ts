@@ -285,9 +285,9 @@ export class Event implements IHasUserId {
   @JoinColumn({ name: 'teacherReferenceId' })
   teacher: Teacher;
 
-  // @ManyToOne(() => Student, { nullable: true })
-  // @JoinColumn({ name: 'studentReferenceId' })
-  // student: Student;
+  @ManyToOne(() => Student, { nullable: true })
+  @JoinColumn({ name: 'studentReferenceId' })
+  student: Student;
 
   @ManyToOne(() => Class, { nullable: true })
   @JoinColumn({ name: 'studentClassReferenceId' })

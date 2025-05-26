@@ -131,7 +131,7 @@ const Representation = CommonRepresentation;
 
 const importer = {
     fields: ['studentTz', 'eventTypeId', 'levelTypeId', 'teacherTz', 'name', 'description', 'eventDate', 'completed', 'grade', 'year'],
-    updateFields: ['id', 'name', 'description', 'eventDate', 'eventHebrewDate', 'eventHebrewMonth', 'completed', 'grade', '', 'eventTypeId', '', 'teacherTz', '', 'studentTz', '', '', 'levelTypeId', 'year', 'newNote'],
+    updateFields: ['id', 'studentTz', '', 'eventDate', 'eventHebrewDate', 'eventTypeId', '', '', '', '', '', '', '', '', '', 'newNote'],
 }
 
 const entity = {
