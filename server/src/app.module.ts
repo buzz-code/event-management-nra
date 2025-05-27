@@ -20,7 +20,7 @@ import { YemotHandlerService } from './yemot-handler.service';
   imports: [
     RequestContextModule,
     LoggerModule.forRoot(getPinoConfig(process.env.NODE_ENV === 'development')),
-    ThrottlerModule.forRoot({ ttl: 5, limit: 200 }),
+    ThrottlerModule.forRoot({ ttl: 5, limit: 2000 }),
     TypeOrmModule.forRoot(typeOrmModuleConfig),
     MailSendModule,
     EntitiesModule,
