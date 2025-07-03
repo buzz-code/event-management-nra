@@ -5,8 +5,7 @@ import { EventType } from 'src/db/entities/EventType.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { Event } from 'src/db/entities/Event.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-import { getJewishMonthByIndex, toGregorianDate } from 'jewish-date';
-import { formatHebrewDateForIVR, gematriyaLetters, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
+import { formatHebrewDateForIVR, gematriyaLetters, getGregorianDateFromHebrew, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
 
@@ -204,11 +203,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
     }
 
-    const eventDate = toGregorianDate({
-      year: year,
-      monthName: getJewishMonthByIndex(month.index, year),
-      day: dayNumber,
-    });
+    const eventDate = this.createEventDateWithYearAdjustment(year, month.index, dayNumber);
 
     this.logger.log(`Event date selected: ${eventDate.toISOString()}`);
 
@@ -220,6 +215,20 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     if (!isConfirmed) {
       return this.getEventDate();
+    }
+
+    return eventDate;
+  }
+
+  private createEventDateWithYearAdjustment(year: number, monthIndex: number, dayNumber: number): Date {
+    let eventDate = getGregorianDateFromHebrew(year, monthIndex, dayNumber);
+
+    const today = new Date();
+    const daysDifference = Math.floor((today.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysDifference > 100) {
+      this.logger.log(`Selected date ${eventDate.toISOString()} is more than 100 days ago (${daysDifference} days), using next year`);
+      eventDate = getGregorianDateFromHebrew(year + 1, monthIndex, dayNumber);
     }
 
     return eventDate;
