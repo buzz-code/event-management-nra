@@ -8,7 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RequestContextModule } from 'nestjs-request-context';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from '@shared/auth/auth.module';
-import { YemotModule } from '@shared/utils/yemot/yemot.module';
+import { YemotModule } from '@shared/utils/yemot/v2/yemot.module';
 import { MailSendModule } from '@shared/utils/mail/mail-send.module';
 import { EntitiesModule } from '../entities.module';
 import { getPinoConfig } from '@shared/config/pino.config';
@@ -131,7 +131,11 @@ describe('AppModule', () => {
 
   it('should configure YemotModule with chain', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
-    const yemotConfig = imports.find((imp: any) => imp && imp.module === YemotModule);
+    const yemotConfig = imports.find((imp: any) => {
+      // Check if this is a dynamic module with YemotModule
+      return imp && (imp.module === YemotModule || 
+        (typeof imp === 'object' && imp.module && imp.module.name === 'YemotModule'));
+    });
     expect(yemotConfig).toBeDefined();
     expect(yemotConfig.module).toBe(YemotModule);
   });

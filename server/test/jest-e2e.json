@@ -1,9 +1,29 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": ["js", "json", "ts", "tsx"],
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+    "^.+\\.(t|j)sx?$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/../src/$1",
+    "^@shared/(.*)$": "<rootDir>/../shared/$1"
+  },
+  "modulePaths": [
+    "<rootDir>/../"
+  ],
+  "testTimeout": 10000,
+  "setupFilesAfterEnv": ["<rootDir>/setup-tests.ts"],
+  "maxWorkers": 1,
+  "forceExit": true,
+  "detectOpenHandles": true,
+  "collectCoverageFrom": [
+    "../src/**/*.(t|j)sx?",
+    "!../src/**/*.spec.(t|j)sx?",
+    "!../src/**/*.test.(t|j)sx?",
+    "!../src/**/index.(t|j)sx?",
+    "!../src/migrations/**",
+    "!../src/main.ts"
+  ]
 }

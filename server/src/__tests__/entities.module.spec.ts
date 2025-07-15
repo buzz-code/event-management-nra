@@ -31,29 +31,27 @@ const MockBaseEntityModule = global.MockBaseEntityModule;
 
 // Import all configs and entities
 import userConfig from '../entity-modules/user.config';
-import attReportConfig from '../entity-modules/att-report.config';
-import gradeConfig from '../entity-modules/grade.config';
-import klassConfig from '../entity-modules/klass.config';
-import klassTypeConfig from '../entity-modules/klass-type.config';
-import knownAbsenceConfig from '../entity-modules/known-absence.config';
-import lessonConfig from '../entity-modules/lesson.config';
-import studentKlassConfig from '../entity-modules/student-klass.config';
+import auditLogConfig from '../entity-modules/audit-log.config';
+import importFileConfig from '../entity-modules/import-file.config';
+import pageConfig from '../entity-modules/page.config';
+import paymentTrackConfig from '../entity-modules/payment-track.config';
+import textConfig from '../entity-modules/text.config';
+import mailAddressConfig from '@shared/utils/mail/mail-address.config';
+import eventConfig from '../entity-modules/event.config';
+import eventTypeConfig from '../entity-modules/event-type.config';
+import eventNoteConfig from '../entity-modules/event-note.config';
+import giftConfig from '../entity-modules/gift.config';
+import eventGiftConfig from '../entity-modules/event-gift.config';
+import classConfig from '../entity-modules/class.config';
 import studentConfig from '../entity-modules/student.config';
 import teacherConfig from '../entity-modules/teacher.config';
-import textConfig from '../entity-modules/text.config';
-import { StudentBaseKlass } from '../db/view-entities/StudentBaseKlass.entity';
+import levelTypeConfig from '../entity-modules/level-type.config';
+import studentClassConfig from '../entity-modules/student-class.config';
+import studentByYearConfig from '../entity-modules/student-by-year.config';
 import { YemotCall } from '@shared/entities/YemotCall.entity';
+import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 import { RecievedMail } from '@shared/entities/RecievedMail.entity';
 import { Image } from '@shared/entities/Image.entity';
-import { ReportMonth } from '../db/entities/ReportMonth.entity';
-import { AttReportAndGrade } from '../db/view-entities/AttReportAndGrade.entity';
-import { StudentGlobalReport } from '../db/view-entities/StudentGlobalReport.entity';
-import { KnownAbsenceWithReportMonth } from '../db/view-entities/KnownAbsenceWithReportMonth.entity';
-import { GradeName } from '../db/entities/GradeName.entity';
-import { AttGradeEffect } from '../db/entities/AttGradeEffect';
-import { GradeEffectByUser } from '@shared/view-entities/GradeEffectByUser.entity';
-import { AbsCountEffectByUser } from '@shared/view-entities/AbsCountEffectByUser.entity';
-import { LessonKlassName } from '../db/view-entities/LessonKlassName.entity';
 
 describe('EntitiesModule', () => {
   let module: TestingModule;
@@ -84,33 +82,29 @@ describe('EntitiesModule', () => {
             ...mockDataSource,
             options: {
               type: 'sqlite' as const,
-              database: ':memory:',
-              entities: [
-                userConfig.entity,
-                attReportConfig.entity,
-                gradeConfig.entity,
-                klassConfig.entity,
-                klassTypeConfig.entity,
-                knownAbsenceConfig.entity,
-                lessonConfig.entity,
-                studentKlassConfig.entity,
-                studentConfig.entity,
-                teacherConfig.entity,
-                textConfig.entity,
-                StudentBaseKlass,
-                YemotCall,
-                RecievedMail,
-                Image,
-                ReportMonth,
-                AttReportAndGrade,
-                StudentGlobalReport,
-                KnownAbsenceWithReportMonth,
-                GradeName,
-                AttGradeEffect,
-                GradeEffectByUser,
-                AbsCountEffectByUser,
-                LessonKlassName,
-              ],
+              database: ':memory:',            entities: [
+              userConfig.entity,
+              auditLogConfig.entity,
+              importFileConfig.entity,
+              pageConfig.entity,
+              paymentTrackConfig.entity,
+              textConfig.entity,
+              eventConfig.entity,
+              eventTypeConfig.entity,
+              eventNoteConfig.entity,
+              giftConfig.entity,
+              eventGiftConfig.entity,
+              classConfig.entity,
+              studentConfig.entity,
+              teacherConfig.entity,
+              levelTypeConfig.entity,
+              studentClassConfig.entity,
+              studentByYearConfig.entity,
+              YemotCall,
+              TextByUser,
+              RecievedMail,
+              Image,
+            ],
               synchronize: true,
             },
           }),
@@ -139,16 +133,23 @@ describe('EntitiesModule', () => {
   describe('Entity Configurations', () => {
     const configsToTest = [
       { name: 'userConfig', config: userConfig },
-      { name: 'attReportConfig', config: attReportConfig },
-      { name: 'gradeConfig', config: gradeConfig },
-      { name: 'klassConfig', config: klassConfig },
-      { name: 'klassTypeConfig', config: klassTypeConfig },
-      { name: 'knownAbsenceConfig', config: knownAbsenceConfig },
-      { name: 'lessonConfig', config: lessonConfig },
-      { name: 'studentKlassConfig', config: studentKlassConfig },
+      { name: 'auditLogConfig', config: auditLogConfig },
+      { name: 'importFileConfig', config: importFileConfig },
+      { name: 'pageConfig', config: pageConfig },
+      { name: 'paymentTrackConfig', config: paymentTrackConfig },
+      { name: 'textConfig', config: textConfig },
+      { name: 'mailAddressConfig', config: mailAddressConfig },
+      { name: 'eventConfig', config: eventConfig },
+      { name: 'eventTypeConfig', config: eventTypeConfig },
+      { name: 'eventNoteConfig', config: eventNoteConfig },
+      { name: 'giftConfig', config: giftConfig },
+      { name: 'eventGiftConfig', config: eventGiftConfig },
+      { name: 'classConfig', config: classConfig },
       { name: 'studentConfig', config: studentConfig },
       { name: 'teacherConfig', config: teacherConfig },
-      { name: 'textConfig', config: textConfig },
+      { name: 'levelTypeConfig', config: levelTypeConfig },
+      { name: 'studentClassConfig', config: studentClassConfig },
+      { name: 'studentByYearConfig', config: studentByYearConfig },
     ];
 
     configsToTest.forEach(({ name, config }) => {
@@ -159,22 +160,10 @@ describe('EntitiesModule', () => {
     });
 
     const entitiesToTest = [
-      { name: 'StudentBaseKlass', entity: StudentBaseKlass },
       { name: 'YemotCall', entity: YemotCall },
+      { name: 'TextByUser', entity: TextByUser },
       { name: 'RecievedMail', entity: RecievedMail },
       { name: 'Image', entity: Image },
-      { name: 'ReportMonth', entity: ReportMonth },
-      { name: 'AttReportAndGrade', entity: AttReportAndGrade },
-      { name: 'StudentGlobalReport', entity: StudentGlobalReport },
-      {
-        name: 'KnownAbsenceWithReportMonth',
-        entity: KnownAbsenceWithReportMonth,
-      },
-      { name: 'GradeName', entity: GradeName },
-      { name: 'AttGradeEffect', entity: AttGradeEffect },
-      { name: 'GradeEffectByUser', entity: GradeEffectByUser },
-      { name: 'AbsCountEffectByUser', entity: AbsCountEffectByUser },
-      { name: 'LessonKlassName', entity: LessonKlassName },
     ];
 
     entitiesToTest.forEach(({ name, entity }) => {
