@@ -1,0 +1,20 @@
+{
+  "testUser": {
+    "username": "admin@test.com",
+    "password": "testpassword"
+  },
+  "sampleEvent": {
+    "title": "Sample Event for Testing",
+    "date": "2024-06-15",
+    "description": "This is a sample event created for E2E testing purposes",
+    "maxParticipants": 50,
+    "location": "Test Location"
+  },
+  "sampleStudent": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@test.com",
+    "phone": "123-456-7890",
+    "grade": "10"
+  }
+}
