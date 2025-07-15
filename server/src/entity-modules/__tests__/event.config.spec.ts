@@ -55,4 +55,39 @@ describe('EventConfig', () => {
     expect(mockInnerFunc).toHaveBeenCalledWith(mockReq);
     expect(result).toBe('result');
   });
+
+  it('should process dynamic value functions in export headers', () => {
+    const headers = eventConfig.exporter.getExportHeaders([]);
+    
+    // Find the notes header by checking the structure 
+    const notesHeader = headers.find(h => (h as any).label === 'הערות');
+    expect(notesHeader).toBeDefined();
+    expect(typeof (notesHeader as any).value).toBe('function');
+    
+    // Test the notes function
+    const mockRow = {
+      notes: [
+        { noteText: 'הערה 1' },
+        { noteText: 'הערה 2' }
+      ]
+    };
+    const result = ((notesHeader as any).value as Function)(mockRow);
+    expect(result).toBe('הערה 1\r\nהערה 2');
+    
+    // Find the empty note header
+    const emptyNoteHeader = headers.find(h => (h as any).label === 'הערה חדשה');
+    expect(emptyNoteHeader).toBeDefined();
+    expect(typeof (emptyNoteHeader as any).value).toBe('function');
+    expect(((emptyNoteHeader as any).value as Function)({})).toBe('');
+  });
+
+  it('should have crudAuth configuration', () => {
+    expect(eventConfig.crudAuth).toBeDefined();
+    // crudAuth is a filter object, not a function
+    expect(typeof eventConfig.crudAuth).toBe('object');
+  });
+
+  it('should have service class defined', () => {
+    expect(eventConfig.service).toBeDefined();
+  });
 });
