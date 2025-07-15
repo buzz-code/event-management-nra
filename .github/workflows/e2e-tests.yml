@@ -32,20 +32,28 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Node.js
+    - name: Setup Node.js for server
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-        cache: 'npm'
+        node-version: '20'
+        cache: 'yarn'
+        cache-dependency-path: server/yarn.lock
 
     - name: Install server dependencies
       working-directory: ./server
-      run: npm ci --legacy-peer-deps
+      run: yarn install
+
+    - name: Setup Node.js for client  
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        cache-dependency-path: client/yarn.lock
 
     - name: Install client dependencies (skip puppeteer)
       working-directory: ./client
       run: |
-        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm ci --legacy-peer-deps
+        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn install
 
     - name: Setup test database
       working-directory: ./server
@@ -60,25 +68,25 @@ jobs:
         
     - name: Run database migrations
       working-directory: ./server
-      run: npm run typeorm:run
+      run: yarn run typeorm:run
 
     - name: Start server
       working-directory: ./server
       run: |
-        npm run build
-        npm run start:prod &
+        yarn build
+        yarn start:prod &
         # Wait for server to be ready
         sleep 10
         curl -f http://localhost:3001/health || exit 1
 
     - name: Build client
       working-directory: ./client
-      run: npm run build
+      run: yarn build
 
     - name: Start client
       working-directory: ./client
       run: |
-        npm run start &
+        yarn start &
         # Wait for client to be ready
         sleep 10
 
@@ -88,7 +96,7 @@ jobs:
         # Install Cypress binary (avoiding puppeteer)
         npx cypress install
         # Run tests
-        npm run cypress:run
+        yarn cypress:run
       env:
         CYPRESS_baseUrl: http://localhost:3000
         CYPRESS_apiUrl: http://localhost:3001
