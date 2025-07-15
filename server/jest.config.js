@@ -8,12 +8,12 @@ module.exports = {
         '<rootDir>'
     ],
     maxWorkers: 1,
-    testRegex: ".*\\.(spec|test)\\.ts$",
+    testRegex: ".*\\.(spec|test)\\.(ts|tsx)$",
     transform: {
-        "^.+\\.(t|j)s$": "ts-jest"
+        "^.+\\.(t|j)sx?$": "ts-jest"
     },
     collectCoverageFrom: [
-        "**/*.(t|j)s",
+        "**/*.(t|j)sx?",
         "!**/node_modules/**",
         "!**/dist/**",
         "!**/coverage/**",
