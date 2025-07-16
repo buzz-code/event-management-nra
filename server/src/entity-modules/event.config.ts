@@ -44,6 +44,8 @@ function getConfig(): BaseEntityModuleOptions {
       getExportHeaders(): IHeader[] {
         return [
           { value: 'id', label: 'מזהה', readOnly: true },
+          { value: 'teacher.tz', label: 'תז מורה' },
+          { value: 'teacher.name', label: 'שם מורה', readOnly: true },
           { value: 'student.tz', label: 'תז תלמיד' },
           { value: 'student.name', label: 'שם תלמידה', readOnly: true },
           { value: getISODateFormatter('eventDate'), label: 'תאריך אירוע' },
