@@ -29,6 +29,7 @@ import gift from "src/entities/gift";
 import eventGift from "src/entities/event-gift";
 import classEntity from "src/entities/class";
 import levelType from "src/entities/level-type";
+import familyStatusType from "src/entities/family-status-type";
 import studentClass from './entities/student-class';
 import studentByYear from './entities/student-by-year'; // Added import
 
@@ -80,6 +81,7 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import RouteIcon from '@mui/icons-material/Route';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -100,6 +102,7 @@ const App = () => (
             <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
             <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
             <Resource name="level_type" {...levelType} options={{ menuGroup: 'data' }} icon={RouteIcon} />
+            <Resource name="family_status_type" {...familyStatusType} options={{ menuGroup: 'data' }} icon={FavoriteIcon} />
             
             {/* Keep Student and Teacher from original system */}
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />

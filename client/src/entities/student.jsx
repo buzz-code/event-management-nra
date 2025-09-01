@@ -18,6 +18,7 @@ const filters = [
     <TextInput source="fatherName:$cont" />,
     <TextInput source="fatherContact:$cont" />,
     <TextInput source="motherPreviousName:$cont" />,
+    <CommonReferenceInputFilter source="familyStatusReferenceId" reference="family_status_type" filterToQuery={filterByUserId} />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -34,6 +35,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="fatherName" />
             <TextField source="fatherContact" />
             <TextField source="motherPreviousName" />
+            <ReferenceField source="familyStatusReferenceId" reference="family_status_type" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -54,6 +56,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="fatherName" validate={[maxLength(255)]} />
         <TextInput source="fatherContact" validate={[maxLength(255)]} />
         <TextInput source="motherPreviousName" validate={[maxLength(255)]} />
+        <CommonReferenceInput source="familyStatusReferenceId" reference="family_status_type" filter={filterByUserId} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
@@ -62,7 +65,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'name', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName'],
+    fields: ['tz', 'name', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName', 'familyStatusKey'],
 }
 
 const entity = {

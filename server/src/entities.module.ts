@@ -19,6 +19,7 @@ import classConfig from './entity-modules/class.config';
 import studentConfig from './entity-modules/student.config';
 import teacherConfig from './entity-modules/teacher.config';
 import levelTypeConfig from './entity-modules/level-type.config';
+import familyStatusTypeConfig from './entity-modules/family-status-type.config';
 import studentClassConfig from './entity-modules/student-class.config';
 import studentByYearConfig from './entity-modules/student-by-year.config';
 
@@ -42,6 +43,7 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register(studentConfig),
     BaseEntityModule.register(teacherConfig),
     BaseEntityModule.register(levelTypeConfig),
+    BaseEntityModule.register(familyStatusTypeConfig),
     BaseEntityModule.register(studentClassConfig),
     BaseEntityModule.register(studentByYearConfig),
 

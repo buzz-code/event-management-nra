@@ -12,9 +12,11 @@ import {
 } from 'typeorm';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, IsUniqueCombination, MaxLength } from '@shared/utils/validation/class-validator-he';
-import { StringType } from '@shared/utils/entity/class-transformer';
+import { IsNotEmpty, IsUniqueCombination, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
+import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { FamilyStatusType } from './FamilyStatusType.entity';
 
 @Entity('students')
 @Index('students_user_id_idx', ['userId'], {})
@@ -24,7 +26,23 @@ import { IHasUserId } from '@shared/base-entity/interface';
 export class Student implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
-  async fillFields() {}
+  async fillFields() {
+    let dataSource: DataSource;
+    try {
+      dataSource = await getDataSource([FamilyStatusType, Student]);
+
+      this.familyStatusReferenceId = await findOneAndAssignReferenceId(
+        dataSource,
+        FamilyStatusType,
+        { key: this.familyStatusKey },
+        this.userId,
+        this.familyStatusReferenceId,
+        this.familyStatusKey,
+      );
+    } finally {
+      dataSource?.destroy();
+    }
+  }
 
   @PrimaryGeneratedColumn()
   id: number;
@@ -82,6 +100,19 @@ export class Student implements IHasUserId {
   @MaxLength(255, { always: true })
   @Column({ length: 255, nullable: true })
   motherPreviousName: string;
+
+  @ValidateIf((student: Student) => !Boolean(student.familyStatusReferenceId), {
+    always: true,
+  })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  familyStatusKey: number;
+
+  @ValidateIf((student: Student) => !Boolean(student.familyStatusKey) && Boolean(student.familyStatusReferenceId), { always: true })
+  @Column('int', { name: 'family_status_reference_id', nullable: true })
+  familyStatusReferenceId: number;
 
   @CreateDateColumn()
   createdAt: Date;

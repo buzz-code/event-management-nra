@@ -49,6 +49,12 @@ export default {
                 'description:$cont': 'חיפוש בתיאור',
             }
         },
+        family_status_type: {
+            name: 'סוג מצב משפחתי |||| סוגי מצב משפחתי',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
         event_note: {
             name: 'הערה לאירוע |||| הערות לאירועים',
             fields: {
@@ -121,6 +127,8 @@ export default {
                 'fatherContact:$cont': 'חיפוש ביצירת קשר עם האב',
                 motherPreviousName: 'שם משפחה קודם של האם',
                 'motherPreviousName:$cont': 'חיפוש בשם משפחה קודם של האם',
+                familyStatusKey: 'מצב משפחתי',
+                familyStatusReferenceId: 'מצב משפחתי',
             }
         },
         teacher: {
