@@ -56,7 +56,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="fatherName" validate={[maxLength(255)]} />
         <TextInput source="fatherContact" validate={[maxLength(255)]} />
         <TextInput source="motherPreviousName" validate={[maxLength(255)]} />
-        <CommonReferenceInput source="familyStatusReferenceId" reference="family_status_type" filter={filterByUserId} />
+        <CommonReferenceInput source="familyStatusReferenceId" reference="family_status_type" dynamicFilter={filterByUserId} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>

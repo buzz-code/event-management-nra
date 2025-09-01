@@ -9,6 +9,8 @@ import {
   BeforeUpdate,
   DataSource,
   Unique,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
@@ -119,4 +121,8 @@ export class Student implements IHasUserId {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => FamilyStatusType, { nullable: true })
+  @JoinColumn({ name: 'family_status_reference_id' })
+  familyStatus: FamilyStatusType;
 }

@@ -34,6 +34,7 @@ function getConfig(): BaseEntityModuleOptions {
           eventType: { eager: true },
           teacher: { eager: true },
           student: { eager: true },
+          'student.familyStatus': { eager: true },
           studentClass: { eager: true },
           levelType: { eager: true },
           notes: { eager: true },
@@ -59,6 +60,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'student.fatherName', label: 'שם האב', readOnly: true },
           { value: 'student.fatherContact', label: 'טלפון האב', readOnly: true },
           { value: 'student.motherPreviousName', label: 'שם משפחה קודם של האם', readOnly: true },
+          { value: 'student.familyStatus.name', label: 'מצב משפחתי', readOnly: true },
           { value: (row: any) => row.notes.map(note => note.noteText).join('\r\n'), label: 'הערות', readOnly: true },
           { value: (_) => '', label: 'הערה חדשה' },
         ];
