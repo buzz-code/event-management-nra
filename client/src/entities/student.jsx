@@ -1,12 +1,40 @@
-import { DateField, DateTimeInput, Labeled, maxLength, ReferenceField, required, TextField, TextInput } from 'react-admin';
+import { DateField, DateTimeInput, Labeled, maxLength, ReferenceField, required, TextField, TextInput, UrlField, useCreatePath, useRecordContext, useResourceContext } from 'react-admin';
+import { Link } from 'react-router-dom';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { useUnique } from '@shared/utils/useUnique';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
-import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
+import get from 'lodash/get';
+
+const FamilySizeField = ({ source, reference, ...props }) => {
+    const record = useRecordContext(props);
+    const resource = useResourceContext(props);
+    const createPath = useCreatePath();
+
+    if (!record || (!!source && !get(record, source))) return null;
+
+    const listUrl = createPath({ resource, type: 'list' });
+    const filterValue = { [source]: get(record, source) };
+
+    return (
+        <ReferenceField
+            source={source}
+            reference={reference}
+            link={false}
+            record={record}
+        >
+            <Link to={{
+                pathname: listUrl,
+                search: `filter=${JSON.stringify(filterValue)}`
+            }} onClick={e => e.stopPropagation()}>
+                <TextField source="numberOfDaughters" />
+            </Link>
+        </ReferenceField>
+    );
+};
 
 const filters = [
     ...commonAdminFilters,
@@ -36,6 +64,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="fatherContact" />
             <TextField source="motherPreviousName" />
             <ReferenceField source="familyStatusReferenceId" reference="family_status_type" />
+            <FamilySizeField source="familyReferenceId" reference="family" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>

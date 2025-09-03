@@ -22,6 +22,7 @@ import levelTypeConfig from './entity-modules/level-type.config';
 import familyStatusTypeConfig from './entity-modules/family-status-type.config';
 import studentClassConfig from './entity-modules/student-class.config';
 import studentByYearConfig from './entity-modules/student-by-year.config';
+import familyConfig from './entity-modules/family.config';
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -46,6 +47,7 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register(familyStatusTypeConfig),
     BaseEntityModule.register(studentClassConfig),
     BaseEntityModule.register(studentByYearConfig),
+    BaseEntityModule.register(familyConfig),
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),

@@ -19,6 +19,7 @@ import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { FamilyStatusType } from './FamilyStatusType.entity';
+import { Family } from '../view-entities/Family.entity';
 
 @Entity('students')
 @Index('students_user_id_idx', ['userId'], {})
@@ -41,6 +42,20 @@ export class Student implements IHasUserId {
         this.familyStatusReferenceId,
         this.familyStatusKey,
       );
+
+      // Generate familyReferenceId based on family identifying information
+      if (!this.familyReferenceId) {
+        const familyIdentifier = [
+          this.userId || '',
+          this.fatherName || '',
+          this.motherName || '',
+          this.motherPreviousName || '',
+          this.fatherContact || '',
+          this.motherContact || ''
+        ].join('_');
+
+        this.familyReferenceId = familyIdentifier;
+      }
     } finally {
       dataSource?.destroy();
     }
@@ -116,6 +131,9 @@ export class Student implements IHasUserId {
   @Column('int', { name: 'family_status_reference_id', nullable: true })
   familyStatusReferenceId: number;
 
+  @Column('varchar', { name: 'family_reference_id', nullable: true, length: 255 })
+  familyReferenceId: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -125,4 +143,8 @@ export class Student implements IHasUserId {
   @ManyToOne(() => FamilyStatusType, { nullable: true })
   @JoinColumn({ name: 'family_status_reference_id' })
   familyStatus: FamilyStatusType;
+
+  @ManyToOne(() => Family, { nullable: true })
+  @JoinColumn({ name: 'family_reference_id' })
+  family: Family;
 }

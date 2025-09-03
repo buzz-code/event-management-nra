@@ -32,6 +32,7 @@ import levelType from "src/entities/level-type";
 import familyStatusType from "src/entities/family-status-type";
 import studentClass from './entities/student-class';
 import studentByYear from './entities/student-by-year'; // Added import
+import family from './entities/family';
 
 // Keep required shared entities
 import student from "src/entities/student";
@@ -82,6 +83,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import RouteIcon from '@mui/icons-material/Route';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import PeopleIcon from '@mui/icons-material/People';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -108,6 +110,7 @@ const App = () => (
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
+            <Resource name="family" {...family} options={{ menuGroup: 'data' }} icon={PeopleIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
 
             {/* Common settings and utilities */}

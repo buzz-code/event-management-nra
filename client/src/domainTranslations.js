@@ -129,6 +129,27 @@ export default {
                 'motherPreviousName:$cont': 'חיפוש בשם משפחה קודם של האם',
                 familyStatusKey: 'מצב משפחתי',
                 familyStatusReferenceId: 'מצב משפחתי',
+                familyReferenceId: 'בנות במשפחה',
+            }
+        },
+        family: {
+            name: 'משפחה |||| משפחות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                familyName: 'שם משפחה',
+                'familyName:$cont': 'חיפוש בשם משפחה',
+                fatherName: 'שם האב',
+                'fatherName:$cont': 'חיפוש בשם האב',
+                motherName: 'שם האם',
+                'motherName:$cont': 'חיפוש בשם האם',
+                motherPreviousName: 'שם קודם של האם',
+                'motherPreviousName:$cont': 'חיפוש בשם קודם של האם',
+                fatherContact: 'טלפון האב',
+                'fatherContact:$cont': 'חיפוש בטלפון האב',
+                motherContact: 'טלפון האם',
+                'motherContact:$cont': 'חיפוש בטלפון האם',
+                numberOfDaughters: 'מספר בנות',
+                representativeStudentId: 'תלמידה מייצגת',
             }
         },
         teacher: {

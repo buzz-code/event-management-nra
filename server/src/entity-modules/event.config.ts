@@ -35,11 +35,15 @@ function getConfig(): BaseEntityModuleOptions {
           teacher: { eager: true },
           student: { eager: true },
           'student.familyStatus': { eager: true },
+          'student.family': { eager: true },
           studentClass: { eager: true },
           levelType: { eager: true },
           notes: { eager: true },
           eventGifts: { eager: true },
         };
+        req.options.query.sort = [
+          { field: 'student.familyReferenceId', order: 'ASC' },
+        ]
         return innerFunc(req);
       },
       getExportHeaders(): IHeader[] {
@@ -61,6 +65,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'student.fatherContact', label: 'טלפון האב', readOnly: true },
           { value: 'student.motherPreviousName', label: 'שם משפחה קודם של האם', readOnly: true },
           { value: 'student.familyStatus.name', label: 'מצב משפחתי', readOnly: true },
+          { value: 'student.family.numberOfDaughters', label: 'מספר בנות במשפחה', readOnly: true },
           { value: (row: any) => row.notes.map(note => note.noteText).join('\r\n'), label: 'הערות', readOnly: true },
           { value: (_) => '', label: 'הערה חדשה' },
         ];
