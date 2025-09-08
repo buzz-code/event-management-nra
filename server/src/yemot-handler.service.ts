@@ -37,7 +37,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Student found: ${student.name}`);
     this.sendMessage(await this.getTextByUserId('GENERAL.WELCOME', { name: student.name }));
 
-    await this.createEventForStudent(student);
+    const mainMenuSelection = await this.askForInput(await this.getTextByUserId('GENERAL.MAIN_MENU'));
+    if (mainMenuSelection === '1') {
+      await this.createEventForStudent(student);
+    } else if (mainMenuSelection === '2') {
+      this.hangupWithMessage(await this.getTextByUserId('EVENT.FULFILLMENT_UNAVAILABLE'));
+    }
   }
 
   private async createEventForStudent(student: Student): Promise<void> {
