@@ -41,7 +41,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     if (mainMenuSelection === '1') {
       await this.createEventForStudent(student);
     } else if (mainMenuSelection === '2') {
-      this.hangupWithMessage(await this.getTextByUserId('EVENT.FULFILLMENT_UNAVAILABLE'));
+      await this.updateEventFulfillment(student);
     }
   }
 
@@ -391,5 +391,58 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_COMPLETE'));
+  }
+
+  private async updateEventFulfillment(student: Student): Promise<void> {
+    this.logger.log(`Updating event fulfillment for student: ${student.name}`);
+
+    // Send start message
+    this.sendMessage(await this.getTextByUserId('FULFILLMENT.START_MESSAGE', { name: student.name }));
+
+    // Fixed number of questions (11)
+    const numberOfQuestions = 11;
+
+    const fulfillmentData: Array<{ question: number; level: number }> = [];
+
+    // Ask each question and get level selection
+    for (let i = 1; i <= numberOfQuestions; i++) {
+      const level = await this.getQuestionLevel(i);
+      fulfillmentData.push({ question: i, level });
+      this.logger.log(`Question ${i}: Level ${level} selected`);
+    }
+
+    // Log the collected data (for now, not saving to database)
+    this.logger.log(`Event fulfillment data collected:`, fulfillmentData);
+
+    // Send data saved message and hangup
+    this.sendMessage(await this.getTextByUserId('FULFILLMENT.DATA_SAVED'));
+    this.hangupWithMessage(await this.getTextByUserId('FULFILLMENT.GOODBYE'));
+  }
+
+  private async getQuestionLevel(questionNumber: number): Promise<number> {
+    this.logger.log(`Getting level for question ${questionNumber}`);
+
+    // Use specific question key for each question
+    const questionKey = `FULFILLMENT.QUESTION_${questionNumber}`;
+
+    const levelInput = await this.askForInput(
+      await this.getTextByUserId(questionKey),
+      {
+        min_digits: 1,
+        max_digits: 1
+      }
+    );
+
+    const level = parseInt(levelInput);
+
+    // Validate level is between 1-3
+    if (level < 1 || level > 3) {
+      this.sendMessage(await this.getTextByUserId('FULFILLMENT.INVALID_LEVEL'));
+      return this.getQuestionLevel(questionNumber);
+    }
+
+    this.logger.log(`Question ${questionNumber}: Level ${level} selected`);
+
+    return level;
   }
 }
