@@ -32,6 +32,17 @@ export default {
                 completed: 'הושלם?',
                 grade: 'ציון',
                 newNote: 'הערה חדשה',
+                fulfillmentQuestion1: 'שאלת מימוש 1',
+                fulfillmentQuestion2: 'שאלת מימוש 2',
+                fulfillmentQuestion3: 'שאלת מימוש 3',
+                fulfillmentQuestion4: 'שאלת מימוש 4',
+                fulfillmentQuestion5: 'שאלת מימוש 5',
+                fulfillmentQuestion6: 'שאלת מימוש 6',
+                fulfillmentQuestion7: 'שאלת מימוש 7',
+                fulfillmentQuestion8: 'שאלת מימוש 8',
+                fulfillmentQuestion9: 'שאלת מימוש 9',
+                fulfillmentQuestion10: 'שאלת מימוש 10',
+                fulfillmentQuestion11: 'שאלת מימוש 11',
             }
         },
         event_type: {

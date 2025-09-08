@@ -20,6 +20,8 @@ import { EventGift } from './EventGift.entity';
 import { LevelType } from './LevelType.entity';
 import { StudentClass } from './StudentClass.entity';
 import { Class } from './Class.entity';
+import { FamilyStatusType } from './FamilyStatusType.entity';
+import { Family } from '../view-entities/Family.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsDate, IsNumber, Min } from '@shared/utils/validation/class-validator-he';
@@ -51,7 +53,7 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift]);
+      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift, FamilyStatusType, Family]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -270,6 +272,84 @@ export class Event implements IHasUserId {
   @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
   @Column({ nullable: true })
   studentClassReferenceId: number;
+
+  // Fulfillment Questions (1-3 scale)
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion1: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion2: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion3: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion4: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion5: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion6: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion7: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion8: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion9: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion10: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  fulfillmentQuestion11: number;
 
   @CreateDateColumn()
   createdAt: Date;

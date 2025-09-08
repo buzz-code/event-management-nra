@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LessThan } from 'typeorm';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -399,24 +400,72 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     // Send start message
     this.sendMessage(await this.getTextByUserId('FULFILLMENT.START_MESSAGE', { name: student.name }));
 
-    // Fixed number of questions (11)
+    // Find the last event where the first fulfillment question is null
+    const event = await this.findEventForFulfillment(student);
+
+    if (!event) {
+      this.sendMessage(await this.getTextByUserId('FULFILLMENT.NO_EVENT_FOUND'));
+      this.hangupWithMessage(await this.getTextByUserId('FULFILLMENT.GOODBYE'));
+      return;
+    }
+
+    // Collect fulfillment data for all 11 questions
+    const fulfillmentData: Record<string, number> = {};
+
     const numberOfQuestions = 11;
-
-    const fulfillmentData: Array<{ question: number; level: number }> = [];
-
     // Ask each question and get level selection
     for (let i = 1; i <= numberOfQuestions; i++) {
       const level = await this.getQuestionLevel(i);
-      fulfillmentData.push({ question: i, level });
+      fulfillmentData[`fulfillmentQuestion${i}`] = level;
       this.logger.log(`Question ${i}: Level ${level} selected`);
     }
 
-    // Log the collected data (for now, not saving to database)
-    this.logger.log(`Event fulfillment data collected:`, fulfillmentData);
+    // Update the event with fulfillment data
+    await this.saveEventFulfillment(event, fulfillmentData);
 
     // Send data saved message and hangup
     this.sendMessage(await this.getTextByUserId('FULFILLMENT.DATA_SAVED'));
     this.hangupWithMessage(await this.getTextByUserId('FULFILLMENT.GOODBYE'));
+  }
+
+  private async findEventForFulfillment(student: Student): Promise<Event | null> {
+    this.logger.log(`Finding event for fulfillment for student: ${student.name}`);
+
+    const eventRepo = this.dataSource.getRepository(Event);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    
+    const event = await eventRepo.findOne({
+      where: {
+        userId: this.user.id,
+        studentReferenceId: student.id,
+        fulfillmentQuestion1: null, // First question is null, meaning not yet fulfilled
+        eventDate: LessThan(today) // Only events in the past
+      },
+      order: {
+        eventDate: 'DESC' // Get the most recent past event
+      }
+    });
+
+    if (event) {
+      this.logger.log(`Found event for fulfillment: ${event.id} (date: ${event.eventDate})`);
+    } else {
+      this.logger.log(`No past event found for fulfillment`);
+    }
+
+    return event;
+  }
+
+  private async saveEventFulfillment(event: Event, fulfillmentData: Record<string, number>): Promise<void> {
+    this.logger.log(`Saving event fulfillment for event: ${event.id}`);
+
+    const eventRepo = this.dataSource.getRepository(Event);
+
+    // Update the event with fulfillment data
+    Object.assign(event, fulfillmentData);
+
+    await eventRepo.save(event);
+    this.logger.log(`Event fulfillment saved successfully for event: ${event.id}`);
   }
 
   private async getQuestionLevel(questionNumber: number): Promise<number> {

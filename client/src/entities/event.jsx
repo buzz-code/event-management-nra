@@ -26,6 +26,7 @@ import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } fro
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters, notPermissionFilter } from '@shared/components/fields/PermissionFilter';
 import { isTeacher } from '../utils/appPermissions';
+import { CommonRatingField, CommonRatingInput } from '@shared/components/fields/CommonRating';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
@@ -85,6 +86,17 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
             <NumberField source="grade" />
+            <CommonRatingField source="fulfillmentQuestion1" />
+            <CommonRatingField source="fulfillmentQuestion2" />
+            <CommonRatingField source="fulfillmentQuestion3" />
+            <CommonRatingField source="fulfillmentQuestion4" />
+            <CommonRatingField source="fulfillmentQuestion5" />
+            <CommonRatingField source="fulfillmentQuestion6" />
+            <CommonRatingField source="fulfillmentQuestion7" />
+            <CommonRatingField source="fulfillmentQuestion8" />
+            <CommonRatingField source="fulfillmentQuestion9" />
+            <CommonRatingField source="fulfillmentQuestion10" />
+            <CommonRatingField source="fulfillmentQuestion11" />
             {isPreview && <TextField source="newNote" />}
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -105,6 +117,17 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <DateTimeInput source="eventDate" validate={[required()]} />
         <BooleanInput source="completed" validate={[required()]} />
         <NumberInput source="grade" validate={[required()]} />
+        <CommonRatingInput source="fulfillmentQuestion1" />
+        <CommonRatingInput source="fulfillmentQuestion2" />
+        <CommonRatingInput source="fulfillmentQuestion3" />
+        <CommonRatingInput source="fulfillmentQuestion4" />
+        <CommonRatingInput source="fulfillmentQuestion5" />
+        <CommonRatingInput source="fulfillmentQuestion6" />
+        <CommonRatingInput source="fulfillmentQuestion7" />
+        <CommonRatingInput source="fulfillmentQuestion8" />
+        <CommonRatingInput source="fulfillmentQuestion9" />
+        <CommonRatingInput source="fulfillmentQuestion10" />
+        <CommonRatingInput source="fulfillmentQuestion11" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
