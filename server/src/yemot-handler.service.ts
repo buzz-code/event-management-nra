@@ -37,6 +37,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Student found: ${student.name}`);
     this.sendMessage(await this.getTextByUserId('GENERAL.WELCOME', { name: student.name }));
 
+    await this.createEventForStudent(student);
+  }
+
+  private async createEventForStudent(student: Student): Promise<void> {
+    this.logger.log(`Creating event for student: ${student.name}`);
     const eventType = await this.getEventType();
     const eventDate = await this.getEventDate();
     const gifts = await this.getGifts();
