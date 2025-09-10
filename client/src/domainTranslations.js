@@ -194,6 +194,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
                 value: 'ערך',
+                filepath: 'נתיב קובץ שמע',
             }
         },
         text_by_user: {
@@ -202,6 +203,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
                 value: 'ערך',
+                filepath: 'נתיב קובץ שמע',
             }
         },
         page: {
