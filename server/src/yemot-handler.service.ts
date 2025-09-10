@@ -36,9 +36,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const student = await this.getStudentByTz();
     this.logger.log(`Student found: ${student.name}`);
-    this.sendMessage(await this.getTextByUserId('GENERAL.WELCOME', { name: student.name }));
+    await this.sendMessageByKey('GENERAL.WELCOME', { name: student.name });
 
-    const mainMenuSelection = await this.askForInput(await this.getTextByUserId('GENERAL.MAIN_MENU'));
+    const mainMenuSelection = await this.askForInputByKey('GENERAL.MAIN_MENU');
     if (mainMenuSelection === '1') {
       await this.createEventForStudent(student);
     } else if (mainMenuSelection === '2') {
@@ -67,8 +67,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const savedEvent = await eventRepo.save(event);
     this.logger.log(`Event created: ${savedEvent.id}`);
 
-    this.sendMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
-    this.hangupWithMessage(await this.getTextByUserId('EVENT.GIFTS_ADDED', { count: gifts.length }));
+    await this.sendMessageByKey('EVENT.SAVE_SUCCESS');
+    await this.hangupWithMessageByKey('EVENT.GIFTS_ADDED', { count: gifts.length });
   }
 
   private async getStudentByTz(): Promise<Student> {
@@ -88,7 +88,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       this.logger.log(`No student found with ApiEnterID: ${this.call.ApiEnterID}`);
     }
 
-    const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
+    const tz = await this.askForInputByKey('STUDENT.TZ_PROMPT', {}, {
       min_digits: 1,
       max_digits: 9
     });
@@ -98,7 +98,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return student;
     }
 
-    this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
+    await this.sendMessageByKey('STUDENT.NOT_FOUND');
     return this.getStudentByTz();
   }
 
@@ -145,7 +145,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const eventType = await this.askForMenu('EVENT.TYPE_SELECTION', this.eventTypes);
 
     if (!eventType) {
-      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+      await this.hangupWithMessageByKey('GENERAL.INVALID_INPUT');
     }
     this.logger.log(`Event type selected: ${eventType.name}`);
 
@@ -174,7 +174,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       const gift = await this.askForMenu(promptKey, availableGifts);
 
       if (!gift) {
-        this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+        await this.hangupWithMessageByKey('GENERAL.INVALID_INPUT');
       }
 
       selectedGifts.push(gift);
@@ -202,7 +202,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Getting event date`);
 
     const year = getCurrentHebrewYear();
-    const day = await this.askForInput(await this.getTextByUserId('DATE.DAY_SELECTION'), {
+    const day = await this.askForInputByKey('DATE.DAY_SELECTION', {}, {
       min_digits: 1,
       max_digits: 2,
     });
@@ -211,7 +211,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const months = getHebrewMonthsList(year);
     const month = await this.askForMenu('DATE.MONTH_SELECTION', months);
     if (!month) {
-      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+      await this.hangupWithMessageByKey('GENERAL.INVALID_INPUT');
     }
 
     const eventDate = this.createEventDateWithYearAdjustment(year, month.index, dayNumber);
@@ -248,7 +248,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async processClassCelebrationsListener(): Promise<void> {
     this.logger.log(`Processing class celebrations listener`);
 
-    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.WELCOME'));
+    await this.sendMessageByKey('CELEBRATIONS.WELCOME');
 
     const grade = await this.getGradeForCelebrations();
     const classEntity = await this.getClassNumber(grade);
@@ -258,24 +258,22 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     await this.readClassCelebrations(classEntity, currentYear, month.name);
 
-    this.hangupWithMessage(await this.getTextByUserId('CELEBRATIONS.GOODBYE'));
+    await this.hangupWithMessageByKey('CELEBRATIONS.GOODBYE');
   }
 
   private async getGradeForCelebrations(): Promise<string> {
     this.logger.log(`Getting grade for celebrations`);
 
-    const gradeInput = await this.askForInput(
-      await this.getTextByUserId('CELEBRATIONS.GRADE_PROMPT'),
-      {
-        min_digits: 1,
-        max_digits: 2
-      }
+    const gradeInput = await this.askForInputByKey('CELEBRATIONS.GRADE_PROMPT', {}, {
+      min_digits: 1,
+      max_digits: 2
+    }
     );
 
     const grade = parseInt(gradeInput);
 
     if (grade < 9 || grade > 14) {
-      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.INVALID_GRADE'));
+      await this.sendMessageByKey('CELEBRATIONS.INVALID_GRADE');
       return this.getGradeForCelebrations();
     }
 
@@ -287,12 +285,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getClassNumber(grade: string): Promise<Class> {
     this.logger.log(`Getting class number for grade ${grade}`);
 
-    const classNumberInput = await this.askForInput(
-      await this.getTextByUserId('CELEBRATIONS.CLASS_PROMPT'),
-      {
-        min_digits: 1,
-        max_digits: 2
-      }
+    const classNumberInput = await this.askForInputByKey('CELEBRATIONS.CLASS_PROMPT', {}, {
+      min_digits: 1,
+      max_digits: 2
+    }
     );
 
     const classNumber = parseInt(classNumberInput);
@@ -307,7 +303,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     });
 
     if (!classEntity) {
-      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.INVALID_CLASS'));
+      await this.sendMessageByKey('CELEBRATIONS.INVALID_CLASS');
       return this.getClassNumber(grade);
     }
 
@@ -321,7 +317,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const months = getHebrewMonthsList(currentYear);
     const month = await this.askForMenu('DATE.MONTH_SELECTION', months);
     if (!month) {
-      this.sendMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+      await this.sendMessageByKey('GENERAL.INVALID_INPUT');
       return this.getMonthForCelebrations(currentYear);
     }
 
@@ -346,10 +342,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       .getMany();
 
     if (events.length === 0) {
-      this.hangupWithMessage(await this.getTextByUserId('CELEBRATIONS.NO_CELEBRATIONS_FOUND', {
+      await this.hangupWithMessageByKey('CELEBRATIONS.NO_CELEBRATIONS_FOUND', {
         className: classEntity.name,
         month: monthName
-      }));
+      });
       return;
     }
 
@@ -374,38 +370,38 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return acc;
     }, {} as Record<string, Event[]>);
 
-    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_START', {
+    await this.sendMessageByKey('CELEBRATIONS.READING_START', {
       className: classEntity.name,
       month: monthName,
       count: events.length.toString()
-    }));
+    });
 
     for (const [studentName, studentEvents] of Object.entries(eventsByStudent)) {
-      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.STUDENT_NAME', { name: studentName }));
+      await this.sendMessageByKey('CELEBRATIONS.STUDENT_NAME', { name: studentName });
 
       for (const event of studentEvents) {
-        this.sendMessage(await this.getTextByUserId('CELEBRATIONS.EVENT_DETAIL', {
+        await this.sendMessageByKey('CELEBRATIONS.EVENT_DETAIL', {
           eventType: event.eventType.name,
           date: formatHebrewDateForIVR(event.eventDate)
-        }));
+        });
       }
     }
 
-    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_COMPLETE'));
+    await this.sendMessageByKey('CELEBRATIONS.READING_COMPLETE');
   }
 
   private async updateEventFulfillment(student: Student): Promise<void> {
     this.logger.log(`Updating event fulfillment for student: ${student.name}`);
 
     // Send start message
-    this.sendMessage(await this.getTextByUserId('FULFILLMENT.START_MESSAGE', { name: student.name }));
+    await this.sendMessageByKey('FULFILLMENT.START_MESSAGE', { name: student.name });
 
     // Find the last event where the first fulfillment question is null
     const event = await this.findEventForFulfillment(student);
 
     if (!event) {
-      this.sendMessage(await this.getTextByUserId('FULFILLMENT.NO_EVENT_FOUND'));
-      this.hangupWithMessage(await this.getTextByUserId('FULFILLMENT.GOODBYE'));
+      await this.sendMessageByKey('FULFILLMENT.NO_EVENT_FOUND');
+      await this.hangupWithMessageByKey('FULFILLMENT.GOODBYE');
       return;
     }
 
@@ -424,8 +420,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     await this.saveEventFulfillment(event, fulfillmentData);
 
     // Send data saved message and hangup
-    this.sendMessage(await this.getTextByUserId('FULFILLMENT.DATA_SAVED'));
-    this.hangupWithMessage(await this.getTextByUserId('FULFILLMENT.GOODBYE'));
+    await this.sendMessageByKey('FULFILLMENT.DATA_SAVED');
+    await this.hangupWithMessageByKey('FULFILLMENT.GOODBYE');
   }
 
   private async findEventForFulfillment(student: Student): Promise<Event | null> {
@@ -434,7 +430,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const eventRepo = this.dataSource.getRepository(Event);
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for comparison
-    
+
     const event = await eventRepo.findOne({
       where: {
         userId: this.user.id,
@@ -474,19 +470,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     // Use specific question key for each question
     const questionKey = `FULFILLMENT.QUESTION_${questionNumber}`;
 
-    const levelInput = await this.askForInput(
-      await this.getTextByUserId(questionKey),
-      {
-        min_digits: 1,
-        max_digits: 1
-      }
+    const levelInput = await this.askForInputByKey(questionKey, {}, {
+      min_digits: 1,
+      max_digits: 1
+    }
     );
 
     const level = parseInt(levelInput);
 
     // Validate level is between 1-3
     if (level < 1 || level > 3) {
-      this.sendMessage(await this.getTextByUserId('FULFILLMENT.INVALID_LEVEL'));
+      await this.sendMessageByKey('FULFILLMENT.INVALID_LEVEL');
       return this.getQuestionLevel(questionNumber);
     }
 
