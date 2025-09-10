@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessThan } from 'typeorm';
+import { LessThan, Raw } from 'typeorm';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -435,7 +435,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       where: {
         userId: this.user.id,
         studentReferenceId: student.id,
-        fulfillmentQuestion1: null, // First question is null, meaning not yet fulfilled
+        fulfillmentQuestion1: Raw(alias => `COALESCE(${alias}, 0) <= 0`),
         eventDate: LessThan(today) // Only events in the past
       },
       order: {
