@@ -26,7 +26,6 @@ import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } fro
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters, notPermissionFilter } from '@shared/components/fields/PermissionFilter';
 import { isTeacher } from '../utils/appPermissions';
-import { CommonRatingField, CommonRatingInput } from '@shared/components/fields/CommonRating';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
@@ -86,17 +85,17 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
             <NumberField source="grade" />
-            <CommonRatingField source="fulfillmentQuestion1" />
-            <CommonRatingField source="fulfillmentQuestion2" />
-            <CommonRatingField source="fulfillmentQuestion3" />
-            <CommonRatingField source="fulfillmentQuestion4" />
-            <CommonRatingField source="fulfillmentQuestion5" />
-            <CommonRatingField source="fulfillmentQuestion6" />
-            <CommonRatingField source="fulfillmentQuestion7" />
-            <CommonRatingField source="fulfillmentQuestion8" />
-            <CommonRatingField source="fulfillmentQuestion9" />
-            <CommonRatingField source="fulfillmentQuestion10" />
-            <CommonRatingField source="fulfillmentQuestion11" />
+            <NumberField source="fulfillmentQuestion1" />
+            <NumberField source="fulfillmentQuestion2" />
+            <NumberField source="fulfillmentQuestion3" />
+            <NumberField source="fulfillmentQuestion4" />
+            <NumberField source="fulfillmentQuestion5" />
+            <NumberField source="fulfillmentQuestion6" />
+            <NumberField source="fulfillmentQuestion7" />
+            <NumberField source="fulfillmentQuestion8" />
+            <NumberField source="fulfillmentQuestion9" />
+            <NumberField source="fulfillmentQuestion10" />
+            <NumberField source="fulfillmentQuestion11" />
             {isPreview && <TextField source="newNote" />}
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -117,17 +116,17 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <DateTimeInput source="eventDate" validate={[required()]} />
         <BooleanInput source="completed" validate={[required()]} />
         <NumberInput source="grade" validate={[required()]} />
-        <CommonRatingInput source="fulfillmentQuestion1" />
-        <CommonRatingInput source="fulfillmentQuestion2" />
-        <CommonRatingInput source="fulfillmentQuestion3" />
-        <CommonRatingInput source="fulfillmentQuestion4" />
-        <CommonRatingInput source="fulfillmentQuestion5" />
-        <CommonRatingInput source="fulfillmentQuestion6" />
-        <CommonRatingInput source="fulfillmentQuestion7" />
-        <CommonRatingInput source="fulfillmentQuestion8" />
-        <CommonRatingInput source="fulfillmentQuestion9" />
-        <CommonRatingInput source="fulfillmentQuestion10" />
-        <CommonRatingInput source="fulfillmentQuestion11" />
+        <NumberInput source="fulfillmentQuestion1" />
+        <NumberInput source="fulfillmentQuestion2" />
+        <NumberInput source="fulfillmentQuestion3" />
+        <NumberInput source="fulfillmentQuestion4" />
+        <NumberInput source="fulfillmentQuestion5" />
+        <NumberInput source="fulfillmentQuestion6" />
+        <NumberInput source="fulfillmentQuestion7" />
+        <NumberInput source="fulfillmentQuestion8" />
+        <NumberInput source="fulfillmentQuestion9" />
+        <NumberInput source="fulfillmentQuestion10" />
+        <NumberInput source="fulfillmentQuestion11" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
