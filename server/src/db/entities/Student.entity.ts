@@ -144,7 +144,7 @@ export class Student implements IHasUserId {
   @JoinColumn({ name: 'family_status_reference_id' })
   familyStatus: FamilyStatusType;
 
-  @ManyToOne(() => Family, { nullable: true })
+  @ManyToOne(() => Family, { nullable: true, createForeignKeyConstraints: false })
   @JoinColumn({ name: 'family_reference_id' })
   family: Family;
 }
