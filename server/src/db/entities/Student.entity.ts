@@ -32,7 +32,7 @@ export class Student implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([FamilyStatusType, Student]);
+      dataSource = await getDataSource([FamilyStatusType, Student, Family]);
 
       this.familyStatusReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -70,7 +70,7 @@ export class Student implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @IsUniqueCombination(['userId'], [Student], { always: true })
+  @IsUniqueCombination(['userId'], [Student, FamilyStatusType, Family], { always: true })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @Column()
   tz: string;
