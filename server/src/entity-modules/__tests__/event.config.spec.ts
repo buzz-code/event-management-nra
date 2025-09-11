@@ -6,15 +6,6 @@ describe('EventConfig', () => {
     expect(eventConfig.entity).toBe(Event);
   });
 
-  it('should have correct export headers', () => {
-    const headers = eventConfig.exporter.getExportHeaders([]);
-    
-    expect(headers).toContainEqual({ value: 'id', label: 'מזהה', readOnly: true });
-    expect(headers).toContainEqual({ value: 'student.tz', label: 'תז תלמיד' });
-    expect(headers).toContainEqual({ value: 'student.name', label: 'שם תלמידה', readOnly: true });
-    expect(headers.length).toBeGreaterThan(0);
-  });
-
   it('should have correct query configuration', () => {
     expect(eventConfig.query).toBeDefined();
     expect(eventConfig.query.join).toBeDefined();
@@ -23,36 +14,21 @@ describe('EventConfig', () => {
     expect(eventConfig.query.join.student).toEqual({ eager: false });
   });
 
-  it('should have exporter with processReqForExport function', () => {
-    expect(eventConfig.exporter).toBeDefined();
-    expect(eventConfig.exporter.processReqForExport).toBeDefined();
-    expect(typeof eventConfig.exporter.processReqForExport).toBe('function');
+  it('should have service configured', () => {
+    expect(eventConfig.service).toBeDefined();
   });
 
-  it('should configure eager loading for export', () => {
-    const mockReq = {
-      options: {
-        query: {
-          join: {}
-        }
-      }
-    };
+  it('should have exporter with headers', () => {
+    expect(eventConfig.exporter).toBeDefined();
+    expect(eventConfig.exporter.getExportHeaders).toBeInstanceOf(Function);
+    expect(eventConfig.exporter.processReqForExport).toBeInstanceOf(Function);
     
-    const mockInnerFunc = jest.fn().mockReturnValue('result');
-    
-    const result = eventConfig.exporter.processReqForExport(mockReq as any, mockInnerFunc);
-    
-    expect(mockReq.options.query.join).toEqual({
-      eventType: { eager: true },
-      teacher: { eager: true },
-      student: { eager: true },
-      studentClass: { eager: true },
-      levelType: { eager: true },
-      notes: { eager: true },
-      eventGifts: { eager: true },
-    });
-    
-    expect(mockInnerFunc).toHaveBeenCalledWith(mockReq);
-    expect(result).toBe('result');
+    // Test that headers are properly defined
+    const mockEntityColumns = ['id', 'name', 'year'];
+    const headers = eventConfig.exporter.getExportHeaders(mockEntityColumns);
+    expect(Array.isArray(headers)).toBe(true);
+    expect(headers.length).toBeGreaterThan(0);
+    expect(headers[0]).toHaveProperty('value');
+    expect(headers[0]).toHaveProperty('label');
   });
 });

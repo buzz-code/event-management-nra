@@ -18,6 +18,7 @@ import {
     SelectField
 } from 'react-admin';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -30,6 +31,7 @@ import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
 import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
+import { BulkReportButton } from '@shared/components/crudContainers/BulkReportButton';
 
 const filters = [
     ...commonAdminFilters,
@@ -55,6 +57,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
         <BulkActionButton label='שיוך למורה' icon={<SupervisedUserCircleIcon />} name='teacherAssociation' >
             <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
         </BulkActionButton>,
+        <BulkReportButton label='ייצוא אירועים' icon={<GetAppIcon />} name='eventExport' />,
     ];
 
     return (
@@ -97,7 +100,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <NumberField source="fulfillmentQuestion10" />
             <NumberField source="fulfillmentQuestion11" />
             {isPreview && <TextField source="newNote" />}
-            {isAdmin && <DateField showDate showTime source="createdAt" />}
+            {!isPreview && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
