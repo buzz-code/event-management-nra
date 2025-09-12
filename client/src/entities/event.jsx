@@ -57,7 +57,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
         <BulkActionButton label='שיוך למורה' icon={<SupervisedUserCircleIcon />} name='teacherAssociation' >
             <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
         </BulkActionButton>,
-        <BulkReportButton label='ייצוא אירועים' icon={<GetAppIcon />} name='eventExport' />,
+        <BulkReportButton label='ייצוא אירועים למורה' icon={<GetAppIcon />} name='eventExport' />,
     ];
 
     return (
@@ -97,8 +97,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <NumberField source="fulfillmentQuestion7" />
             <NumberField source="fulfillmentQuestion8" />
             <NumberField source="fulfillmentQuestion9" />
-            <NumberField source="fulfillmentQuestion10" />
-            <NumberField source="fulfillmentQuestion11" />
+            <NumberField source="lotteryTrack" />
             {isPreview && <TextField source="newNote" />}
             {!isPreview && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -128,8 +127,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <NumberInput source="fulfillmentQuestion7" />
         <NumberInput source="fulfillmentQuestion8" />
         <NumberInput source="fulfillmentQuestion9" />
-        <NumberInput source="fulfillmentQuestion10" />
-        <NumberInput source="fulfillmentQuestion11" />
+        <NumberInput source="lotteryTrack" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}

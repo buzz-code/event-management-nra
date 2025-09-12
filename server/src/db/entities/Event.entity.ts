@@ -351,6 +351,13 @@ export class Event implements IHasUserId {
   @Column({ type: 'int', nullable: true })
   fulfillmentQuestion11: number;
 
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Min(1, { always: true })
+  @Column({ type: 'int', nullable: true })
+  lotteryTrack: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

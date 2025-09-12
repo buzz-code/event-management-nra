@@ -43,6 +43,7 @@ export default {
                 fulfillmentQuestion9: 'שאלת מימוש 9',
                 fulfillmentQuestion10: 'שאלת מימוש 10',
                 fulfillmentQuestion11: 'שאלת מימוש 11',
+                lotteryTrack: 'מסלול הגרלה',
             }
         },
         event_type: {

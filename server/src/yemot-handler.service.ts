@@ -43,6 +43,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       await this.createEventForStudent(student);
     } else if (mainMenuSelection === '2') {
       await this.updateEventFulfillment(student);
+    } else if (mainMenuSelection === '3') {
+      await this.processLotteryEntry(student);
     }
   }
 
@@ -405,10 +407,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return;
     }
 
-    // Collect fulfillment data for all 11 questions
     const fulfillmentData: Record<string, number> = {};
 
-    const numberOfQuestions = 11;
+    const numberOfQuestions = 9;
     // Ask each question and get level selection
     for (let i = 1; i <= numberOfQuestions; i++) {
       const level = await this.getQuestionLevel(i);
@@ -487,5 +488,98 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Question ${questionNumber}: Level ${level} selected`);
 
     return level;
+  }
+
+  private async processLotteryEntry(student: Student): Promise<void> {
+    this.logger.log(`Processing lottery entry for student: ${student.name}`);
+
+    // Send start message
+    await this.sendMessageByKey('LOTTERY.WELCOME', { name: student.name });
+
+    // Find an event where lotteryTrack is null or 0
+    const event = await this.findEventForLotteryEntry(student);
+
+    if (!event) {
+      await this.sendMessageByKey('LOTTERY.NO_EVENT_FOUND');
+      await this.hangupWithMessageByKey('LOTTERY.GOODBYE');
+      return;
+    }
+
+    const lotteryTrack = await this.getLotteryTrack();
+
+    // Update the event with lottery track
+    await this.saveEventLotteryTrack(event, lotteryTrack);
+
+    // Send success message and hangup
+    await this.sendMessageByKey('LOTTERY.ENTRY_SUCCESS', { track: lotteryTrack });
+    await this.hangupWithMessageByKey('LOTTERY.GOODBYE');
+  }
+
+  private async getLotteryTrack(): Promise<number> {
+    this.logger.log(`Getting lottery track selection`);
+
+    const trackInput = await this.askForInputByKey('LOTTERY.TRACK_SELECTION', {}, {
+      min_digits: 1,
+      max_digits: 1
+    });
+
+    const track = parseInt(trackInput);
+
+    // Validate track is between 1-3
+    if (track < 1 || track > 3) {
+      await this.sendMessageByKey('LOTTERY.INVALID_TRACK');
+      return this.getLotteryTrack();
+    }
+
+    this.logger.log(`Lottery track selected: ${track}`);
+
+    const isConfirmed = await this.askConfirmation(
+      'LOTTERY.CONFIRM_TRACK',
+      { track: track.toString() }
+    );
+
+    if (!isConfirmed) {
+      this.logger.log(`Lottery track not confirmed, selecting again`);
+      return this.getLotteryTrack();
+    }
+
+    return track;
+  }
+
+  private async findEventForLotteryEntry(student: Student): Promise<Event | null> {
+    this.logger.log(`Finding event for lottery entry for student: ${student.name}`);
+
+    const eventRepo = this.dataSource.getRepository(Event);
+
+    const event = await eventRepo.findOne({
+      where: {
+        userId: this.user.id,
+        studentReferenceId: student.id,
+        lotteryTrack: Raw(alias => `COALESCE(${alias}, 0) <= 0`)
+      },
+      order: {
+        eventDate: 'DESC' // Get the most recent event
+      }
+    });
+
+    if (event) {
+      this.logger.log(`Found event for lottery entry: ${event.id} (date: ${event.eventDate})`);
+    } else {
+      this.logger.log(`No event found for lottery entry`);
+    }
+
+    return event;
+  }
+
+  private async saveEventLotteryTrack(event: Event, lotteryTrack: number): Promise<void> {
+    this.logger.log(`Saving lottery track for event: ${event.id}`);
+
+    const eventRepo = this.dataSource.getRepository(Event);
+
+    // Update the event with lottery track
+    event.lotteryTrack = lotteryTrack;
+
+    await eventRepo.save(event);
+    this.logger.log(`Event lottery track saved successfully for event: ${event.id}`);
   }
 }
