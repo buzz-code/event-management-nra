@@ -201,7 +201,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getEventDate(): Promise<Date> {
     this.logger.log(`Getting event date`);
 
-    const year = getCurrentHebrewYear();
+    const year = getCurrentHebrewYear(false);
     const day = await this.askForInputByKey('DATE.DAY_SELECTION', {}, {
       min_digits: 1,
       max_digits: 2,
