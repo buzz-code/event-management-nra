@@ -96,7 +96,6 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <NumberField source="fulfillmentQuestion6" />
             <NumberField source="fulfillmentQuestion7" />
             <NumberField source="fulfillmentQuestion8" />
-            <NumberField source="fulfillmentQuestion9" />
             <NumberField source="lotteryTrack" />
             {isPreview && <TextField source="newNote" />}
             {!isPreview && <DateField showDate showTime source="createdAt" />}
@@ -126,7 +125,6 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <NumberInput source="fulfillmentQuestion6" />
         <NumberInput source="fulfillmentQuestion7" />
         <NumberInput source="fulfillmentQuestion8" />
-        <NumberInput source="fulfillmentQuestion9" />
         <NumberInput source="lotteryTrack" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />

@@ -409,7 +409,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const fulfillmentData: Record<string, number> = {};
 
-    const numberOfQuestions = 9;
+    const numberOfQuestions = 8;
     // Ask each question and get level selection
     for (let i = 1; i <= numberOfQuestions; i++) {
       const level = await this.getQuestionLevel(i);

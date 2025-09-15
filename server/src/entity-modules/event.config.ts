@@ -70,7 +70,6 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'fulfillmentQuestion6', label: 'שאלת הגשמה 6' },
           { value: 'fulfillmentQuestion7', label: 'שאלת הגשמה 7' },
           { value: 'fulfillmentQuestion8', label: 'שאלת הגשמה 8' },
-          { value: 'fulfillmentQuestion9', label: 'שאלת הגשמה 9' },
           { value: 'lotteryTrack', label: 'מסלול הגרלה' },
           { value: 'createdAt', label: 'תאריך יצירה' },
         ];
