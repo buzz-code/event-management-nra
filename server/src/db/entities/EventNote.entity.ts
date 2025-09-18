@@ -12,9 +12,9 @@ import {
 } from 'typeorm';
 import { Event } from './Event.entity';
 import { User } from './User.entity';
-import { IsOptional, IsNumber } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';

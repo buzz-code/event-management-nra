@@ -12,9 +12,9 @@ import {
   BeforeUpdate,
   DataSource,
 } from 'typeorm';
-import { IsOptional, IsNumber, ValidateIf } from 'class-validator';
+import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { Student } from './Student.entity';
