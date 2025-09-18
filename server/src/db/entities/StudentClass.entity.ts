@@ -21,6 +21,8 @@ import { Student } from './Student.entity';
 import { Class } from './Class.entity';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { Family } from '../view-entities/Family.entity';
+import { FamilyStatusType } from './FamilyStatusType.entity';
 
 @Entity('student_classes')
 @Unique(['studentReferenceId', 'classReferenceId', 'year'])
@@ -35,7 +37,7 @@ export class StudentClass implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([Student, Class]);
+      dataSource = await getDataSource([Student, Class, FamilyStatusType, Family]);
 
       this.studentReferenceId = await findOneAndAssignReferenceId(
         dataSource,
