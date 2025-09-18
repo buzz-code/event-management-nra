@@ -13,4 +13,4 @@ const options = {
     apiVersion: 'v1',
 };
 
-connectToOpenobserve(options);
+// connectToOpenobserve(options);
