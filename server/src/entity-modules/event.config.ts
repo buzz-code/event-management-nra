@@ -1,4 +1,4 @@
-import { DeepPartial } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { CrudRequest } from '@dataui/crud';
 import { CrudAuthCustomFilter, getUserIdFilter } from '@shared/auth/crud-auth.filter';
 import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
@@ -9,6 +9,7 @@ import { getISODateFormatter } from '@shared/utils/formatting/formatter.util';
 import eventExportReport from 'src/reports/eventExport';
 import { CommonReportData } from '@shared/utils/report/types';
 import { getUserIdFromUser } from '@shared/auth/auth.util';
+import { fixReferences } from '@shared/utils/entity/fixReference.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -104,10 +105,11 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
   }
 
   async doAction(req: CrudRequest<any, any>, body: any): Promise<any> {
-    switch (req.parsed.extra.action) {
+    const extra = req.parsed.extra as any;
+    switch (extra.action) {
       case 'teacherAssociation': {
-        const teacherIds = req.parsed.extra.teacherReferenceIds?.toString()?.split(',') || [];
-        const eventIds = req.parsed.extra.ids?.toString()?.split(',') || [];
+        const teacherIds = extra.teacherReferenceIds?.toString()?.split(',') || [];
+        const eventIds = extra.ids?.toString()?.split(',') || [];
         for (const eventId of eventIds) {
           const event = await this.dataSource.getRepository(Event).findOneBy({ id: parseInt(eventId) });
           if (event) {
@@ -117,6 +119,10 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
           }
         }
         return 'האירועים עודכנו בהצלחה';
+      }
+      case 'fixReferences': {
+        const ids = extra.ids.toString().split(',').map(Number);
+        return fixReferences(this.repo as Repository<Event>, ids, { studentReferenceId: 'studentClassReferenceId' });
       }
     }
     return super.doAction(req, body);

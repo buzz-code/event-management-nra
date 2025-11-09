@@ -32,6 +32,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
 import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
 import { BulkReportButton } from '@shared/components/crudContainers/BulkReportButton';
+import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
 
 const filters = [
     ...commonAdminFilters,
@@ -58,6 +59,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
         </BulkActionButton>,
         <BulkReportButton label='ייצוא אירועים למורה' icon={<GetAppIcon />} name='eventExport' />,
+        isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך כיתות" />
     ];
 
     return (
