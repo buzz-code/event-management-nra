@@ -44,6 +44,7 @@ export default {
                 fulfillmentQuestion10: 'שאלת מימוש 10',
                 fulfillmentQuestion11: 'שאלת מימוש 11',
                 lotteryTrack: 'מסלול הגרלה',
+                reportedByTatnikit: 'דווח ע"י תתניקית',
             }
         },
         event_type: {
@@ -108,6 +109,31 @@ export default {
                 studentTz: 'תלמיד',
                 classReferenceId: 'כיתה',
                 classKey: 'כיתה',
+            }
+        },
+        tatnikit: {
+            name: 'תתניקית |||| תתניקיות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentReferenceId: 'תלמידה',
+                studentTz: 'ת.ז. תלמידה',
+                classReferenceId: 'כיתה',
+                classKey: 'כיתה',
+            }
+        },
+        unreported_event: {
+            name: 'אירוע לא מדווח |||| אירועים לא מדווחים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                studentReferenceId: 'תלמידה',
+                studentTz: 'ת.ז. תלמידה',
+                eventTypeReferenceId: 'סוג אירוע',
+                eventTypeKey: 'סוג אירוע',
+                eventDate: 'תאריך',
+                eventHebrewDate: 'תאריך עברי',
+                eventHebrewMonth: 'חודש עברי',
+                reporterStudentReferenceId: 'דווח ע"י',
+                reporterStudentTz: 'דווח ע"י',
             }
         },
         student_by_year: {

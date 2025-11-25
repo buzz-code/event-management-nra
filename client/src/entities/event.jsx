@@ -92,6 +92,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <SelectField source="year" choices={yearChoices} />
             <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
+            <BooleanField source="reportedByTatnikit" />
             <NumberField source="grade" />
             <NumberField source="fulfillmentQuestion1" />
             <NumberField source="fulfillmentQuestion2" />
@@ -121,6 +122,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="description" validate={[maxLength(1000)]} />
         <DateTimeInput source="eventDate" validate={[required()]} />
         <BooleanInput source="completed" validate={[required()]} />
+        <BooleanInput source="reportedByTatnikit" />
         <NumberInput source="grade" validate={[required()]} />
         <NumberInput source="fulfillmentQuestion1" />
         <NumberInput source="fulfillmentQuestion2" />

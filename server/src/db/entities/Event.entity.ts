@@ -179,6 +179,10 @@ export class Event implements IHasUserId {
   completed: boolean;
 
   @IsOptional({ always: true })
+  @Column({ default: false })
+  reportedByTatnikit: boolean;
+
+  @IsOptional({ always: true })
   @NumberType
   @IsNumber({ maxDecimalPlaces: 2 }, { always: true })
   @Min(0, { always: true })

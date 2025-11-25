@@ -33,6 +33,8 @@ import familyStatusType from "src/entities/family-status-type";
 import studentClass from './entities/student-class';
 import studentByYear from './entities/student-by-year'; // Added import
 import family from './entities/family';
+import tatnikit from './entities/tatnikit';
+import unreportedEvent from './entities/unreported-event';
 
 // Keep required shared entities
 import student from "src/entities/student";
@@ -111,6 +113,8 @@ const App = () => (
             <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="family" {...family} options={{ menuGroup: 'data' }} icon={PeopleIcon} />
+            <Resource name="tatnikit" {...tatnikit} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+            <Resource name="unreported_event" {...unreportedEvent} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
 
             {/* Common settings and utilities */}
