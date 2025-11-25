@@ -129,9 +129,6 @@ export default {
                 studentTz: 'ת.ז. תלמידה',
                 eventTypeReferenceId: 'סוג אירוע',
                 eventTypeKey: 'סוג אירוע',
-                eventDate: 'תאריך',
-                eventHebrewDate: 'תאריך עברי',
-                eventHebrewMonth: 'חודש עברי',
                 reporterStudentReferenceId: 'דווח ע"י',
                 reporterStudentTz: 'דווח ע"י',
             }

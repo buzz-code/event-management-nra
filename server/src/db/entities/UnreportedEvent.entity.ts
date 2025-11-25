@@ -67,11 +67,6 @@ export class UnreportedEvent implements IHasUserId {
         this.reporterStudentReferenceId,
         this.reporterStudentTz,
       );
-
-      if (this.eventDate) {
-        this.eventHebrewDate = formatHebrewDate(this.eventDate);
-        this.eventHebrewMonth = this.eventHebrewDate.split(' ')[1];
-      }
     } finally {
       dataSource?.destroy();
     }
@@ -117,26 +112,6 @@ export class UnreportedEvent implements IHasUserId {
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @Column({ nullable: true })
   eventTypeReferenceId: number;
-
-  // Event date
-  @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
-  @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @DateType
-  @IsDate({ always: true })
-  @Column()
-  eventDate: Date;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  eventHebrewDate: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  eventHebrewMonth: string;
 
   // Reporter (tatnikit) student
   @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.reporterStudentReferenceId), {

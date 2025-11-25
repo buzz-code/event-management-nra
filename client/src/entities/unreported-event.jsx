@@ -41,9 +41,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <TextField source="tz" />
       </MultiReferenceField>
       <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
-      <DateField source="eventDate" />
-      <TextField source="eventHebrewDate" />
-      <TextField source="eventHebrewMonth" />
       <MultiReferenceField source="reporterStudentReferenceId" reference="student" optionalSource="reporterStudentTz" optionalTarget="tz" label="דווח ע״י" />
       <SelectField source="year" choices={yearChoices} />
       {isAdmin && <DateField showDate showTime source="createdAt" />}
@@ -58,7 +55,6 @@ const Inputs = ({ isCreate, isAdmin }) => {
     {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
     <CommonReferenceInput source="studentReferenceId" reference="student" validate={required()} dynamicFilter={filterByUserId} />
     <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} dynamicFilter={filterByUserIdAndYear} />
-    <DateInput source="eventDate" validate={required()} />
     <CommonReferenceInput source="reporterStudentReferenceId" reference="student" validate={required()} dynamicFilter={filterByUserId} label="דווח ע״י" />
     <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} validate={required()} />
     {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
@@ -69,7 +65,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-  fields: ['studentTz', 'eventTypeKey', 'eventDate', 'reporterStudentTz', 'year'],
+  fields: ['studentTz', 'eventTypeKey', 'reporterStudentTz', 'year'],
 }
 
 const entity = {

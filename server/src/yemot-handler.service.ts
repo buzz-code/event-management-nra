@@ -5,7 +5,7 @@ import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { Event } from 'src/db/entities/Event.entity';
-import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
+import { getCurrentHebrewYear, getHebrewYearByGregorianDate } from '@shared/utils/entity/year.util';
 import { formatHebrewDateForIVR, gematriyaLetters, getGregorianDateFromHebrew, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
@@ -112,8 +112,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         userId: this.user.id,
         studentReferenceId: student.id,
         eventTypeReferenceId: eventType.id,
-        eventDate: eventDate,
+        year: getHebrewYearByGregorianDate(eventDate),
       },
+      order: { id: 'DESC' },
     });
 
     if (unreportedEvent) {
@@ -773,16 +774,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Get event type
     const eventType = await this.getEventType();
-    
-    // Get event date
-    const eventDate = await this.getEventDate();
 
     const unreportedEventRepo = this.dataSource.getRepository(UnreportedEvent);
     const unreportedEvent = unreportedEventRepo.create({
       userId: this.user.id,
       studentReferenceId: student.id,
       eventTypeReferenceId: eventType.id,
-      eventDate: eventDate,
       reporterStudentReferenceId: reporterStudent.id,
       year: getCurrentHebrewYear(),
     });

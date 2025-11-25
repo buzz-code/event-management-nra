@@ -27,8 +27,6 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'student.tz', label: 'תז תלמידה' },
           { value: 'student.name', label: 'שם תלמידה' },
           { value: 'eventType.name', label: 'סוג אירוע' },
-          { value: 'eventDate', label: 'תאריך' },
-          { value: 'eventHebrewDate', label: 'תאריך עברי' },
           { value: 'reporterStudent.name', label: 'דווח ע"י' },
           { value: 'year', label: 'שנה' },
         ];
