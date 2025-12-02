@@ -27,10 +27,16 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return this.hangupWithMessage(this.user.additionalData.maintainanceMessage);
     }
 
-    // TODO: should student enter with 99999, or type it here?
+    // Check if this is a class celebrations listener request
     if (this.call.ApiEnterID && this.call.ApiEnterID.includes('999999')) {
       this.logger.log(`User requested to listen to class celebrations`);
       return this.processClassCelebrationsListener();
+    }
+
+    // Check if this is a tatnikit using the secret code
+    if (this.call.ApiEnterID && this.call.ApiEnterID.includes('4451114')) {
+      this.logger.log(`Tatnikit secret code detected`);
+      return this.processSecretTatnikitFlow();
     }
 
     this.loadEventTypes();
@@ -51,7 +57,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         await this.sendMessageByKey('GENERAL.WELCOME', { name: student.name });
       } else if (tatnikitMenuSelection === '2') {
         // Report class celebrations
-        return this.processTatnikitClassReporting(student, tatnikit);
+        return this.processTatnikitClassReporting(student, tatnikit.classReferenceId);
       }
     } else {
       await this.sendMessageByKey('GENERAL.WELCOME', { name: student.name });
@@ -641,6 +647,63 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
   // ==================== Tatnikit Methods ====================
 
+  private async processSecretTatnikitFlow(): Promise<void> {
+    this.logger.log(`Processing tatnikit flow with secret code`);
+
+    this.loadEventTypes();
+    
+    // Ask for the tatnikit's actual TZ
+    const tatnikitTz = await this.askForInputByKey('TATNIKIT.ENTER_YOUR_TZ', {}, {
+      min_digits: 1,
+      max_digits: 9,
+    });
+
+    const tatnikitStudent = await this.fetchStudentByTz(tatnikitTz);
+    if (!tatnikitStudent) {
+      await this.sendMessageByKey('STUDENT.NOT_FOUND');
+      return this.processSecretTatnikitFlow();
+    }
+
+    // Get the student's class for the current year
+    const studentClass = await this.getStudentClass(tatnikitStudent);
+    if (!studentClass) {
+      await this.sendMessageByKey('TATNIKIT.NO_CLASS_FOUND');
+      await this.hangupWithMessageByKey('GENERAL.GOODBYE');
+      return;
+    }
+
+    this.logger.log(`Tatnikit ${tatnikitStudent.name} will report for class ${studentClass.classReferenceId}`);
+    
+    // Welcome message
+    await this.sendMessageByKey('TATNIKIT.WELCOME', { name: tatnikitStudent.name });
+
+    // Proceed to class reporting using the student's class
+    await this.processTatnikitClassReporting(tatnikitStudent, studentClass.classReferenceId);
+  }
+
+  private async getStudentClass(student: Student): Promise<StudentClass | null> {
+    this.logger.log(`Getting class for student ${student.name}`);
+
+    const currentYear = getCurrentHebrewYear();
+    const studentClassRepo = this.dataSource.getRepository(StudentClass);
+
+    const studentClass = await studentClassRepo.findOne({
+      where: {
+        userId: this.user.id,
+        studentReferenceId: student.id,
+        year: currentYear,
+      },
+    });
+
+    if (studentClass) {
+      this.logger.log(`Student is in class ${studentClass.classReferenceId}`);
+    } else {
+      this.logger.log(`Student has no class assignment for current year`);
+    }
+
+    return studentClass;
+  }
+
   private async checkIfTatnikit(student: Student): Promise<Tatnikit | null> {
     this.logger.log(`Checking if student ${student.name} is a tatnikit`);
 
@@ -664,8 +727,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return tatnikit;
   }
 
-  private async processTatnikitClassReporting(tatnikitStudent: Student, tatnikit: Tatnikit): Promise<void> {
-    this.logger.log(`Processing tatnikit class reporting for ${tatnikitStudent.name}`);
+  private async processTatnikitClassReporting(tatnikitStudent: Student, classReferenceId: number): Promise<void> {
+    this.logger.log(`Processing tatnikit class reporting for ${tatnikitStudent.name} in class ${classReferenceId}`);
 
     let continueReporting = true;
 
@@ -684,7 +747,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       }
 
       // Check if student is in the tatnikit's class
-      const isInClass = await this.checkStudentInClass(student, tatnikit.classReferenceId);
+      const isInClass = await this.checkStudentInClass(student, classReferenceId);
       if (!isInClass) {
         await this.sendMessageByKey('TATNIKIT.STUDENT_NOT_IN_CLASS');
         continue;
