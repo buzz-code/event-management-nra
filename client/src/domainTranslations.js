@@ -43,7 +43,8 @@ export default {
                 fulfillmentQuestion9: 'שאלת מימוש 9',
                 fulfillmentQuestion10: 'שאלת מימוש 10',
                 fulfillmentQuestion11: 'שאלת מימוש 11',
-                lotteryTrack: 'מסלול הגרלה',
+                lotteryTrack: 'מספר הגרלה',
+                lotteryName: 'מסלול הגרלה',
                 reportedByTatnikit: 'דווח ע"י תתניקית',
             }
         },

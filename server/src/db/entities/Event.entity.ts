@@ -362,6 +362,12 @@ export class Event implements IHasUserId {
   @Column({ type: 'int', nullable: true })
   lotteryTrack: number;
 
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  lotteryName: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

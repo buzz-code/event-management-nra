@@ -124,6 +124,14 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
         const ids = extra.ids.toString().split(',').map(Number);
         return fixReferences(this.repo as Repository<Event>, ids, { studentReferenceId: 'studentClassReferenceId' });
       }
+      case 'lotteryNameUpdate': {
+        const lotteryName = extra.lotteryName;
+        const eventIds = extra.ids?.toString()?.split(',') || [];
+        if (eventIds.length > 0) {
+          await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
+        }
+        return 'שם הגרלה עודכן בהצלחה';
+      }
     }
     return super.doAction(req, body);
   }

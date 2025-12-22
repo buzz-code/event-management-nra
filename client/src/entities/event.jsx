@@ -19,6 +19,7 @@ import {
 } from 'react-admin';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import EditIcon from '@mui/icons-material/Edit';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -46,6 +47,7 @@ const filters = [
     <DateInput source="eventDate:$gte" />,
     <DateInput source="eventDate:$lte" />,
     <TextInput source="eventHebrewMonth:$cont" alwaysOn />,
+    <BooleanInput source="lotteryName:$isnull" label="ללא מסלול הגרלה" defaultValue={true} />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
 ];
 
@@ -57,6 +59,9 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
     const additionalBulkButtons = [
         <BulkActionButton label='שיוך למורה' icon={<SupervisedUserCircleIcon />} name='teacherAssociation' >
             <CommonReferenceArrayInput source="teacherReferenceIds" reference="teacher" label="מורה" dynamicFilter={filterByUserId} validate={required()} />
+        </BulkActionButton>,
+        <BulkActionButton label='עדכון שם הגרלה' icon={<EditIcon />} name='lotteryNameUpdate' reloadOnEnd>
+            <TextInput source="lotteryName" label="שם הגרלה" />
         </BulkActionButton>,
         <BulkReportButton label='ייצוא אירועים למורה' icon={<GetAppIcon />} name='eventExport' />,
         isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך כיתות" />
@@ -102,7 +107,11 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <NumberField source="fulfillmentQuestion6" />
             <NumberField source="fulfillmentQuestion7" />
             <NumberField source="fulfillmentQuestion8" />
+            {/* <NumberField source="fulfillmentQuestion9" /> */}
+            {/* <NumberField source="fulfillmentQuestion10" /> */}
+            {/* <NumberField source="fulfillmentQuestion11" /> */}
             <NumberField source="lotteryTrack" />
+            <TextField source="lotteryName" />
             {isPreview && <TextField source="newNote" />}
             {!isPreview && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -132,7 +141,11 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <NumberInput source="fulfillmentQuestion6" />
         <NumberInput source="fulfillmentQuestion7" />
         <NumberInput source="fulfillmentQuestion8" />
+        {/* <NumberInput source="fulfillmentQuestion9" /> */}
+        {/* <NumberInput source="fulfillmentQuestion10" /> */}
+        {/* <NumberInput source="fulfillmentQuestion11" /> */}
         <NumberInput source="lotteryTrack" />
+        <TextInput source="lotteryName" validate={[maxLength(255)]} />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="description" multiline validate={[maxLength(1000)]} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
