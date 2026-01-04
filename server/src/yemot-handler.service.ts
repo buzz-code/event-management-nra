@@ -753,6 +753,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         continue;
       }
 
+      await this.sendMessageByKey('TATNIKIT.STUDENT_SELECTED', { name: student.name });
+
       // Check for existing event
       const existingEvent = await this.findExistingEventForStudent(student);
       
