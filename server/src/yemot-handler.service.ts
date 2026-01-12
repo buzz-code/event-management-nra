@@ -755,17 +755,19 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       await this.sendMessageByKey('TATNIKIT.STUDENT_SELECTED', { name: student.name });
 
+      // Get event type
+      const eventType = await this.getEventType();
+
       // Check for existing event
-      const existingEvent = await this.findExistingEventForStudent(student);
+      const existingEvent = await this.findExistingEventForStudent(student, eventType);
       
       if (existingEvent) {
         // Event exists - ask for confirmation
-        const eventType = await this.dataSource.getRepository(EventType).findOneBy({ id: existingEvent.eventTypeReferenceId });
         const hebrewDate = formatHebrewDateForIVR(existingEvent.eventDate);
         
         const confirmed = await this.askConfirmation('TATNIKIT.EVENT_EXISTS', {
           name: student.name,
-          eventType: eventType?.name || '',
+          eventType: eventType.name,
           date: hebrewDate,
         });
 
@@ -776,11 +778,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           await this.sendMessageByKey('TATNIKIT.EVENT_CONFIRMED');
         } else {
           // Create new unreported event
-          await this.createUnreportedEvent(student, tatnikitStudent);
+          await this.createUnreportedEvent(student, tatnikitStudent, eventType);
         }
       } else {
         // No existing event - create unreported event
-        await this.createUnreportedEvent(student, tatnikitStudent);
+        await this.createUnreportedEvent(student, tatnikitStudent, eventType);
       }
 
       // Ask if want to continue
@@ -808,19 +810,23 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return !!studentClass;
   }
 
-  private async findExistingEventForStudent(student: Student): Promise<Event | null> {
-    this.logger.log(`Finding existing event for student ${student.name}`);
+  private async findExistingEventForStudent(student: Student, eventType: EventType): Promise<Event | null> {
+    this.logger.log(`Finding existing event for student ${student.name} and type ${eventType.name}`);
 
     const currentYear = getCurrentHebrewYear();
     const eventRepo = this.dataSource.getRepository(Event);
+
+    const searchDate = this.getStartOfDay();
+    searchDate.setMonth(searchDate.getMonth() - 2);
 
     const event = await eventRepo.findOne({
       where: {
         userId: this.user.id,
         studentReferenceId: student.id,
+        eventTypeReferenceId: eventType.id,
         year: currentYear,
         reportedByTatnikit: false,
-        eventDate: MoreThan(this.getStartOfDay()),
+        eventDate: MoreThan(searchDate),
       },
       order: {
         eventDate: 'DESC',
@@ -834,11 +840,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return event;
   }
 
-  private async createUnreportedEvent(student: Student, reporterStudent: Student): Promise<void> {
-    this.logger.log(`Creating unreported event for student ${student.name}`);
-
-    // Get event type
-    const eventType = await this.getEventType();
+  private async createUnreportedEvent(student: Student, reporterStudent: Student, eventType: EventType): Promise<void> {
+    this.logger.log(`Creating unreported event for student ${student.name}, reported by ${reporterStudent.name}, event type ${eventType.name}`);
 
     const unreportedEventRepo = this.dataSource.getRepository(UnreportedEvent);
     const unreportedEvent = unreportedEventRepo.create({
