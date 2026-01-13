@@ -11,6 +11,7 @@ function getConfig(): BaseEntityModuleOptions {
         student: { eager: false },
         eventType: { eager: false },
         reporterStudent: { eager: false },
+        class: { eager: false },
       },
     },
     exporter: {
@@ -19,6 +20,7 @@ function getConfig(): BaseEntityModuleOptions {
           student: { eager: true },
           eventType: { eager: true },
           reporterStudent: { eager: true },
+          class: { eager: true },
         };
         return innerFunc(req);
       },
@@ -26,9 +28,11 @@ function getConfig(): BaseEntityModuleOptions {
         return [
           { value: 'student.tz', label: 'תז תלמידה' },
           { value: 'student.name', label: 'שם תלמידה' },
+          { value: 'class.name', label: 'כיתה' },
           { value: 'eventType.name', label: 'סוג אירוע' },
           { value: 'reporterStudent.name', label: 'דווח ע"י' },
           { value: 'year', label: 'שנה' },
+          { value: 'createdAt', label: 'תאריך דיווח' },
         ];
       },
     },

@@ -778,11 +778,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           await this.sendMessageByKey('TATNIKIT.EVENT_CONFIRMED');
         } else {
           // Create new unreported event
-          await this.createUnreportedEvent(student, tatnikitStudent, eventType);
+          await this.createUnreportedEvent(student, tatnikitStudent, eventType, classReferenceId);
         }
       } else {
         // No existing event - create unreported event
-        await this.createUnreportedEvent(student, tatnikitStudent, eventType);
+        await this.createUnreportedEvent(student, tatnikitStudent, eventType, classReferenceId);
       }
 
       // Ask if want to continue
@@ -840,8 +840,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return event;
   }
 
-  private async createUnreportedEvent(student: Student, reporterStudent: Student, eventType: EventType): Promise<void> {
-    this.logger.log(`Creating unreported event for student ${student.name}, reported by ${reporterStudent.name}, event type ${eventType.name}`);
+  private async createUnreportedEvent(student: Student, reporterStudent: Student, eventType: EventType, classReferenceId: number): Promise<void> {
+    this.logger.log(`Creating unreported event for student ${student.name}, reported by ${reporterStudent.name}, event type ${eventType.name}, class ${classReferenceId}`);
 
     const unreportedEventRepo = this.dataSource.getRepository(UnreportedEvent);
     const unreportedEvent = unreportedEventRepo.create({
@@ -849,6 +849,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       studentReferenceId: student.id,
       eventTypeReferenceId: eventType.id,
       reporterStudentReferenceId: reporterStudent.id,
+      classReferenceId: classReferenceId,
       year: getCurrentHebrewYear(),
     });
 

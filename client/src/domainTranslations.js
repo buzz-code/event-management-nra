@@ -132,6 +132,7 @@ export default {
                 eventTypeKey: 'סוג אירוע',
                 reporterStudentReferenceId: 'דווח ע"י',
                 reporterStudentTz: 'דווח ע"י',
+                classReferenceId: 'כיתה',
             }
         },
         student_by_year: {

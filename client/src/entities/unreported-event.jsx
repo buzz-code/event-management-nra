@@ -23,6 +23,7 @@ const filters = [
   <CommonReferenceInputFilter source="studentReferenceId" reference="student" dynamicFilter={filterByUserId} />,
   <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" dynamicFilter={filterByUserIdAndYear} />,
   <CommonReferenceInputFilter source="reporterStudentReferenceId" reference="student" dynamicFilter={filterByUserId} label="דווח ע״י" />,
+  <CommonReferenceInputFilter source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />,
   <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />
 ];
 
@@ -40,8 +41,10 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
       <MultiReferenceField source="studentReferenceId" reference="student" optionalSource="studentTz" optionalTarget="tz" label='ת"ז תלמידה'>
         <TextField source="tz" />
       </MultiReferenceField>
+      <ReferenceField source="classReferenceId" reference="class" />
       <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
       <MultiReferenceField source="reporterStudentReferenceId" reference="student" optionalSource="reporterStudentTz" optionalTarget="tz" label="דווח ע״י" />
+      <DateField showDate source="createdAt" label="תאריך דיווח" />
       <SelectField source="year" choices={yearChoices} />
       {isAdmin && <DateField showDate showTime source="createdAt" />}
       {isAdmin && <DateField showDate showTime source="updatedAt" />}

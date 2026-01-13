@@ -13,17 +13,17 @@ import {
 } from 'typeorm';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, IsNumber, IsDate, MaxLength } from '@shared/utils/validation/class-validator-he';
-import { NumberType, StringType, DateType } from '@shared/utils/entity/class-transformer';
+import { IsNotEmpty, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { NumberType, StringType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { Student } from './Student.entity';
 import { EventType } from './EventType.entity';
+import { Class } from './Class.entity';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { FamilyStatusType } from './FamilyStatusType.entity';
 import { Family } from '../view-entities/Family.entity';
 import { cleanDateFields } from '@shared/utils/entity/deafultValues.util';
-import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
 
 @Entity('unreported_events')
 @Index('unreported_events_user_id_idx', ['userId'], {})
@@ -98,6 +98,9 @@ export class UnreportedEvent implements IHasUserId {
   @Column({ nullable: true })
   studentReferenceId: number;
 
+  @Column({ nullable: true })
+  classReferenceId: number;
+
   // Event type
   @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.eventTypeReferenceId), {
     always: true,
@@ -136,6 +139,10 @@ export class UnreportedEvent implements IHasUserId {
   @ManyToOne(() => Student, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'studentReferenceId' })
   student: Student;
+
+  @ManyToOne(() => Class, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'classReferenceId' })
+  class: Class;
 
   @ManyToOne(() => EventType, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'eventTypeReferenceId' })
