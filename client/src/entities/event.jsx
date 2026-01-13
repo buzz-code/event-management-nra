@@ -48,6 +48,7 @@ const filters = [
     <DateInput source="eventDate:$lte" />,
     <TextInput source="eventHebrewMonth:$cont" alwaysOn />,
     <BooleanInput source="lotteryName:$isnull" label="ללא מסלול הגרלה" defaultValue={true} />,
+    <TextInput source="lotteryName:$cont" label="שם הגרלה" />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
 ];
 
