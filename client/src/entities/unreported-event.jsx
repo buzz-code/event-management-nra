@@ -17,6 +17,7 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { yearChoices, defaultYearFilter } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
+import { CommonHebrewMonth } from '@shared/components/fields/CommonHebrewMonth';
 
 const filters = [
   ...commonAdminFilters,
@@ -42,7 +43,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <TextField source="tz" />
       </MultiReferenceField>
       <ReferenceField source="classReferenceId" reference="class" />
-      <TextField source="eventMonth" label="חודש" />
+      <CommonHebrewMonth source="eventMonth" />
       <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
       <MultiReferenceField source="reporterStudentReferenceId" reference="student" optionalSource="reporterStudentTz" optionalTarget="tz" label="דווח ע״י" />
       <DateField showDate source="createdAt" label="תאריך דיווח" />

@@ -133,6 +133,7 @@ export default {
                 reporterStudentReferenceId: 'דווח ע"י',
                 reporterStudentTz: 'דווח ע"י',
                 classReferenceId: 'כיתה',
+                eventMonth: 'חודש',
             }
         },
         student_by_year: {
