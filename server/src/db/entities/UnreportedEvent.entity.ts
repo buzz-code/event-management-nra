@@ -84,6 +84,12 @@ export class UnreportedEvent implements IHasUserId {
   @Column({ nullable: true })
   year: number;
 
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  eventMonth: number;
+
   // Student being reported on
   @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.studentReferenceId), {
     always: true,

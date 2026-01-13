@@ -42,6 +42,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <TextField source="tz" />
       </MultiReferenceField>
       <ReferenceField source="classReferenceId" reference="class" />
+      <TextField source="eventMonth" label="חודש" />
       <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
       <MultiReferenceField source="reporterStudentReferenceId" reference="student" optionalSource="reporterStudentTz" optionalTarget="tz" label="דווח ע״י" />
       <DateField showDate source="createdAt" label="תאריך דיווח" />
