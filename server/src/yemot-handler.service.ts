@@ -70,6 +70,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       await this.updateEventFulfillment(student);
     } else if (mainMenuSelection === '3') {
       await this.processLotteryEntry(student);
+    } else if (mainMenuSelection === '4') {
+      await this.hangupWithMessageByKey('GENERAL.SONG_MESSAGE');
     }
   }
 
