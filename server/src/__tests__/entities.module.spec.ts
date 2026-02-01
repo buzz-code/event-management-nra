@@ -30,12 +30,12 @@ jest.mock('@shared/base-entity/base-entity.module', () => {
 const MockBaseEntityModule = global.MockBaseEntityModule;
 
 // Import all configs and entities
-import userConfig from '../entity-modules/user.config';
+import userConfig from '@shared/entities/configs/user.config';
 import auditLogConfig from '../entity-modules/audit-log.config';
 import importFileConfig from '../entity-modules/import-file.config';
-import pageConfig from '../entity-modules/page.config';
-import paymentTrackConfig from '../entity-modules/payment-track.config';
-import textConfig from '../entity-modules/text.config';
+import pageConfig from '@shared/entities/configs/page.config';
+import paymentTrackConfig from '@shared/entities/configs/payment-track.config';
+import textConfig from '@shared/entities/configs/text.config';
 import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 import eventConfig from '../entity-modules/event.config';
 import eventTypeConfig from '../entity-modules/event-type.config';

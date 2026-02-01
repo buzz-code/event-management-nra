@@ -24,6 +24,7 @@ describe('student-class.config', () => {
   it('should return correct export headers', () => {
     const headers = studentClassConfig.exporter.getExportHeaders([]);
     expect(headers).toEqual([
+      { value: 'student.tz', label: 'תז תלמיד' },
       { value: 'student.name', label: 'שם תלמיד' },
       { value: 'class.name', label: 'שם כיתה' },
       { value: 'year', label: 'שנה' },

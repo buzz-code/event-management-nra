@@ -1,4 +1,4 @@
-import textConfig from '../text.config';
+import textConfig from '@shared/entities/configs/text.config';
 import { Text } from '@shared/entities/Text.entity';
 
 describe('text.config', () => {
