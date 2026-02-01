@@ -31,8 +31,8 @@ const MockBaseEntityModule = global.MockBaseEntityModule;
 
 // Import all configs and entities
 import userConfig from '@shared/entities/configs/user.config';
-import auditLogConfig from '../entity-modules/audit-log.config';
-import importFileConfig from '../entity-modules/import-file.config';
+import auditLogConfig from '@shared/entities/configs/audit-log.config';
+import importFileConfig from '@shared/entities/configs/import-file.config';
 import pageConfig from '@shared/entities/configs/page.config';
 import paymentTrackConfig from '@shared/entities/configs/payment-track.config';
 import textConfig from '@shared/entities/configs/text.config';

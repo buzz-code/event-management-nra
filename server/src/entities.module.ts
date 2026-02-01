@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { BaseEntityModule } from '@shared/base-entity/base-entity.module';
 
-import auditLogConfig from './entity-modules/audit-log.config';
-import importFileConfig from './entity-modules/import-file.config';
+import { Student } from './db/entities/Student.entity';
+import { Teacher } from './db/entities/Teacher.entity';
 
 // Event Management System entities
 import eventConfig from './entity-modules/event.config';
@@ -31,6 +31,17 @@ import pageConfig from '@shared/entities/configs/page.config';
 import paymentTrackConfig from '@shared/entities/configs/payment-track.config';
 import textConfig from '@shared/entities/configs/text.config';
 import mailAddressConfig from '@shared/utils/mail/mail-address.config';
+import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
+import importFileConfig, { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
+
+registerEntityNameMap({
+  student: 'תלמידות',
+  teacher: 'מורות',
+  klass: 'כיתות',
+  lesson: 'שיעורים',
+  att_report: 'דיווחי נוכחות',
+  grade: 'ציונים',
+});
 
 @Module({
   imports: [
@@ -55,7 +66,12 @@ import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),
-    BaseEntityModule.register(auditLogConfig),
+    BaseEntityModule.register(
+      createAuditLogConfig({
+        student: Student,
+        teacher: Teacher,
+      }),
+    ),
     BaseEntityModule.register(importFileConfig),
     BaseEntityModule.register({ entity: YemotCall }),
     BaseEntityModule.register(mailAddressConfig),
