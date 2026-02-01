@@ -2,6 +2,7 @@ import { BaseEntityModuleOptions } from '@shared/base-entity/interface';
 import { UnreportedEvent } from '../db/entities/UnreportedEvent.entity';
 import { IHeader } from '@shared/utils/exporter/types';
 import { CrudRequest } from '@dataui/crud';
+import { getHebrewMonthName } from '@shared/utils/formatting/hebrew.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -32,6 +33,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'eventType.name', label: 'סוג אירוע' },
           { value: 'reporterStudent.name', label: 'דווח ע"י' },
           { value: 'year', label: 'שנה' },
+          { value: (row: any) => getHebrewMonthName(row.eventMonth, row.year), label: 'חודש' },
           { value: 'createdAt', label: 'תאריך דיווח' },
         ];
       },
