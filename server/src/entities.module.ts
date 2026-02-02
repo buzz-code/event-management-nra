@@ -1,14 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BaseEntityModule } from '@shared/base-entity/base-entity.module';
 
-import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
-import importFileConfig, { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
-import mailAddressConfig from '@shared/utils/mail/mail-address.config';
-import userConfig from '@shared/entities/configs/user.config';
-import pageConfig from '@shared/entities/configs/page.config';
-import paymentTrackConfig from '@shared/entities/configs/payment-track.config';
-import textConfig from '@shared/entities/configs/text.config';
-
 import { Student } from './db/entities/Student.entity';
 import { Teacher } from './db/entities/Teacher.entity';
 
@@ -34,6 +26,13 @@ import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 import { RecievedMail } from '@shared/entities/RecievedMail.entity';
 import { Image } from '@shared/entities/Image.entity';
+import userConfig from '@shared/entities/configs/user.config';
+import pageConfig from '@shared/entities/configs/page.config';
+import textConfig from '@shared/entities/configs/text.config';
+import paymentTrackConfig from '@shared/entities/configs/payment-track.config';
+import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
+import importFileConfig, { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
+import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 
 registerEntityNameMap({
   student: 'תלמידות',
