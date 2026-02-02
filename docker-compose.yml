@@ -16,8 +16,8 @@ services:
             caddy: $DOMAIN_NAME
             caddy.reverse_proxy: "{{upstreams 80}}"
             caddy.reverse_proxy.health_uri: "/"
-            caddy.reverse_proxy.health_interval: 30s
-            caddy.reverse_proxy.health_timeout: 10s
+            caddy.reverse_proxy.health_interval: 5s
+            caddy.reverse_proxy.health_timeout: 5s
         volumes:
             - ./client:/app
         networks:
@@ -71,8 +71,8 @@ services:
             caddy: api.$DOMAIN_NAME
             caddy.reverse_proxy: "{{upstreams 3000}}"
             caddy.reverse_proxy.health_uri: "/health"
-            caddy.reverse_proxy.health_interval: 30s
-            caddy.reverse_proxy.health_timeout: 10s
+            caddy.reverse_proxy.health_interval: 5s
+            caddy.reverse_proxy.health_timeout: 5s
         volumes: 
             - ./server:/app
         networks:
