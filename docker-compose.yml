@@ -41,6 +41,8 @@ services:
             SMTP_USER: $SMTP_USER
             SMTP_PASSWORD: $SMTP_PASSWORD
             YARN_CACHE_FOLDER: /yarn-cache
+            MAINTENANCE_MODE: $MAINTENANCE_MODE
+            MAINTENANCE_MESSAGE: $MAINTENANCE_MESSAGE
         depends_on:
             - database
         labels:
