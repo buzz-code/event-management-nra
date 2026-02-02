@@ -98,6 +98,7 @@ services:
         #   - '30004:3000'
         networks:
             - private-network
+            - backend-network
             - caddy
             - elknet
 
@@ -186,4 +187,6 @@ networks:
     caddy:
         external: true
     elknet:
+        external: true
+    backend-network:
         external: true
