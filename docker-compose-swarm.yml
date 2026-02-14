@@ -48,8 +48,6 @@ services:
     server:
         image: 'ghcr.io/buzz-code/event-management-nra-server:latest'
         container_name: server
-        depends_on:
-            - database
         deploy:
             labels:
                 caddy: api.$DOMAIN_NAME
@@ -101,85 +99,6 @@ services:
             - backend-network
             - caddy
             - elknet
-
-    database:
-        image: mysql:9.3
-        container_name: database
-        cap_add:
-            - SYS_NICE
-        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-buffer-pool-size=64M --innodb-log-buffer-size=8M
-        deploy:
-            placement:
-                constraints:
-                    - node.labels.first == true
-            resources:
-                limits:
-                    memory: 512M  # Hard cap
-                reservations:
-                    memory: 256M  # Guaranteed amount                    
-        environment:
-            MYSQL_DATABASE: $MYSQL_DATABASE
-            MYSQL_USER: $MYSQL_USER
-            MYSQL_PASSWORD: $MYSQL_PASSWORD
-            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
-        volumes:
-            - 'db_data:/var/lib/mysql'
-        networks:
-            - private-network
-
-    phpmyadmin:
-        image: phpmyadmin:5.2.1
-        container_name: phpmyadmin
-        depends_on:
-            - database
-        deploy:
-            labels:
-                caddy: sql.$DOMAIN_NAME
-                caddy.reverse_proxy: '{{upstreams 80}}'
-            placement:
-                constraints:
-                    - node.labels.listenReport != true
-        environment:
-            PMA_HOST: $MYSQL_HOST
-            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
-        # ports:
-        #   - '80'
-        networks:
-            - private-network
-            - caddy
-
-    mysql_dump:
-        image: tiredofit/db-backup:4.1.17
-        container_name: mysql_dump
-        depends_on:
-            - database
-        environment:
-            DB_TYPE: mysql
-            DB_HOST: $MYSQL_HOST
-            DB_NAME: $MYSQL_DATABASE
-            DB_USER: $MYSQL_USER
-            DB_PASS: $MYSQL_PASSWORD
-            DB_DUMP_BEGIN: '0200'
-            DB_CLEANUP_TIME: 10 # clean backups they are older than 10 days
-            CHECKSUM: SHA1
-            COMPRESSION: GZ
-            SPLIT_DB: 'FALSE'
-            EXTRA_DUMP_OPTS: '--no-tablespaces'
-            CONTAINER_ENABLE_MONITORING: 'FALSE'
-        labels:
-            co.elastic.logs/enabled: 'true'
-        deploy:
-            placement:
-                constraints:
-                    - node.labels.first != true
-        volumes:
-            - db_backup:/backup
-        networks:
-            - private-network
-
-volumes:
-    db_data:
-    db_backup:
 
 
 networks:
