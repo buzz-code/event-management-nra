@@ -29,6 +29,8 @@ function getConfig(): BaseEntityModuleOptions {
         return [
           { value: 'student.tz', label: 'תז תלמידה' },
           { value: 'student.name', label: 'שם תלמידה' },
+          { value: 'student.motherContact', label: 'טלפון אם' },
+          { value: 'student.fatherContact', label: 'טלפון אב' },
           { value: 'class.name', label: 'כיתה' },
           { value: 'eventType.name', label: 'סוג אירוע' },
           { value: 'reporterStudent.name', label: 'דווח ע"י' },

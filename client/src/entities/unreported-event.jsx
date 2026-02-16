@@ -1,7 +1,6 @@
 import {
   DateField,
   DateTimeInput,
-  DateInput,
   ReferenceField,
   required,
   TextField,
@@ -17,7 +16,7 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { yearChoices, defaultYearFilter } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
-import { CommonHebrewMonth } from '@shared/components/fields/CommonHebrewMonth';
+import { CommonHebrewMonthField, CommonHebrewMonthInputFilter } from '@shared/components/fields/CommonHebrewMonth';
 
 const filters = [
   ...commonAdminFilters,
@@ -25,6 +24,7 @@ const filters = [
   <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" dynamicFilter={filterByUserIdAndYear} />,
   <CommonReferenceInputFilter source="reporterStudentReferenceId" reference="student" dynamicFilter={filterByUserId} label="דווח ע״י" />,
   <CommonReferenceInputFilter source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />,
+  <CommonHebrewMonthInputFilter source="eventMonth:$eq" label="חודש" />,
   <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />
 ];
 
@@ -43,7 +43,13 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <TextField source="tz" />
       </MultiReferenceField>
       <ReferenceField source="classReferenceId" reference="class" />
-      <CommonHebrewMonth source="eventMonth" />
+      <CommonHebrewMonthField source="eventMonth" />
+      <MultiReferenceField source="studentReferenceId" reference="student" optionalSource="studentTz" optionalTarget="tz" label="טלפון אם">
+        <TextField source="motherContact" />
+      </MultiReferenceField>
+      <MultiReferenceField source="studentReferenceId" reference="student" optionalSource="studentTz" optionalTarget="tz" label="טלפון אב">
+        <TextField source="fatherContact" />
+      </MultiReferenceField>
       <MultiReferenceField source="eventTypeReferenceId" reference="event_type" optionalSource="eventTypeKey" optionalTarget="key" />
       <MultiReferenceField source="reporterStudentReferenceId" reference="student" optionalSource="reporterStudentTz" optionalTarget="tz" label="דווח ע״י" />
       <DateField showDate source="createdAt" label="תאריך דיווח" />
