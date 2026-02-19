@@ -1,5 +1,4 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
-import { Text } from "@shared/entities/Text.entity";
 
 const MESSAGE_CONSTANTS = {
     GENERAL: {
@@ -361,12 +360,10 @@ export class CreateTexts1747572215578 implements MigrationInterface {
             }
             return;
         }
-        await queryRunner.manager.getRepository(Text).insert({
-            name: key,
-            description: value,
-            value,
-            userId: 0,
-        });
+        await queryRunner.query(
+            'INSERT INTO `texts` (`user_id`, `name`, `description`, `value`) VALUES (?, ?, ?, ?)',
+            [0, key, value, value],
+        );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

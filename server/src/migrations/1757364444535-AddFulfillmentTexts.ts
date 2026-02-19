@@ -1,10 +1,8 @@
-import { Text } from "@shared/entities/Text.entity";
-import { In, MigrationInterface, QueryRunner } from "typeorm"
+import { MigrationInterface, QueryRunner } from "typeorm"
 
 export class AddFulfillmentTexts1757364444535 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        const textRepo = queryRunner.manager.getRepository(Text);
         const texts = [
             { name: 'FULFILLMENT.START_MESSAGE', text: 'שלום {name}, נתחיל בתהליך בדיקת מימוש האירוע' },
             { name: 'FULFILLMENT.QUESTION_1', text: 'שאלה 1: נא לבחור רמה בין 1 ל-3' },
@@ -23,35 +21,25 @@ export class AddFulfillmentTexts1757364444535 implements MigrationInterface {
             { name: 'FULFILLMENT.GOODBYE', text: 'תודה רבה, להתראות' },
         ];
 
-        await textRepo.save(texts.map(text => ({
-            name: text.name,
-            value: text.text,
-            description: text.text,
-            userId: 0,
-        })));
+        for (const text of texts) {
+            await queryRunner.query(
+                'INSERT INTO `texts` (`user_id`, `name`, `description`, `value`) VALUES (?, ?, ?, ?)',
+                [0, text.name, text.text, text.text],
+            );
+        }
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        const textRepo = queryRunner.manager.getRepository(Text);
-        await textRepo.delete({
-            name: In([
-                'FULFILLMENT.START_MESSAGE',
-                'FULFILLMENT.QUESTION_1',
-                'FULFILLMENT.QUESTION_2',
-                'FULFILLMENT.QUESTION_3',
-                'FULFILLMENT.QUESTION_4',
-                'FULFILLMENT.QUESTION_5',
-                'FULFILLMENT.QUESTION_6',
-                'FULFILLMENT.QUESTION_7',
-                'FULFILLMENT.QUESTION_8',
-                'FULFILLMENT.QUESTION_9',
-                'FULFILLMENT.QUESTION_10',
-                'FULFILLMENT.QUESTION_11',
-                'FULFILLMENT.INVALID_LEVEL',
-                'FULFILLMENT.DATA_SAVED',
-                'FULFILLMENT.GOODBYE'
-            ])
-        });
+        await queryRunner.query(
+            `DELETE FROM \`texts\` WHERE \`name\` IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                'FULFILLMENT.START_MESSAGE', 'FULFILLMENT.QUESTION_1', 'FULFILLMENT.QUESTION_2',
+                'FULFILLMENT.QUESTION_3', 'FULFILLMENT.QUESTION_4', 'FULFILLMENT.QUESTION_5',
+                'FULFILLMENT.QUESTION_6', 'FULFILLMENT.QUESTION_7', 'FULFILLMENT.QUESTION_8',
+                'FULFILLMENT.QUESTION_9', 'FULFILLMENT.QUESTION_10', 'FULFILLMENT.QUESTION_11',
+                'FULFILLMENT.INVALID_LEVEL', 'FULFILLMENT.DATA_SAVED', 'FULFILLMENT.GOODBYE',
+            ],
+        );
     }
 
 }
