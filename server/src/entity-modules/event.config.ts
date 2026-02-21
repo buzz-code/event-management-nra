@@ -26,6 +26,7 @@ function getConfig(): BaseEntityModuleOptions {
         eventType: { eager: false },
         teacher: { eager: true },
         student: { eager: false },
+        reporterStudent: { eager: false },
         studentClass: { eager: false },
         levelType: { eager: false },
         notes: { eager: false },
@@ -38,6 +39,7 @@ function getConfig(): BaseEntityModuleOptions {
           eventType: { eager: true },
           teacher: { eager: true },
           student: { eager: true },
+          reporterStudent: { eager: true },
           studentClass: { eager: true },
           levelType: { eager: true },
           notes: { eager: true },
@@ -52,6 +54,7 @@ function getConfig(): BaseEntityModuleOptions {
         return [
           { value: 'student.tz', label: 'תז תלמיד' },
           { value: 'student.name', label: 'שם תלמיד' },
+          { value: 'reporterStudent.name', label: 'דווח ע"י' },
           { value: 'eventType.name', label: 'סוג אירוע' },
           { value: 'levelType.name', label: 'רמה' },
           { value: 'teacher.name', label: 'שם מורה' },

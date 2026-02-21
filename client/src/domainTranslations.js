@@ -15,6 +15,8 @@ export default {
                 ...generalResourceFieldsTranslation,
                 studentTz: 'תלמידה',
                 studentReferenceId: 'תלמידה',
+                reporterStudentTz: 'דווח ע"י',
+                reporterStudentReferenceId: 'דווח ע"י',
                 teacherTz: 'מורה אחראית',
                 teacherReferenceId: 'מורה אחראית',
                 eventTypeReferenceId: 'סוג האירוע',

@@ -4,13 +4,12 @@ import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.s
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
-import { Event } from 'src/db/entities/Event.entity';
+import { Event, EventReportOrigin } from 'src/db/entities/Event.entity';
 import { getCurrentHebrewYear, getHebrewYearByGregorianDate } from '@shared/utils/entity/year.util';
 import { formatHebrewDateForIVR, gematriyaLetters, getGregorianDateFromHebrew, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
 import { Tatnikit } from 'src/db/entities/Tatnikit.entity';
-import { UnreportedEvent } from 'src/db/entities/UnreportedEvent.entity';
 
 const MAX_GIFTS = 5;
 
@@ -50,7 +49,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     if (tatnikit) {
       this.logger.log(`Student ${student.name} is a tatnikit for class ${tatnikit.classReferenceId}`);
       await this.sendMessageByKey('TATNIKIT.WELCOME', { name: student.name });
-      
+
       const tatnikitMenuSelection = await this.askForInputByKey('TATNIKIT.MENU');
       if (tatnikitMenuSelection === '1') {
         // Report for self - continue to normal flow
@@ -81,55 +80,66 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const eventDate = await this.getEventDate();
     const gifts = await this.getGifts();
 
-    // Check if there's a matching unreported event from tatnikit
-    const unreportedEvent = await this.findMatchingUnreportedEvent(student, eventType, eventDate);
+    // Check if there's a matching tatnikit-only event
+    const tatnikitOnlyEvent = await this.findMatchingTatnikitOnlyEvent(student, eventType, eventDate);
 
     const eventRepo = this.dataSource.getRepository(Event);
-    const event = eventRepo.create({
-      userId: this.user.id,
-      studentReferenceId: student.id,
-      eventTypeReferenceId: eventType.id,
-      eventDate: eventDate,
-      name: `${student.name} - ${eventType.name}`,
-      reportedByTatnikit: !!unreportedEvent,
-      eventGifts: gifts.map(gift => ({
+    let savedEvent: Event;
+
+    if (tatnikitOnlyEvent) {
+      tatnikitOnlyEvent.eventDate = eventDate;
+      tatnikitOnlyEvent.name = `${student.name} - ${eventType.name}`;
+      tatnikitOnlyEvent.reportedByTatnikit = true;
+      tatnikitOnlyEvent.reportOrigin = EventReportOrigin.BOTH_TATNIKIT_FIRST;
+      tatnikitOnlyEvent.eventGifts = gifts.map(gift => ({
         userId: this.user.id,
         giftReferenceId: gift.id,
-      })),
-    });
-    const savedEvent = await eventRepo.save(event);
-    this.logger.log(`Event created: ${savedEvent.id}`);
-
-    // Delete unreported event if it existed
-    if (unreportedEvent) {
-      await this.dataSource.getRepository(UnreportedEvent).remove(unreportedEvent);
-      this.logger.log(`Deleted matching unreported event: ${unreportedEvent.id}`);
+      })) as any;
+      savedEvent = await eventRepo.save(tatnikitOnlyEvent);
+      this.logger.log(`Merged student report into tatnikit event: ${savedEvent.id}`);
+    } else {
+      const event = eventRepo.create({
+        userId: this.user.id,
+        studentReferenceId: student.id,
+        eventTypeReferenceId: eventType.id,
+        eventDate: eventDate,
+        name: `${student.name} - ${eventType.name}`,
+        reportedByTatnikit: false,
+        reportOrigin: EventReportOrigin.ONLY_STUDENT,
+        eventGifts: gifts.map(gift => ({
+          userId: this.user.id,
+          giftReferenceId: gift.id,
+        })),
+      });
+      savedEvent = await eventRepo.save(event);
+      this.logger.log(`Event created: ${savedEvent.id}`);
     }
 
     await this.sendMessageByKey('EVENT.SAVE_SUCCESS');
     await this.hangupWithMessageByKey('EVENT.GIFTS_ADDED', { count: gifts.length });
   }
 
-  private async findMatchingUnreportedEvent(student: Student, eventType: EventType, eventDate: Date): Promise<UnreportedEvent | null> {
-    this.logger.log(`Checking for matching unreported event for student ${student.name}`);
+  private async findMatchingTatnikitOnlyEvent(student: Student, eventType: EventType, eventDate: Date): Promise<Event | null> {
+    this.logger.log(`Checking for matching tatnikit-only event for student ${student.name}`);
 
-    const unreportedEventRepo = this.dataSource.getRepository(UnreportedEvent);
-    
-    const unreportedEvent = await unreportedEventRepo.findOne({
+    const eventRepo = this.dataSource.getRepository(Event);
+
+    const matchingEvent = await eventRepo.findOne({
       where: {
         userId: this.user.id,
         studentReferenceId: student.id,
         eventTypeReferenceId: eventType.id,
         year: getHebrewYearByGregorianDate(eventDate),
+        reportOrigin: EventReportOrigin.ONLY_TATNIKIT,
       },
       order: { id: 'DESC' },
     });
 
-    if (unreportedEvent) {
-      this.logger.log(`Found matching unreported event: ${unreportedEvent.id}`);
+    if (matchingEvent) {
+      this.logger.log(`Found matching tatnikit-only event: ${matchingEvent.id}`);
     }
 
-    return unreportedEvent;
+    return matchingEvent;
   }
 
   private async getStudentByTz(): Promise<Student> {
@@ -653,7 +663,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Processing tatnikit flow with secret code`);
 
     this.loadEventTypes();
-    
+
     // Ask for the tatnikit's actual TZ
     const tatnikitTz = await this.askForInputByKey('TATNIKIT.ENTER_YOUR_TZ', {}, {
       min_digits: 1,
@@ -675,7 +685,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     this.logger.log(`Tatnikit ${tatnikitStudent.name} will report for class ${studentClass.classReferenceId}`);
-    
+
     // Welcome message
     await this.sendMessageByKey('TATNIKIT.WELCOME', { name: tatnikitStudent.name });
 
@@ -767,11 +777,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       // Check for existing event
       const existingEvent = await this.findExistingEventForStudent(student, eventType);
-      
+
       if (existingEvent) {
         // Event exists - ask for confirmation
         const hebrewDate = formatHebrewDateForIVR(existingEvent.eventDate);
-        
+
         const confirmed = await this.askConfirmation('TATNIKIT.EVENT_EXISTS', {
           name: student.name,
           eventType: eventType.name,
@@ -781,15 +791,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         if (confirmed) {
           // Mark as reported by tatnikit
           existingEvent.reportedByTatnikit = true;
+          existingEvent.reportOrigin = this.mergeReportOriginWithTatnikitReport(existingEvent.reportOrigin);
+          existingEvent.reporterStudentReferenceId = existingEvent.reporterStudentReferenceId || tatnikitStudent.id;
           await this.dataSource.getRepository(Event).save(existingEvent);
           await this.sendMessageByKey('TATNIKIT.EVENT_CONFIRMED');
         } else {
-          // Create new unreported event
-          await this.createUnreportedEvent(student, tatnikitStudent, eventType, classReferenceId, monthSelection.index);
+          // Create new tatnikit-only event
+          await this.createTatnikitOnlyEvent(student, tatnikitStudent, eventType, classReferenceId, monthSelection.index);
         }
       } else {
-        // No existing event - create unreported event
-        await this.createUnreportedEvent(student, tatnikitStudent, eventType, classReferenceId, monthSelection.index);
+        // No existing event - create tatnikit-only event
+        await this.createTatnikitOnlyEvent(student, tatnikitStudent, eventType, classReferenceId, monthSelection.index);
       }
 
       // Ask if want to continue
@@ -832,7 +844,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         studentReferenceId: student.id,
         eventTypeReferenceId: eventType.id,
         year: currentYear,
-        reportedByTatnikit: false,
+        reportOrigin: EventReportOrigin.ONLY_STUDENT,
         eventDate: MoreThan(searchDate),
       },
       order: {
@@ -847,23 +859,42 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return event;
   }
 
-  private async createUnreportedEvent(student: Student, reporterStudent: Student, eventType: EventType, classReferenceId: number, eventMonth: number): Promise<void> {
-    this.logger.log(`Creating unreported event for student ${student.name}, reported by ${reporterStudent.name}, event type ${eventType.name}, class ${classReferenceId}, month ${eventMonth}`);
+  private async createTatnikitOnlyEvent(student: Student, reporterStudent: Student, eventType: EventType, classReferenceId: number, eventMonth: number): Promise<void> {
+    this.logger.log(`Creating tatnikit-only event for student ${student.name}, reported by ${reporterStudent.name}, event type ${eventType.name}, class ${classReferenceId}, month ${eventMonth}`);
 
-    const unreportedEventRepo = this.dataSource.getRepository(UnreportedEvent);
-    const unreportedEvent = unreportedEventRepo.create({
+    const currentYear = getCurrentHebrewYear();
+    const eventDate = getGregorianDateFromHebrew(currentYear, eventMonth, 1);
+    const eventRepo = this.dataSource.getRepository(Event);
+
+    const event = eventRepo.create({
       userId: this.user.id,
       studentReferenceId: student.id,
-      eventTypeReferenceId: eventType.id,
       reporterStudentReferenceId: reporterStudent.id,
-      classReferenceId: classReferenceId,
-      year: getCurrentHebrewYear(),
-      eventMonth: eventMonth,
+      eventTypeReferenceId: eventType.id,
+      studentClassReferenceId: classReferenceId,
+      year: currentYear,
+      eventDate,
+      name: `${student.name} - ${eventType.name}`,
+      reportedByTatnikit: true,
+      reportOrigin: EventReportOrigin.ONLY_TATNIKIT,
     });
 
-    await unreportedEventRepo.save(unreportedEvent);
-    this.logger.log(`Unreported event created: ${unreportedEvent.id}`);
+    const savedEvent = await eventRepo.save(event);
+    this.logger.log(`Tatnikit-only event created: ${savedEvent.id}`);
 
     await this.sendMessageByKey('TATNIKIT.EVENT_SAVED');
+  }
+
+  private mergeReportOriginWithTatnikitReport(currentOrigin: EventReportOrigin | null | undefined): EventReportOrigin {
+    switch (currentOrigin) {
+      case EventReportOrigin.ONLY_STUDENT:
+        return EventReportOrigin.BOTH_STUDENT_FIRST;
+      case EventReportOrigin.BOTH_TATNIKIT_FIRST:
+      case EventReportOrigin.BOTH_STUDENT_FIRST:
+        return currentOrigin;
+      case EventReportOrigin.ONLY_TATNIKIT:
+      default:
+        return EventReportOrigin.BOTH_TATNIKIT_FIRST;
+    }
   }
 }
