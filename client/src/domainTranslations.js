@@ -46,6 +46,8 @@ export default {
                 lotteryTrack: 'מספר הגרלה',
                 lotteryName: 'מסלול הגרלה',
                 reportedByTatnikit: 'דווח ע"י תתניקית',
+                reportOrigin: 'מקור הדיווח',
+                'reportOrigin:$eq': 'מקור הדיווח',
             }
         },
         event_type: {

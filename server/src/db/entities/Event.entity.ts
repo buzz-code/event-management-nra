@@ -35,6 +35,13 @@ import { fillDefaultYearValue, getCurrentHebrewYear } from '@shared/utils/entity
 import { Gift } from './Gift.entity';
 import { getCurrentUser } from '@shared/utils/validation/current-user.util';
 
+export enum EventReportOrigin {
+  ONLY_TATNIKIT = 'only_tatnikit',
+  ONLY_STUDENT = 'only_student',
+  BOTH_TATNIKIT_FIRST = 'both_tatnikit_first',
+  BOTH_STUDENT_FIRST = 'both_student_first',
+}
+
 @Entity('events')
 @Index('events_user_id_idx', ['userId'], {})
 @Index('events_event_type_id_idx', ['eventTypeReferenceId'], {})
@@ -181,6 +188,10 @@ export class Event implements IHasUserId {
   @IsOptional({ always: true })
   @Column({ default: false })
   reportedByTatnikit: boolean;
+
+  @IsOptional({ always: true })
+  @Column({ type: 'simple-enum', enum: EventReportOrigin, nullable: true })
+  reportOrigin: EventReportOrigin;
 
   @IsOptional({ always: true })
   @NumberType
