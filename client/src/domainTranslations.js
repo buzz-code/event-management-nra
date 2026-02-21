@@ -200,7 +200,29 @@ export default {
                 tz: 'תעודת זהות',
             }
         },
-        
+        teacher_assignment_rule: {
+            name: 'כלל שיבוץ מורה |||| כללי שיבוץ מורות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                classRulesJson: 'כיתות',
+                'classRulesJson.classReferenceId': 'כיתה',
+                gradeRulesJson: 'שכבות',
+                'gradeRulesJson.grade': 'שכבה',
+                customRatio: 'יחס מותאם',
+                isActive: 'פעיל?',
+            }
+        },
+        family_teacher_assignment: {
+            name: 'שיבוץ מורה למשפחה |||| שיבוצי מורות למשפחות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                familyReferenceId: 'מזהה משפחה',
+                teacherReferenceId: 'מורה ברירת מחדל',
+                historyJson: 'היסטוריית שיבוצים',
+            }
+        },
+
         // Common Settings and Utilities - to keep as requested
         settings: {
             name: 'הגדרות',

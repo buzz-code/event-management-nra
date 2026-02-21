@@ -25,7 +25,7 @@
     "typeorm:cli-no-d": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
     "typeorm:run": "npm run typeorm:cli -- migration:run",
     "typeorm:run:js": "npm run typeorm:cli-js -- migration:run",
-    "typeorm:generate": "npm run typeorm:cli -- migration:generate",
+    "typeorm:generate": "npm run typeorm:cli -- migration:generate -p",
     "typeorm:create": "npm run typeorm:cli-no-d -- migration:create",
     "typeorm:revert": "npm run typeorm:cli -- migration:revert",
     "clean-migrations": "node helpers/clean-migrations"
