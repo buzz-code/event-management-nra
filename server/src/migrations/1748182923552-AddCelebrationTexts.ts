@@ -1,10 +1,8 @@
-import { Text } from "@shared/entities/Text.entity";
-import { In, MigrationInterface, QueryRunner } from "typeorm"
+import { MigrationInterface, QueryRunner } from "typeorm"
 
 export class AddCelebrationTexts1748182923552 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        const textRepo = queryRunner.manager.getRepository(Text);
         const texts = [
             { name: 'CELEBRATIONS.WELCOME', text: 'ברוכות הבאות למערכת שמיעת שמחות הכיתה' },
             { name: 'CELEBRATIONS.GRADE_PROMPT', text: 'נא להקיש את מספר השכבה: ט 9, י 10, יא 11, יב 12' },
@@ -22,34 +20,25 @@ export class AddCelebrationTexts1748182923552 implements MigrationInterface {
             { name: 'CELEBRATIONS.GOODBYE', text: 'תודה על השימוש במערכת, יום טוב' }
         ];
 
-        await textRepo.save(texts.map(text => ({
-            name: text.name,
-            value: text.text,
-            description: text.text,
-            userId: 0,
-        })));
+        for (const text of texts) {
+            await queryRunner.query(
+                'INSERT INTO `texts` (`user_id`, `name`, `description`, `value`) VALUES (?, ?, ?, ?)',
+                [0, text.name, text.text, text.text],
+            );
+        }
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        const textRepo = queryRunner.manager.getRepository(Text);
-        await textRepo.delete({
-            name: In([
-                'CELEBRATIONS.WELCOME',
-                'CELEBRATIONS.GRADE_PROMPT',
-                'CELEBRATIONS.INVALID_GRADE',
-                'CELEBRATIONS.CLASS_PROMPT',
-                'CELEBRATIONS.INVALID_CLASS',
-                'CELEBRATIONS.MONTH_PROMPT',
-                'CELEBRATIONS.INVALID_MONTH',
-                'CELEBRATIONS.CLASS_NOT_FOUND',
-                'CELEBRATIONS.NO_CELEBRATIONS_FOUND',
-                'CELEBRATIONS.READING_START',
-                'CELEBRATIONS.STUDENT_NAME',
-                'CELEBRATIONS.EVENT_DETAIL',
-                'CELEBRATIONS.READING_COMPLETE',
-                'CELEBRATIONS.GOODBYE'
-            ])
-        });
+        await queryRunner.query(
+            `DELETE FROM \`texts\` WHERE \`name\` IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                'CELEBRATIONS.WELCOME', 'CELEBRATIONS.GRADE_PROMPT', 'CELEBRATIONS.INVALID_GRADE',
+                'CELEBRATIONS.CLASS_PROMPT', 'CELEBRATIONS.INVALID_CLASS', 'CELEBRATIONS.MONTH_PROMPT',
+                'CELEBRATIONS.INVALID_MONTH', 'CELEBRATIONS.CLASS_NOT_FOUND', 'CELEBRATIONS.NO_CELEBRATIONS_FOUND',
+                'CELEBRATIONS.READING_START', 'CELEBRATIONS.STUDENT_NAME', 'CELEBRATIONS.EVENT_DETAIL',
+                'CELEBRATIONS.READING_COMPLETE', 'CELEBRATIONS.GOODBYE',
+            ],
+        );
     }
 
 }
