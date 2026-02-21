@@ -1,4 +1,3 @@
-import { Text } from "@shared/entities/Text.entity";
 import { MigrationInterface, QueryRunner } from "typeorm"
 
 export class UpdateYemotTexts1747596563719 implements MigrationInterface {
@@ -8,7 +7,6 @@ export class UpdateYemotTexts1747596563719 implements MigrationInterface {
             DELETE FROM \`texts\` WHERE 1 = 1;
         `);
 
-        const textRepo = queryRunner.manager.getRepository(Text);
         const texts = [
             { name: 'STUDENT.TZ_PROMPT', text: 'הקישי מספר תעודת זהות' },
             { name: 'STUDENT.NOT_FOUND', text: 'לא נמצאה תלמידה עם תעודת זהות זו' },
@@ -23,12 +21,12 @@ export class UpdateYemotTexts1747596563719 implements MigrationInterface {
             { name: 'DATE.CONFIRM_DATE', text: 'נא לאשר תאריך {date} {yes} {no}' },
             { name: 'EVENT.SAVE_SUCCESS', text: 'האירוע נשמר בהצלחה' },
         ];
-        await textRepo.save(texts.map(text => ({
-            name: text.name,
-            value: text.text,
-            description: text.text,
-            userId: 0,
-        })));
+        for (const text of texts) {
+            await queryRunner.query(
+                'INSERT INTO `texts` (`user_id`, `name`, `description`, `value`) VALUES (?, ?, ?, ?)',
+                [0, text.name, text.text, text.text],
+            );
+        }
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
