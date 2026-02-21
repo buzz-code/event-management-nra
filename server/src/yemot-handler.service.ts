@@ -792,6 +792,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           // Mark as reported by tatnikit
           existingEvent.reportedByTatnikit = true;
           existingEvent.reportOrigin = this.mergeReportOriginWithTatnikitReport(existingEvent.reportOrigin);
+          existingEvent.reporterStudentReferenceId = existingEvent.reporterStudentReferenceId || tatnikitStudent.id;
           await this.dataSource.getRepository(Event).save(existingEvent);
           await this.sendMessageByKey('TATNIKIT.EVENT_CONFIRMED');
         } else {
@@ -868,6 +869,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const event = eventRepo.create({
       userId: this.user.id,
       studentReferenceId: student.id,
+      reporterStudentReferenceId: reporterStudent.id,
       eventTypeReferenceId: eventType.id,
       studentClassReferenceId: classReferenceId,
       year: currentYear,

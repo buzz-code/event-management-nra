@@ -48,6 +48,7 @@ const filters = [
     // <TextInput source="name:$cont" alwaysOn />,
     notPermissionFilter(isTeacher, <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />),
     <CommonReferenceInputFilter source="studentReferenceId" reference="student" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="reporterStudentReferenceId" reference="student" dynamicFilter={filterByUserId} label='דווח ע"י' />,
     <CommonReferenceInputFilter source="eventTypeReferenceId" reference="event_type" dynamicFilter={filterByUserIdAndYear} />,
     <CommonReferenceInputFilter source="levelTypeReferenceId" reference="level_type" dynamicFilter={filterByUserIdAndYear} />,
     <CommonReferenceInputFilter source="studentClassReferenceId" reference="class" dynamicFilter={filterByUserId} alwaysOn />,
@@ -83,6 +84,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <MultiReferenceField source="studentReferenceId" reference="student" optionalSource="studentTz" optionalTarget="tz" />
+            <MultiReferenceField source="reporterStudentReferenceId" reference="student" optionalSource="reporterStudentTz" optionalTarget="tz" label='דווח ע"י' />
             <MultiReferenceField source="studentReferenceId" reference="student" optionalSource="studentTz" optionalTarget="tz" label='ת"ז תלמיד'>
                 <TextField source="tz" />
             </MultiReferenceField>
@@ -135,6 +137,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <CommonReferenceInput source="studentReferenceId" reference="student" validate={required()} dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="reporterStudentReferenceId" reference="student" dynamicFilter={filterByUserId} />
         <CommonReferenceInput source="eventTypeReferenceId" reference="event_type" validate={required()} dynamicFilter={filterByUserIdAndYear} />
         <CommonReferenceInput source="levelTypeReferenceId" reference="level_type" dynamicFilter={filterByUserIdAndYear} />
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />

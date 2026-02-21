@@ -89,6 +89,15 @@ export class Event implements IHasUserId {
         this.studentTz,
       );
 
+      this.reporterStudentReferenceId = await findOneAndAssignReferenceId(
+        dataSource,
+        Student,
+        { tz: this.reporterStudentTz },
+        this.userId,
+        this.reporterStudentReferenceId,
+        this.reporterStudentTz,
+      );
+
       if (this.studentReferenceId && !this.studentClassReferenceId) {
         const studentClassRepository = dataSource.getRepository(StudentClass);
 
@@ -238,6 +247,19 @@ export class Event implements IHasUserId {
   @ValidateIf((event: Event) => !Boolean(event.studentTz) && Boolean(event.studentReferenceId), { always: true })
   @Column({ nullable: true })
   studentReferenceId: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.reporterStudentReferenceId), {
+    always: true,
+  })
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  reporterStudentTz: number;
+
+  @ValidateIf((event: Event) => !Boolean(event.reporterStudentTz) && Boolean(event.reporterStudentReferenceId), { always: true })
+  @Column({ nullable: true })
+  reporterStudentReferenceId: number;
 
   @ValidateIf((event: Event) => !Boolean(event.levelTypeReferenceId), {
     always: true,
@@ -396,6 +418,10 @@ export class Event implements IHasUserId {
   @ManyToOne(() => Student, { nullable: true })
   @JoinColumn({ name: 'studentReferenceId' })
   student: Student;
+
+  @ManyToOne(() => Student, { nullable: true })
+  @JoinColumn({ name: 'reporterStudentReferenceId' })
+  reporterStudent: Student;
 
   @ManyToOne(() => Class, { nullable: true })
   @JoinColumn({ name: 'studentClassReferenceId' })
