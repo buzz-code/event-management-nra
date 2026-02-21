@@ -20,6 +20,8 @@ import studentByYearConfig from './entity-modules/student-by-year.config';
 import familyConfig from './entity-modules/family.config';
 import tatnikitConfig from './entity-modules/tatnikit.config';
 import unreportedEventConfig from './entity-modules/unreported-event.config';
+import teacherAssignmentRuleConfig from './entity-modules/teacher-assignment-rule.config';
+import familyTeacherAssignmentConfig from './entity-modules/family-teacher-assignment.config';
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -63,6 +65,8 @@ registerEntityNameMap({
     BaseEntityModule.register(familyConfig),
     BaseEntityModule.register(tatnikitConfig),
     BaseEntityModule.register(unreportedEventConfig),
+    BaseEntityModule.register(teacherAssignmentRuleConfig),
+    BaseEntityModule.register(familyTeacherAssignmentConfig),
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),

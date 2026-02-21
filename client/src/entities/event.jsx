@@ -15,7 +15,8 @@ import {
     BooleanInput,
     SingleFieldList,
     ChipField,
-    SelectField
+    SelectField,
+    SelectInput
 } from 'react-admin';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -35,6 +36,13 @@ import { BulkActionButton } from '@shared/components/crudContainers/BulkActionBu
 import { BulkReportButton } from '@shared/components/crudContainers/BulkReportButton';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
 
+const reportOriginChoices = [
+    { id: 'only_tatnikit', name: 'תתניקית בלבד' },
+    { id: 'only_student', name: 'תלמידה בלבד' },
+    { id: 'both_tatnikit_first', name: 'שניהם - תתניקית ראשונה' },
+    { id: 'both_student_first', name: 'שניהם - תלמידה ראשונה' },
+];
+
 const filters = [
     ...commonAdminFilters,
     // <TextInput source="name:$cont" alwaysOn />,
@@ -50,6 +58,7 @@ const filters = [
     <BooleanInput source="lotteryName:$isnull" label="ללא מסלול הגרלה" defaultValue={true} />,
     <TextInput source="lotteryName:$cont" label="שם הגרלה" />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <SelectInput source="reportOrigin:$eq" choices={reportOriginChoices} />,
 ];
 
 const filterDefaultValues = {
@@ -99,6 +108,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
             <BooleanField source="reportedByTatnikit" />
+            <SelectField source="reportOrigin" choices={reportOriginChoices} />
             <NumberField source="grade" />
             <NumberField source="fulfillmentQuestion1" />
             <NumberField source="fulfillmentQuestion2" />
@@ -133,6 +143,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <DateTimeInput source="eventDate" validate={[required()]} />
         <BooleanInput source="completed" validate={[required()]} />
         <BooleanInput source="reportedByTatnikit" />
+        <SelectInput source="reportOrigin" choices={reportOriginChoices} />
         <NumberInput source="grade" validate={[required()]} />
         <NumberInput source="fulfillmentQuestion1" />
         <NumberInput source="fulfillmentQuestion2" />
