@@ -84,14 +84,10 @@ const App = () => (
         <Resource name="teacher_assignment_rule" {...teacherAssignmentRule} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
         <Resource name="family_teacher_assignment" {...familyTeacherAssignment} options={{ menuGroup: 'data' }} icon={FamilyRestroomIcon} />
 
-        <CommonSettingsResources />
-        <CommonAdminResources permissions={permissions} />
+        {CommonSettingsResources()}
+        {CommonAdminResources({ permissions })}
 
-        <CommonRoutes
-          permissions={permissions}
-          roadmapFeatures={roadmapFeatures}
-          settingsPage={<Settings />}
-        />
+        {CommonRoutes({ permissions, roadmapFeatures, settingsPage: <Settings /> })}
       </>
     )}
   </AdminAppShell>
