@@ -10,6 +10,9 @@ import { formatHebrewDateForIVR, gematriyaLetters, getGregorianDateFromHebrew, g
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
 import { Tatnikit } from 'src/db/entities/Tatnikit.entity';
+import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
+import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
+import { assignTeacher } from 'src/utils/teacher-assignment.util';
 
 const MAX_GIFTS = 5;
 
@@ -97,6 +100,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       })) as any;
       savedEvent = await eventRepo.save(tatnikitOnlyEvent);
       this.logger.log(`Merged student report into tatnikit event: ${savedEvent.id}`);
+      await this.autoAssignTeacher(savedEvent, student);
     } else {
       const event = eventRepo.create({
         userId: this.user.id,
@@ -113,6 +117,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       });
       savedEvent = await eventRepo.save(event);
       this.logger.log(`Event created: ${savedEvent.id}`);
+      await this.autoAssignTeacher(savedEvent, student);
     }
 
     await this.sendMessageByKey('EVENT.SAVE_SUCCESS');
@@ -881,8 +886,37 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const savedEvent = await eventRepo.save(event);
     this.logger.log(`Tatnikit-only event created: ${savedEvent.id}`);
+    await this.autoAssignTeacher(savedEvent, student);
 
     await this.sendMessageByKey('TATNIKIT.EVENT_SAVED');
+  }
+
+  private async autoAssignTeacher(savedEvent: Event, student: Student): Promise<void> {
+    if (savedEvent.teacherReferenceId) return; // already assigned
+
+    const familyReferenceId = student.familyReferenceId;
+    if (!familyReferenceId) return;
+
+    const userId = this.user.id;
+    const year = savedEvent.year ?? getCurrentHebrewYear();
+
+    const [allRules, fta] = await Promise.all([
+      this.dataSource.getRepository(TeacherAssignmentRule).find({ where: { userId, year, isActive: true } }),
+      this.dataSource.getRepository(FamilyTeacherAssignment).findOneBy({ userId, year, familyReferenceId }),
+    ]);
+
+    if (allRules.length === 0 && !fta?.teacherReferenceId) return;
+
+    savedEvent.student = student;
+    const { chosenTeacherId, ftaUpdate } = assignTeacher(savedEvent, allRules, fta, new Map());
+    if (!chosenTeacherId) return;
+
+    savedEvent.teacherReferenceId = chosenTeacherId;
+    await Promise.all([
+      this.dataSource.getRepository(Event).save(savedEvent),
+      ftaUpdate ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdate) : Promise.resolve(),
+    ]);
+    this.logger.log(`Auto-assigned teacher ${chosenTeacherId} to event ${savedEvent.id}`);
   }
 
   private mergeReportOriginWithTatnikitReport(currentOrigin: EventReportOrigin | null | undefined): EventReportOrigin {
