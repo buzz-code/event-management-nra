@@ -1,15 +1,20 @@
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { CrudRequest } from '@dataui/crud';
 import { CrudAuthCustomFilter, getUserIdFilter } from '@shared/auth/crud-auth.filter';
 import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { BaseEntityService } from '@shared/base-entity/base-entity.service';
 import { IHeader } from '@shared/utils/exporter/types';
 import { Event } from 'src/db/entities/Event.entity';
+import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
+import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
 import { getISODateFormatter } from '@shared/utils/formatting/formatter.util';
 import eventExportReport from 'src/reports/eventExport';
 import { CommonReportData } from '@shared/utils/report/types';
 import { getUserIdFromUser } from '@shared/auth/auth.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
+import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
+import { getUniqueValues } from '@shared/utils/reportData.util';
+import { assignTeachersBatch } from 'src/utils/teacher-assignment.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -111,16 +116,51 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
     const extra = req.parsed.extra as any;
     switch (extra.action) {
       case 'teacherAssociation': {
-        const teacherIds = extra.teacherReferenceIds?.toString()?.split(',') || [];
-        const eventIds = extra.ids?.toString()?.split(',') || [];
-        for (const eventId of eventIds) {
-          const event = await this.dataSource.getRepository(Event).findOneBy({ id: parseInt(eventId) });
-          if (event) {
-            const randomTeacherId = teacherIds[Math.floor(Math.random() * teacherIds.length)];
-            event.teacherReferenceId = parseInt(randomTeacherId);
-            await this.dataSource.getRepository(Event).save(event);
+        const teacherIds = extra.teacherReferenceIds?.toString()?.split(',').map(Number).filter(Boolean) || [];
+        const eventIds = extra.ids?.toString()?.split(',').map(Number).filter(Boolean) || [];
+        const eventRepo = this.dataSource.getRepository(Event);
+
+        // Load events with student relation so assignTeachersBatch can read familyReferenceId
+        const events = await eventRepo.find({ where: { id: In(eventIds) }, relations: ['student'] });
+        if (events.length === 0) return 'האירועים עודכנו בהצלחה';
+
+        const userId = events[0].userId;
+        const year = events[0].year ?? getCurrentHebrewYear();
+
+        // Load rules and FTAs in parallel
+        const familyIds = getUniqueValues<Event, string>(events as Event[], (e) => e.student?.familyReferenceId);
+        const rulesQuery = this.dataSource.getRepository(TeacherAssignmentRule).find({
+            where: { userId, year, isActive: true, ...(teacherIds.length ? { teacherReferenceId: In(teacherIds) } : {}) },
+          });
+        const ftaQuery = familyIds.length
+          ? this.dataSource.getRepository(FamilyTeacherAssignment).findBy({ userId, year, familyReferenceId: In(familyIds) })
+          : Promise.resolve([]);
+        const [allRules, existingFtas] = await Promise.all([rulesQuery, ftaQuery]);
+
+        const ftaMap = new Map<string, FamilyTeacherAssignment>(
+          existingFtas.map((fta) => [fta.familyReferenceId, fta]),
+        );
+
+        const { assignmentMap, ftaUpdates } = assignTeachersBatch(
+          events, allRules, ftaMap,
+          teacherIds.length ? teacherIds : undefined,
+        );
+
+        const toSave: Event[] = [];
+        for (const event of events) {
+          const chosenTeacherId = assignmentMap.get(event.id);
+          if (chosenTeacherId != null) {
+            event.teacherReferenceId = chosenTeacherId;
+            toSave.push(event);
           }
         }
+
+        await Promise.all([
+          toSave.length > 0 ? eventRepo.save(toSave) : Promise.resolve(),
+          ftaUpdates.length > 0
+            ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdates)
+            : Promise.resolve(),
+        ]);
         return 'האירועים עודכנו בהצלחה';
       }
       case 'fixReferences': {
