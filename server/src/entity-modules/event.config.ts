@@ -119,46 +119,57 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
         const teacherIds = extra.teacherReferenceIds?.toString()?.split(',').map(Number).filter(Boolean) || [];
         const eventIds = extra.ids?.toString()?.split(',').map(Number).filter(Boolean) || [];
         const eventRepo = this.dataSource.getRepository(Event);
+        const userId = getUserIdFromUser(req.auth);
 
-        // Load events with student relation so assignTeachersBatch can read familyReferenceId
-        const events = await eventRepo.find({ where: { id: In(eventIds) }, relations: ['student'] });
+        // Load only the authenticated user's events with student relation
+        const events = await eventRepo.find({ where: { id: In(eventIds), userId }, relations: ['student'] });
         if (events.length === 0) return 'האירועים עודכנו בהצלחה';
 
-        const userId = events[0].userId;
-        const year = events[0].year ?? getCurrentHebrewYear();
+        // Group by year to avoid cross-year rule/FTA lookups
+        const eventsByYear = events.reduce((acc, event) => {
+          const year = event.year ?? getCurrentHebrewYear();
+          (acc[year] ??= []).push(event);
+          return acc;
+        }, {} as Record<number, Event[]>);
 
-        // Load rules and FTAs in parallel
-        const familyIds = getUniqueValues<Event, string>(events as Event[], (e) => e.student?.familyReferenceId);
-        const rulesQuery = this.dataSource.getRepository(TeacherAssignmentRule).find({
-            where: { userId, year, isActive: true, ...(teacherIds.length ? { teacherReferenceId: In(teacherIds) } : {}) },
-          });
-        const ftaQuery = familyIds.length
-          ? this.dataSource.getRepository(FamilyTeacherAssignment).findBy({ userId, year, familyReferenceId: In(familyIds) })
-          : Promise.resolve([]);
-        const [allRules, existingFtas] = await Promise.all([rulesQuery, ftaQuery]);
+        const allToSave: Event[] = [];
+        const allFtaUpdates: Partial<FamilyTeacherAssignment>[] = [];
 
-        const ftaMap = new Map<string, FamilyTeacherAssignment>(
-          existingFtas.map((fta) => [fta.familyReferenceId, fta]),
-        );
+        for (const [yearStr, yearEvents] of Object.entries(eventsByYear)) {
+          const year = Number(yearStr);
+          const familyIds = getUniqueValues<Event, string>(yearEvents as Event[], (e) => e.student?.familyReferenceId);
+          const [allRules, existingFtas] = await Promise.all([
+            this.dataSource.getRepository(TeacherAssignmentRule).find({
+              where: { userId, year, isActive: true, ...(teacherIds.length ? { teacherReferenceId: In(teacherIds) } : {}) },
+            }),
+            familyIds.length
+              ? this.dataSource.getRepository(FamilyTeacherAssignment).findBy({ userId, year, familyReferenceId: In(familyIds) })
+              : Promise.resolve([]),
+          ]);
 
-        const { assignmentMap, ftaUpdates } = assignTeachersBatch(
-          events, allRules, ftaMap,
-          teacherIds.length ? teacherIds : undefined,
-        );
+          const ftaMap = new Map<string, FamilyTeacherAssignment>(
+            existingFtas.map((fta) => [fta.familyReferenceId, fta]),
+          );
 
-        const toSave: Event[] = [];
-        for (const event of events) {
-          const chosenTeacherId = assignmentMap.get(event.id);
-          if (chosenTeacherId != null) {
-            event.teacherReferenceId = chosenTeacherId;
-            toSave.push(event);
+          const { assignmentMap, ftaUpdates } = assignTeachersBatch(
+            yearEvents, allRules, ftaMap,
+            teacherIds.length ? teacherIds : undefined,
+          );
+
+          for (const event of yearEvents) {
+            const chosenTeacherId = assignmentMap.get(event.id);
+            if (chosenTeacherId != null) {
+              event.teacherReferenceId = chosenTeacherId;
+              allToSave.push(event);
+            }
           }
+          allFtaUpdates.push(...ftaUpdates);
         }
 
         await Promise.all([
-          toSave.length > 0 ? eventRepo.save(toSave) : Promise.resolve(),
-          ftaUpdates.length > 0
-            ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdates)
+          allToSave.length > 0 ? eventRepo.save(allToSave) : Promise.resolve(),
+          allFtaUpdates.length > 0
+            ? this.dataSource.getRepository(FamilyTeacherAssignment).save(allFtaUpdates)
             : Promise.resolve(),
         ]);
         return 'האירועים עודכנו בהצלחה';

@@ -12,8 +12,13 @@ function shuffled<T>(arr: T[]): T[] {
   return copy;
 }
 
+function getSafeCustomRatio(rule: TeacherAssignmentRule): number {
+  const ratio = rule.customRatio;
+  return typeof ratio === 'number' && Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+}
+
 function getWeightedLoad(rule: TeacherAssignmentRule, loadCount: Map<number, number>): number {
-  return (loadCount.get(rule.teacherReferenceId) ?? 0) / (rule.customRatio ?? 1);
+  return (loadCount.get(rule.teacherReferenceId) ?? 0) / getSafeCustomRatio(rule);
 }
 
 /**
