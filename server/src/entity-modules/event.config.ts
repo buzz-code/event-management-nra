@@ -14,6 +14,7 @@ import { getUserIdFromUser } from '@shared/auth/auth.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { getUniqueValues } from '@shared/utils/reportData.util';
+import { groupDataByKeyFn, optionalInFilter } from 'src/utils/reportData.util';
 import { assignTeachersBatch } from 'src/utils/teacher-assignment.util';
 
 function getConfig(): BaseEntityModuleOptions {
@@ -126,11 +127,7 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
         if (events.length === 0) return 'האירועים עודכנו בהצלחה';
 
         // Group by year to avoid cross-year rule/FTA lookups
-        const eventsByYear = events.reduce((acc, event) => {
-          const year = event.year ?? getCurrentHebrewYear();
-          (acc[year] ??= []).push(event);
-          return acc;
-        }, {} as Record<number, Event[]>);
+        const eventsByYear = groupDataByKeyFn(events, (e) => e.year ?? getCurrentHebrewYear());
 
         const allToSave: Event[] = [];
         const allFtaUpdates: Partial<FamilyTeacherAssignment>[] = [];
@@ -140,7 +137,7 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
           const familyIds = getUniqueValues<Event, string>(yearEvents as Event[], (e) => e.student?.familyReferenceId);
           const [allRules, existingFtas] = await Promise.all([
             this.dataSource.getRepository(TeacherAssignmentRule).find({
-              where: { userId, year, isActive: true, ...(teacherIds.length ? { teacherReferenceId: In(teacherIds) } : {}) },
+              where: { userId, year, isActive: true, ...optionalInFilter(teacherIds, 'teacherReferenceId') },
             }),
             familyIds.length
               ? this.dataSource.getRepository(FamilyTeacherAssignment).findBy({ userId, year, familyReferenceId: In(familyIds) })

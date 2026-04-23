@@ -1,3 +1,5 @@
+import { In } from 'typeorm';
+
 type KeyOfType<T, V> = keyof {
   [P in keyof T as T[P] extends V ? P : never]: any;
 };
@@ -37,16 +39,28 @@ export function getUniqueValues<T, S>(arr: T[], getValue: (item: T) => S): S[] {
   return [...new Set(arr.map(getValue).filter(Boolean))];
 }
 
+export function groupDataByKeyFn<T, K extends string | number | symbol>(
+  data: T[],
+  getKey: (item: T) => K,
+): Record<K, T[]> {
+  return (data ?? []).reduce((acc, item) => {
+    const key = getKey(item);
+    (acc[key] ??= []).push(item);
+    return acc;
+  }, {} as Record<K, T[]>);
+}
+
 export function groupDataByKeys<T>(data: T[], keys: KeyOfType<T, any>[]): Record<string, T[]> {
-  return data.reduce((a, b) => {
-    const key = keys
-      .map((k) => b[k])
+  return groupDataByKeyFn(data, (item) =>
+    keys
+      .map((k) => item[k])
       .map(String)
-      .join('_');
-    a[key] ??= [];
-    a[key].push(b);
-    return a;
-  }, {});
+      .join('_'),
+  );
+}
+
+export function optionalInFilter<T>(ids: T[], field: string): Record<string, any> {
+  return ids.length ? { [field]: In(ids) } : {};
 }
 
 export function groupDataByKeysAndCalc<T, V>(
