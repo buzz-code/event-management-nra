@@ -892,11 +892,18 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async autoAssignTeacher(savedEvent: Event, student: Student): Promise<void> {
+    const ctx = `[autoAssign] event=${savedEvent.id} family="${student.familyReferenceId ?? 'none'}" user=${this.user.id} year=${savedEvent.year}`;
     try {
-      if (savedEvent.teacherReferenceId) return; // already assigned
+      if (savedEvent.teacherReferenceId) {
+        this.logger.log(`${ctx} → skip: event already has teacher=${savedEvent.teacherReferenceId}`);
+        return;
+      }
 
       const familyReferenceId = student.familyReferenceId;
-      if (!familyReferenceId) return;
+      if (!familyReferenceId) {
+        this.logger.log(`${ctx} → skip: student has no familyReferenceId`);
+        return;
+      }
 
       const userId = this.user.id;
       const year = savedEvent.year ?? getCurrentHebrewYear();
@@ -916,24 +923,37 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           .getRawMany<{ teacherReferenceId: string; count: string }>(),
       ]);
 
-      if (allRules.length === 0 && !fta?.teacherReferenceId) return;
+      const loadSnapshot = Object.fromEntries(
+        teacherLoadRows.map(({ teacherReferenceId, count }) => [teacherReferenceId, Number(count)]),
+      );
+      this.logger.log(
+        `${ctx} | rules=${allRules.length} fta=${fta ? `teacherId=${fta.teacherReferenceId}(id=${fta.id})` : 'none'} loads=${JSON.stringify(loadSnapshot)}`,
+      );
+
+      if (allRules.length === 0 && !fta?.teacherReferenceId) {
+        this.logger.log(`${ctx} → skip: no active rules and no existing FTA`);
+        return;
+      }
 
       const loadCount = new Map<number, number>(
         teacherLoadRows.map(({ teacherReferenceId, count }) => [Number(teacherReferenceId), Number(count)]),
       );
 
       savedEvent.student = student;
-      const { chosenTeacherId, ftaUpdate } = assignTeacher(savedEvent, allRules, fta, loadCount);
-      if (!chosenTeacherId) return;
+      const { chosenTeacherId, ftaUpdate, reason } = assignTeacher(savedEvent, allRules, fta, loadCount);
+      if (!chosenTeacherId) {
+        this.logger.log(`${ctx} → skip: ${reason}`);
+        return;
+      }
 
       await Promise.all([
         this.dataSource.getRepository(Event).update({ id: savedEvent.id }, { teacherReferenceId: chosenTeacherId }),
         ftaUpdate ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdate) : Promise.resolve(),
       ]);
-      this.logger.log(`Auto-assigned teacher ${chosenTeacherId} to event ${savedEvent.id}`);
+      this.logger.log(`${ctx} → assigned teacher=${chosenTeacherId} reason: ${reason}`);
     } catch (err) {
       const e = err as Error;
-      this.logger.error(`Auto-assign teacher failed for event ${savedEvent.id}: ${e?.message}`, e?.stack);
+      this.logger.error(`${ctx} → ERROR: ${e?.message}`, e?.stack);
     }
   }
 
