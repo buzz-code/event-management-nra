@@ -134,8 +134,14 @@ export class Event implements IHasUserId {
       );
 
       if (this.eventDate) {
-        this.eventHebrewDate = formatHebrewDate(this.eventDate);
-        this.eventHebrewMonth = this.eventHebrewDate.split(' ')[1];
+        const exactHebrewDate = formatHebrewDate(this.eventDate);
+        this.eventHebrewMonth = exactHebrewDate.split(' ')[1];;
+
+        if (this.reportOrigin === EventReportOrigin.ONLY_TATNIKIT && !this.id) {
+          this.eventHebrewDate = this.eventHebrewMonth ? `${this.eventHebrewMonth} (משוער)` : exactHebrewDate;
+        } else {
+          this.eventHebrewDate = exactHebrewDate;
+        }
       }
 
       if (this.id && this.newNote) {
