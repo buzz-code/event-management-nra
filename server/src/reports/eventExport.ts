@@ -86,8 +86,8 @@ const getReportData: IGetReportDataFunction = async (params: EventExportParams, 
   };
 };
 
-const getReportName = (data: IDataToExcelReportGenerator) => `${(data as EventExportData).fileTitle} - ${(data as EventExportData).events.length} אירועים`;
+const getReportName = (data: EventExportData) => `${data.fileTitle} - ${data.events.length} אירועים`;
 
-const generator = new DataToExcelReportGenerator(getReportName, getReportData);
+const generator = new DataToExcelReportGenerator<EventExportParams, EventExportData>(getReportName, getReportData);
 
 export default generator;
