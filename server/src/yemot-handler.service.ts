@@ -10,6 +10,9 @@ import { formatHebrewDateForIVR, gematriyaLetters, getGregorianDateFromHebrew, g
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
 import { Tatnikit } from 'src/db/entities/Tatnikit.entity';
+import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
+import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
+import { assignTeacher } from 'src/utils/teacher-assignment.util';
 
 const MAX_GIFTS = 5;
 
@@ -97,6 +100,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       })) as any;
       savedEvent = await eventRepo.save(tatnikitOnlyEvent);
       this.logger.log(`Merged student report into tatnikit event: ${savedEvent.id}`);
+      this.autoAssignTeacher(savedEvent, student);
     } else {
       const event = eventRepo.create({
         userId: this.user.id,
@@ -113,6 +117,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       });
       savedEvent = await eventRepo.save(event);
       this.logger.log(`Event created: ${savedEvent.id}`);
+      this.autoAssignTeacher(savedEvent, student);
     }
 
     await this.sendMessageByKey('EVENT.SAVE_SUCCESS');
@@ -881,8 +886,75 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const savedEvent = await eventRepo.save(event);
     this.logger.log(`Tatnikit-only event created: ${savedEvent.id}`);
+    this.autoAssignTeacher(savedEvent, student);
 
     await this.sendMessageByKey('TATNIKIT.EVENT_SAVED');
+  }
+
+  private async autoAssignTeacher(savedEvent: Event, student: Student): Promise<void> {
+    const ctx = `[autoAssign] event=${savedEvent.id} family="${student.familyReferenceId ?? 'none'}" user=${this.user.id} year=${savedEvent.year}`;
+    try {
+      if (savedEvent.teacherReferenceId) {
+        this.logger.log(`${ctx} → skip: event already has teacher=${savedEvent.teacherReferenceId}`);
+        return;
+      }
+
+      const familyReferenceId = student.familyReferenceId;
+      if (!familyReferenceId) {
+        this.logger.log(`${ctx} → skip: student has no familyReferenceId`);
+        return;
+      }
+
+      const userId = this.user.id;
+      const year = savedEvent.year ?? getCurrentHebrewYear();
+
+      const [allRules, fta, teacherLoadRows] = await Promise.all([
+        this.dataSource.getRepository(TeacherAssignmentRule).find({ where: { userId, year, isActive: true } }),
+        this.dataSource.getRepository(FamilyTeacherAssignment).findOneBy({ userId, year, familyReferenceId }),
+        this.dataSource
+          .getRepository(Event)
+          .createQueryBuilder('event')
+          .select('event.teacherReferenceId', 'teacherReferenceId')
+          .addSelect('COUNT(*)', 'count')
+          .where('event.userId = :userId', { userId })
+          .andWhere('event.year = :year', { year })
+          .andWhere('event.teacherReferenceId IS NOT NULL')
+          .groupBy('event.teacherReferenceId')
+          .getRawMany<{ teacherReferenceId: string; count: string }>(),
+      ]);
+
+      const loadSnapshot = Object.fromEntries(
+        teacherLoadRows.map(({ teacherReferenceId, count }) => [teacherReferenceId, Number(count)]),
+      );
+      this.logger.log(
+        `${ctx} | rules=${allRules.length} fta=${fta ? `teacherId=${fta.teacherReferenceId}(id=${fta.id})` : 'none'} loads=${JSON.stringify(loadSnapshot)}`,
+      );
+
+      if (allRules.length === 0 && !fta?.teacherReferenceId) {
+        this.logger.log(`${ctx} → skip: no active rules and no existing FTA`);
+        return;
+      }
+
+      const loadCount = new Map<number, number>(
+        teacherLoadRows.map(({ teacherReferenceId, count }) => [Number(teacherReferenceId), Number(count)]),
+      );
+
+      savedEvent.student = student;
+      const { chosenTeacherId, ftaUpdate, reason } = assignTeacher(savedEvent, allRules, fta, loadCount);
+      if (!chosenTeacherId) {
+        this.logger.log(`${ctx} → skip: ${reason}`);
+        return;
+      }
+
+      await Promise.all([
+        this.dataSource.getRepository(Event).update({ id: savedEvent.id }, { teacherReferenceId: chosenTeacherId }),
+        ftaUpdate ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdate) : Promise.resolve(),
+      ]);
+      this.logger.log(`${ctx} → assigned teacher=${chosenTeacherId} reason: ${reason}`);
+    } catch (err) {
+      const e = err as Error;
+      this.logger.error(`${ctx} → ERROR: ${e?.message}`, e?.stack);
+    }
   }
 
   private mergeReportOriginWithTatnikitReport(currentOrigin: EventReportOrigin | null | undefined): EventReportOrigin {

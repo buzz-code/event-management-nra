@@ -74,6 +74,9 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
         <BulkActionButton label='עדכון שם הגרלה' icon={<EditIcon />} name='lotteryNameUpdate' reloadOnEnd>
             <TextInput source="lotteryName" label="שם הגרלה" />
         </BulkActionButton>,
+        <BulkActionButton label='שינוי שנה' icon={<EditIcon />} name='yearUpdate' reloadOnEnd>
+            <CommonAutocompleteInput source="year" choices={yearChoices} label="שנה" />
+        </BulkActionButton>,
         <BulkReportButton label='ייצוא אירועים למורה' icon={<GetAppIcon />} name='eventExport' />,
         isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך כיתות" />
     ];

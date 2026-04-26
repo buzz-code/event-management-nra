@@ -35,6 +35,12 @@ function pickBestRule(
   );
 }
 
+function fmtLoad(rule: TeacherAssignmentRule, loadCount: Map<number, number>): string {
+  const raw = loadCount.get(rule.teacherReferenceId) ?? 0;
+  const ratio = getSafeCustomRatio(rule);
+  return `teacher=${rule.teacherReferenceId} load=${raw}/${ratio}=${(raw / ratio).toFixed(2)}`;
+}
+
 /**
  * Picks the teacher for a given event.
  * Primary pool = rules matching event class or grade.
@@ -42,12 +48,13 @@ function pickBestRule(
  * matching teacher, they absorb the overflow (e.g. קלופר taking grade ט
  * events when grade-ט teachers are busier than her).
  * Falls back to all eligible rules when nothing matches.
+ * @returns chosen rule + human-readable reason string explaining the decision
  */
 function pickTeacher(
   eligibleRules: TeacherAssignmentRule[],
   event: Event,
   loadCount: Map<number, number>,
-): TeacherAssignmentRule {
+): { rule: TeacherAssignmentRule; reason: string } {
   const matchingRules = eligibleRules.filter((rule) => {
     const classMatch = rule.classRulesJson?.some(
       (c) => c.classReferenceId === event.studentClassReferenceId,
@@ -58,7 +65,14 @@ function pickTeacher(
     return classMatch || gradeMatch;
   });
 
-  if (matchingRules.length === 0) return pickBestRule(eligibleRules, loadCount);
+  if (matchingRules.length === 0) {
+    const rule = pickBestRule(eligibleRules, loadCount);
+    const allLoads = eligibleRules.map((r) => fmtLoad(r, loadCount)).join(', ');
+    return {
+      rule,
+      reason: `no class/grade match → fallback all ${eligibleRules.length} rules; winner ${fmtLoad(rule, loadCount)}; all=[${allLoads}]`,
+    };
+  }
 
   const bestMatch = pickBestRule(matchingRules, loadCount);
 
@@ -66,11 +80,19 @@ function pickTeacher(
   if (matchingRules.length < eligibleRules.length) {
     const bestOverall = pickBestRule(eligibleRules, loadCount);
     if (getWeightedLoad(bestOverall, loadCount) < getWeightedLoad(bestMatch, loadCount)) {
-      return bestOverall;
+      const matchLoads = matchingRules.map((r) => fmtLoad(r, loadCount)).join(', ');
+      return {
+        rule: bestOverall,
+        reason: `overflow: non-matching ${fmtLoad(bestOverall, loadCount)} < best matching ${fmtLoad(bestMatch, loadCount)}; matching=[${matchLoads}]`,
+      };
     }
   }
 
-  return bestMatch;
+  const matchLoads = matchingRules.map((r) => fmtLoad(r, loadCount)).join(', ');
+  return {
+    rule: bestMatch,
+    reason: `matched ${matchingRules.length} rules (class=${event.studentClassReferenceId ?? 'none'} grade=${event.grade ?? 'none'}); winner ${fmtLoad(bestMatch, loadCount)}; matching=[${matchLoads}]`,
+  };
 }
 
 /**
@@ -92,8 +114,11 @@ function pickTeacher(
  * @param fta                 Existing FamilyTeacherAssignment for this family, or null.
  * @param loadCount           Map of teacherId → current event count for balancing.
  * @param candidateTeacherIds Optional filter: only rules whose teacher is in this list are eligible.
+ *                            When no rules exist but this list is provided, synthetic equal-weight
+ *                            rules are created for each candidate (same behaviour as assignTeachersBatch).
  * @returns chosenTeacherId: number | null
  *          ftaUpdate: FamilyTeacherAssignment record to save, or null if no assignment made.
+ *          reason: human-readable string explaining why this teacher was chosen (for logging).
  */
 export function assignTeacher(
   event: Event,
@@ -101,25 +126,34 @@ export function assignTeacher(
   fta: FamilyTeacherAssignment | null,
   loadCount: Map<number, number>,
   candidateTeacherIds?: number[],
-): { chosenTeacherId: number | null; ftaUpdate: Partial<FamilyTeacherAssignment> | null } {
+): { chosenTeacherId: number | null; ftaUpdate: Partial<FamilyTeacherAssignment> | null; reason: string } {
   const familyId = event.student?.familyReferenceId ?? null;
-  if (!familyId) return { chosenTeacherId: null, ftaUpdate: null };
+  if (!familyId) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no familyReferenceId on student' };
+
+  const eligibleRules: TeacherAssignmentRule[] =
+    allRules.length === 0 && candidateTeacherIds?.length
+      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 } as TeacherAssignmentRule))
+      : allRules;
 
   const year = event.year ?? getCurrentHebrewYear();
   let chosenTeacherId: number | null = null;
   let source: string;
+  let reason: string;
 
   if (fta?.teacherReferenceId) {
     chosenTeacherId = fta.teacherReferenceId;
     source = 'family_default';
+    reason = `family_default: existing FTA (ftaId=${fta.id ?? 'new'}) has teacherReferenceId=${fta.teacherReferenceId}`;
   } else {
-    if (allRules.length === 0) return { chosenTeacherId: null, ftaUpdate: null };
+    if (eligibleRules.length === 0) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no active rules and no FTA for this family' };
 
-    chosenTeacherId = pickTeacher(allRules, event, loadCount).teacherReferenceId;
+    const { rule, reason: pickReason } = pickTeacher(eligibleRules, event, loadCount);
+    chosenTeacherId = rule.teacherReferenceId;
     source = 'rules';
+    reason = `rules: ${pickReason}`;
   }
 
-  if (!chosenTeacherId) return { chosenTeacherId: null, ftaUpdate: null };
+  if (!chosenTeacherId) return { chosenTeacherId: null, ftaUpdate: null, reason: 'pickTeacher returned null teacherReferenceId' };
 
   const record: Partial<FamilyTeacherAssignment> = fta ?? {
     userId: event.userId,
@@ -133,7 +167,7 @@ export function assignTeacher(
     { eventId: event.id, teacherReferenceId: chosenTeacherId, assignedAt: new Date().toISOString(), source },
   ];
 
-  return { chosenTeacherId, ftaUpdate: record };
+  return { chosenTeacherId, ftaUpdate: record, reason };
 }
 
 /**
@@ -191,7 +225,8 @@ export function assignTeachersBatch(
       chosenTeacherId = fta.teacherReferenceId;
       source = 'family_default';
     } else if (eligibleRules.length > 0) {
-      chosenTeacherId = pickTeacher(eligibleRules, familyEvents[0], batchLoadCount).teacherReferenceId;
+      const { rule } = pickTeacher(eligibleRules, familyEvents[0], batchLoadCount);
+      chosenTeacherId = rule.teacherReferenceId;
       source = 'rules';
     }
 
