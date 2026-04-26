@@ -13,8 +13,7 @@ import { CommonReportData } from '@shared/utils/report/types';
 import { getUserIdFromUser } from '@shared/auth/auth.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-import { getUniqueValues } from '@shared/utils/reportData.util';
-import { groupDataByKeyFn, optionalInFilter } from 'src/utils/reportData.util';
+import { getUniqueValues, groupDataByKeyFn, optionalInFilter } from '@shared/utils/reportData.util';
 import { assignTeachersBatch } from 'src/utils/teacher-assignment.util';
 
 function getConfig(): BaseEntityModuleOptions {

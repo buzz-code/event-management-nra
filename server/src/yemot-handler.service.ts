@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessThan, MoreThan, Raw } from 'typeorm';
+import { IsNull, LessThan, MoreThan, Not, Raw } from 'typeorm';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -13,6 +13,7 @@ import { Tatnikit } from 'src/db/entities/Tatnikit.entity';
 import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
 import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
 import { assignTeacher } from 'src/utils/teacher-assignment.util';
+import { groupDataByKeysAndCalc, recordToMap } from '@shared/utils/reportData.util';
 
 const MAX_GIFTS = 5;
 
@@ -900,15 +901,23 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const userId = this.user.id;
     const year = savedEvent.year ?? getCurrentHebrewYear();
 
-    const [allRules, fta] = await Promise.all([
+    const [allRules, fta, yearEvents] = await Promise.all([
       this.dataSource.getRepository(TeacherAssignmentRule).find({ where: { userId, year, isActive: true } }),
       this.dataSource.getRepository(FamilyTeacherAssignment).findOneBy({ userId, year, familyReferenceId }),
+      this.dataSource.getRepository(Event).find({ select: ['id', 'teacherReferenceId'], where: { userId, year, teacherReferenceId: Not(IsNull()) } }),
     ]);
 
     if (allRules.length === 0 && !fta?.teacherReferenceId) return;
 
+    const countByTeacher = groupDataByKeysAndCalc(
+      yearEvents,
+      ['teacherReferenceId'],
+      (arr) => arr.length,
+    );
+    const loadCount = recordToMap(countByTeacher, Number);
+
     savedEvent.student = student;
-    const { chosenTeacherId, ftaUpdate } = assignTeacher(savedEvent, allRules, fta, new Map());
+    const { chosenTeacherId, ftaUpdate } = assignTeacher(savedEvent, allRules, fta, loadCount);
     if (!chosenTeacherId) return;
 
     savedEvent.teacherReferenceId = chosenTeacherId;
