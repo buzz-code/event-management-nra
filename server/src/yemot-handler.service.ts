@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IsNull, LessThan, MoreThan, Not, Raw } from 'typeorm';
+import { LessThan, MoreThan, Raw } from 'typeorm';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -13,7 +13,6 @@ import { Tatnikit } from 'src/db/entities/Tatnikit.entity';
 import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
 import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
 import { assignTeacher } from 'src/utils/teacher-assignment.util';
-import { groupDataByKeysAndCalc, recordToMap } from '@shared/utils/reportData.util';
 
 const MAX_GIFTS = 5;
 
@@ -101,7 +100,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       })) as any;
       savedEvent = await eventRepo.save(tatnikitOnlyEvent);
       this.logger.log(`Merged student report into tatnikit event: ${savedEvent.id}`);
-      await this.autoAssignTeacher(savedEvent, student);
+      this.autoAssignTeacher(savedEvent, student);
     } else {
       const event = eventRepo.create({
         userId: this.user.id,
@@ -118,7 +117,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       });
       savedEvent = await eventRepo.save(event);
       this.logger.log(`Event created: ${savedEvent.id}`);
-      await this.autoAssignTeacher(savedEvent, student);
+      this.autoAssignTeacher(savedEvent, student);
     }
 
     await this.sendMessageByKey('EVENT.SAVE_SUCCESS');
@@ -887,45 +886,55 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const savedEvent = await eventRepo.save(event);
     this.logger.log(`Tatnikit-only event created: ${savedEvent.id}`);
-    await this.autoAssignTeacher(savedEvent, student);
+    this.autoAssignTeacher(savedEvent, student);
 
     await this.sendMessageByKey('TATNIKIT.EVENT_SAVED');
   }
 
   private async autoAssignTeacher(savedEvent: Event, student: Student): Promise<void> {
-    if (savedEvent.teacherReferenceId) return; // already assigned
+    try {
+      if (savedEvent.teacherReferenceId) return; // already assigned
 
-    const familyReferenceId = student.familyReferenceId;
-    if (!familyReferenceId) return;
+      const familyReferenceId = student.familyReferenceId;
+      if (!familyReferenceId) return;
 
-    const userId = this.user.id;
-    const year = savedEvent.year ?? getCurrentHebrewYear();
+      const userId = this.user.id;
+      const year = savedEvent.year ?? getCurrentHebrewYear();
 
-    const [allRules, fta, yearEvents] = await Promise.all([
-      this.dataSource.getRepository(TeacherAssignmentRule).find({ where: { userId, year, isActive: true } }),
-      this.dataSource.getRepository(FamilyTeacherAssignment).findOneBy({ userId, year, familyReferenceId }),
-      this.dataSource.getRepository(Event).find({ select: ['id', 'teacherReferenceId'], where: { userId, year, teacherReferenceId: Not(IsNull()) } }),
-    ]);
+      const [allRules, fta, teacherLoadRows] = await Promise.all([
+        this.dataSource.getRepository(TeacherAssignmentRule).find({ where: { userId, year, isActive: true } }),
+        this.dataSource.getRepository(FamilyTeacherAssignment).findOneBy({ userId, year, familyReferenceId }),
+        this.dataSource
+          .getRepository(Event)
+          .createQueryBuilder('event')
+          .select('event.teacherReferenceId', 'teacherReferenceId')
+          .addSelect('COUNT(*)', 'count')
+          .where('event.userId = :userId', { userId })
+          .andWhere('event.year = :year', { year })
+          .andWhere('event.teacherReferenceId IS NOT NULL')
+          .groupBy('event.teacherReferenceId')
+          .getRawMany<{ teacherReferenceId: string; count: string }>(),
+      ]);
 
-    if (allRules.length === 0 && !fta?.teacherReferenceId) return;
+      if (allRules.length === 0 && !fta?.teacherReferenceId) return;
 
-    const countByTeacher = groupDataByKeysAndCalc(
-      yearEvents,
-      ['teacherReferenceId'],
-      (arr) => arr.length,
-    );
-    const loadCount = recordToMap(countByTeacher, Number);
+      const loadCount = new Map<number, number>(
+        teacherLoadRows.map(({ teacherReferenceId, count }) => [Number(teacherReferenceId), Number(count)]),
+      );
 
-    savedEvent.student = student;
-    const { chosenTeacherId, ftaUpdate } = assignTeacher(savedEvent, allRules, fta, loadCount);
-    if (!chosenTeacherId) return;
+      savedEvent.student = student;
+      const { chosenTeacherId, ftaUpdate } = assignTeacher(savedEvent, allRules, fta, loadCount);
+      if (!chosenTeacherId) return;
 
-    savedEvent.teacherReferenceId = chosenTeacherId;
-    await Promise.all([
-      this.dataSource.getRepository(Event).save(savedEvent),
-      ftaUpdate ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdate) : Promise.resolve(),
-    ]);
-    this.logger.log(`Auto-assigned teacher ${chosenTeacherId} to event ${savedEvent.id}`);
+      await Promise.all([
+        this.dataSource.getRepository(Event).update({ id: savedEvent.id }, { teacherReferenceId: chosenTeacherId }),
+        ftaUpdate ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdate) : Promise.resolve(),
+      ]);
+      this.logger.log(`Auto-assigned teacher ${chosenTeacherId} to event ${savedEvent.id}`);
+    } catch (err) {
+      const e = err as Error;
+      this.logger.error(`Auto-assign teacher failed for event ${savedEvent.id}: ${e?.message}`, e?.stack);
+    }
   }
 
   private mergeReportOriginWithTatnikitReport(currentOrigin: EventReportOrigin | null | undefined): EventReportOrigin {
