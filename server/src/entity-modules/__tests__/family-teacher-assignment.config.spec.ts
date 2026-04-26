@@ -7,6 +7,7 @@ createEntityConfigTests('FamilyTeacherAssignmentConfig', config, {
   expectedJoins: {
     user: { eager: false },
     teacher: { eager: false },
+    students: { eager: true, allow: ['id', 'name'] },
   },
   expectedExportHeaders: {
     count: 4,
