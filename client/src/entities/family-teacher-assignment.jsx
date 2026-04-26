@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceManyField, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetMany, useRecordContext } from 'react-admin';
+import { ArrayField, ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetMany, useRecordContext } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -59,11 +59,11 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <SelectField source="year" choices={yearChoices} />
-            <ReferenceManyField label="תלמידות" reference="student" target="familyReferenceId" source="familyReferenceId">
+            <ArrayField source="students">
                 <SingleFieldList linkType={false}>
                     <ChipField source="name" />
                 </SingleFieldList>
-            </ReferenceManyField>
+            </ArrayField>
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="historyJson" render={r => {
                 const items = r.historyJson || [];
@@ -82,6 +82,13 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <TextInput source="familyReferenceId" />
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" />
+        {!isCreate && <Labeled source="students">
+            <ArrayField source="students">
+                <SingleFieldList linkType={false}>
+                    <ChipField source="name" />
+                </SingleFieldList>
+            </ArrayField>
+        </Labeled>}
         {!isCreate && <HistoryList />}
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

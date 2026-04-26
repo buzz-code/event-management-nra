@@ -223,6 +223,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 familyReferenceId: 'מזהה משפחה',
                 teacherReferenceId: 'מורה ברירת מחדל',
+                students: 'תלמידות',
                 historyJson: 'היסטוריית שיבוצים',
             }
         },
