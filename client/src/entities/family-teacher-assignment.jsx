@@ -80,7 +80,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
-        <TextInput source="familyReferenceId" />
+        {isAdmin && <TextInput source="familyReferenceId" disabled />}
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" />
         {!isCreate && <Labeled source="students">
             <ArrayField source="students">
@@ -89,7 +89,9 @@ const Inputs = ({ isCreate, isAdmin }) => {
                 </SingleFieldList>
             </ArrayField>
         </Labeled>}
-        {!isCreate && <HistoryList />}
+        {!isCreate && <Labeled source="historyJson">
+            <HistoryList />
+        </Labeled>}
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>;
