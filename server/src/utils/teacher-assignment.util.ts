@@ -114,6 +114,8 @@ function pickTeacher(
  * @param fta                 Existing FamilyTeacherAssignment for this family, or null.
  * @param loadCount           Map of teacherId → current event count for balancing.
  * @param candidateTeacherIds Optional filter: only rules whose teacher is in this list are eligible.
+ *                            When no rules exist but this list is provided, synthetic equal-weight
+ *                            rules are created for each candidate (same behaviour as assignTeachersBatch).
  * @returns chosenTeacherId: number | null
  *          ftaUpdate: FamilyTeacherAssignment record to save, or null if no assignment made.
  *          reason: human-readable string explaining why this teacher was chosen (for logging).
@@ -128,6 +130,11 @@ export function assignTeacher(
   const familyId = event.student?.familyReferenceId ?? null;
   if (!familyId) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no familyReferenceId on student' };
 
+  const eligibleRules: TeacherAssignmentRule[] =
+    allRules.length === 0 && candidateTeacherIds?.length
+      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 } as TeacherAssignmentRule))
+      : allRules;
+
   const year = event.year ?? getCurrentHebrewYear();
   let chosenTeacherId: number | null = null;
   let source: string;
@@ -138,9 +145,9 @@ export function assignTeacher(
     source = 'family_default';
     reason = `family_default: existing FTA (ftaId=${fta.id ?? 'new'}) has teacherReferenceId=${fta.teacherReferenceId}`;
   } else {
-    if (allRules.length === 0) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no active rules and no FTA for this family' };
+    if (eligibleRules.length === 0) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no active rules and no FTA for this family' };
 
-    const { rule, reason: pickReason } = pickTeacher(allRules, event, loadCount);
+    const { rule, reason: pickReason } = pickTeacher(eligibleRules, event, loadCount);
     chosenTeacherId = rule.teacherReferenceId;
     source = 'rules';
     reason = `rules: ${pickReason}`;

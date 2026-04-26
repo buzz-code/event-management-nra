@@ -79,6 +79,24 @@ describe('assignTeacher', () => {
     const result = assignTeacher(makeEvent({ id: 2 }), [], fta, new Map());
     expect(result.ftaUpdate?.historyJson).toHaveLength(2);
   });
+
+  it('uses candidateTeacherIds as synthetic rules when allRules is empty', () => {
+    const event = makeEvent();
+    const result = assignTeacher(event, [], null, new Map(), [55]);
+    expect(result.chosenTeacherId).toBe(55);
+  });
+
+  it('returns null when no rules and candidateTeacherIds is empty', () => {
+    const event = makeEvent();
+    const result = assignTeacher(event, [], null, new Map(), []);
+    expect(result.chosenTeacherId).toBeNull();
+  });
+
+  it('ignores candidateTeacherIds when allRules is non-empty', () => {
+    const event = makeEvent();
+    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42 })], null, new Map(), [99]);
+    expect(result.chosenTeacherId).toBe(42);
+  });
 });
 
 describe('assignTeachersBatch', () => {
