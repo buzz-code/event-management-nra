@@ -6,6 +6,7 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { getISODateFormatter } from '@shared/utils/formatting/formatter.util';
 import { getHeaderFormatters, getHeaderNames } from '@shared/utils/exporter/exporter.util';
 import { In } from 'typeorm';
+import { getAsNumberArray } from '@shared/utils/queryParam.util';
 
 export interface EventExportParams {
   userId: number;
@@ -19,7 +20,7 @@ export interface EventExportData extends IDataToExcelReportGenerator {
 }
 
 const getReportData: IGetReportDataFunction = async (params: EventExportParams, dataSource): Promise<EventExportData> => {
-  const eventIds = params.ids.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+  const eventIds = getAsNumberArray(params.ids) ?? [];
 
   const [user, events] = await Promise.all([
     dataSource.getRepository(User).findOneBy({ id: params.userId }),
@@ -85,7 +86,7 @@ const getReportData: IGetReportDataFunction = async (params: EventExportParams, 
   };
 };
 
-const getReportName = (data: EventExportData) => `${data.fileTitle} - ${data.events.length} אירועים`;
+const getReportName = (data: IDataToExcelReportGenerator) => `${(data as EventExportData).fileTitle} - ${(data as EventExportData).events.length} אירועים`;
 
 const generator = new DataToExcelReportGenerator(getReportName, getReportData);
 

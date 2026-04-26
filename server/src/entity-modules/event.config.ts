@@ -15,6 +15,7 @@ import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { getUniqueValues, groupDataByKeyFn, optionalInFilter } from '@shared/utils/reportData.util';
 import { assignTeachersBatch } from 'src/utils/teacher-assignment.util';
+import { getAsNumber, getAsNumberArray, getAsArray, getAsString } from '@shared/utils/queryParam.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -116,8 +117,8 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
     const extra = req.parsed.extra as any;
     switch (extra.action) {
       case 'teacherAssociation': {
-        const teacherIds = extra.teacherReferenceIds?.toString()?.split(',').map(Number).filter(Boolean) || [];
-        const eventIds = extra.ids?.toString()?.split(',').map(Number).filter(Boolean) || [];
+        const teacherIds = getAsNumberArray(extra.teacherReferenceIds) ?? [];
+        const eventIds = getAsNumberArray(extra.ids) ?? [];
         const eventRepo = this.dataSource.getRepository(Event);
         const userId = getUserIdFromUser(req.auth);
 
@@ -171,16 +172,24 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
         return 'האירועים עודכנו בהצלחה';
       }
       case 'fixReferences': {
-        const ids = extra.ids.toString().split(',').map(Number);
+        const ids = getAsNumberArray(extra.ids) ?? [];
         return fixReferences(this.repo as Repository<Event>, ids, { studentReferenceId: 'studentClassReferenceId' });
       }
       case 'lotteryNameUpdate': {
-        const lotteryName = extra.lotteryName;
-        const eventIds = extra.ids?.toString()?.split(',') || [];
+        const lotteryName = getAsString(extra.lotteryName);
+        const eventIds = getAsArray(extra.ids) ?? [];
         if (eventIds.length > 0) {
           await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
         }
         return 'שם הגרלה עודכן בהצלחה';
+      }
+      case 'yearUpdate': {
+        const year = getAsNumber(extra.year);
+        const eventIds = getAsArray(extra.ids) ?? [];
+        if (eventIds.length > 0 && year) {
+          await this.dataSource.getRepository(Event).update(eventIds, { year });
+        }
+        return 'השנה עודכנה בהצלחה';
       }
     }
     return super.doAction(req, body);
