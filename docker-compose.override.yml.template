@@ -5,23 +5,43 @@ services:
         container_name: client-dev
         build:
             target: development
+        environment:
+            PORT: 3010
+            HMR_PORT: 24679
         ports:
-          - "30013:80"
+            - "3010:3010"    # Vite dev server
+            - "24679:24679"    # Vite HMR
+        volumes:
+            - ./client:/app
+        networks:
+            - private-network
 
     server:
         container_name: server-dev
         build:
             target: development
-            args:
-                CLIENT_PORT: 30013
         ports:
-          - "30014:3000"
+            - "3011:3000"
+        volumes:
+            - ./server:/app
+        networks:
+            - private-network
 
     database:
         container_name: database-dev
+        ports:
+            - "3316:3306"
 
     phpmyadmin:
         container_name: phpmyadmin-dev
         ports:
-          - "30015:80"
+            - "8081:80"
+        networks:
+            - private-network
 
+networks:
+    private-network:
+    caddy:
+        external: false
+    elknet:
+        external: false
