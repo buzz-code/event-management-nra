@@ -20,8 +20,6 @@ CMD ["yarn", "start:dev"]
 
 FROM node:16-alpine AS builder
 
-RUN  apk add curl bash
-
 WORKDIR /app
 
 COPY package*.json /app/
@@ -30,6 +28,9 @@ COPY .yarnclean /app/
 
 RUN yarn install --frozen-lockfile
 
+# Copy shared directory first for better layer caching
+COPY shared /app/shared
+# Copy the rest of the application
 COPY . .
 
 RUN yarn build
