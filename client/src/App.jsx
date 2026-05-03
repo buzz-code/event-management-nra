@@ -56,7 +56,7 @@ const resources = [
   { name: 'event_note',                config: eventNote,               icon: CommentIcon,         menuGroup: 'events' },
   { name: 'gift',                      config: gift,                    icon: CardGiftcardIcon,    menuGroup: 'events' },
   { name: 'event_gift',                config: eventGift,               icon: EventNoteIcon,       menuGroup: 'events' },
-  { name: 'unreported_event',          config: unreportedEvent,         icon: EventNoteIcon,       menuGroup: 'events', condition: isAdmin },
+  p => isAdmin(p) && { name: 'unreported_event',          config: unreportedEvent,         icon: EventNoteIcon,       menuGroup: 'events' },
   { name: 'class',                     config: classEntity,             icon: ClassIcon,           menuGroup: 'data' },
   { name: 'level_type',                config: levelType,               icon: RouteIcon,           menuGroup: 'data' },
   { name: 'family_status_type',        config: familyStatusType,        icon: FavoriteIcon,        menuGroup: 'data' },
