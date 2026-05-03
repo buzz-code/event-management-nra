@@ -1,4 +1,3 @@
-import { Resource } from 'react-admin';
 import { teal, orange } from '@mui/material/colors';
 
 import domainTranslations from 'src/domainTranslations';
@@ -7,10 +6,9 @@ import AdminAppShell from '@shared/components/app/AdminAppShell';
 import CommonRoutes from '@shared/components/app/CommonRoutes';
 import CommonAdminResources from '@shared/components/app/CommonAdminResources';
 import CommonSettingsResources from '@shared/components/app/CommonSettingsResources';
+import { buildResources } from '@shared/components/app/buildResources';
 
 import { Dashboard, Layout } from 'src/GeneralLayout';
-
-import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
 
 // Event Management System Entities
 import event from "src/entities/event";
@@ -22,14 +20,13 @@ import classEntity from "src/entities/class";
 import levelType from "src/entities/level-type";
 import familyStatusType from "src/entities/family-status-type";
 import studentClass from './entities/student-class';
-import studentByYear from './entities/student-by-year'; // Added import
+import studentByYear from './entities/student-by-year';
 import family from './entities/family';
 import tatnikit from './entities/tatnikit';
 import unreportedEvent from './entities/unreported-event';
 import teacherAssignmentRule from './entities/teacher-assignment-rule';
 import familyTeacherAssignment from './entities/family-teacher-assignment';
 
-// Keep required shared entities
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
 
@@ -53,6 +50,26 @@ import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 
 const themeOptions = { primary: teal[700], secondary: orange[600] };
 
+const resources = [
+  { name: 'event',                     config: event,                   icon: EventIcon,           menuGroup: 'events' },
+  { name: 'event_type',                config: eventType,               icon: CategoryIcon,        menuGroup: 'events' },
+  { name: 'event_note',                config: eventNote,               icon: CommentIcon,         menuGroup: 'events' },
+  { name: 'gift',                      config: gift,                    icon: CardGiftcardIcon,    menuGroup: 'events' },
+  { name: 'event_gift',                config: eventGift,               icon: EventNoteIcon,       menuGroup: 'events' },
+  { name: 'unreported_event',          config: unreportedEvent,         icon: EventNoteIcon,       menuGroup: 'events', condition: isAdmin },
+  { name: 'class',                     config: classEntity,             icon: ClassIcon,           menuGroup: 'data' },
+  { name: 'level_type',                config: levelType,               icon: RouteIcon,           menuGroup: 'data' },
+  { name: 'family_status_type',        config: familyStatusType,        icon: FavoriteIcon,        menuGroup: 'data' },
+  { name: 'student',                   config: student,                 icon: PortraitIcon,        menuGroup: 'data' },
+  { name: 'student_class',             config: studentClass,            icon: BadgeIcon,           menuGroup: 'data' },
+  { name: 'student_by_year',           config: studentByYear,           icon: PortraitIcon,        menuGroup: 'data' },
+  { name: 'family',                    config: family,                  icon: PeopleIcon,          menuGroup: 'data' },
+  { name: 'tatnikit',                  config: tatnikit,                icon: BadgeIcon,           menuGroup: 'data' },
+  { name: 'teacher',                   config: teacher,                 icon: BadgeIcon,           menuGroup: 'data' },
+  { name: 'teacher_assignment_rule',   config: teacherAssignmentRule,   icon: AssignmentIcon,      menuGroup: 'data' },
+  { name: 'family_teacher_assignment', config: familyTeacherAssignment, icon: FamilyRestroomIcon,  menuGroup: 'data' },
+];
+
 const App = () => (
   <AdminAppShell
     title='ניהול אירועים'
@@ -63,30 +80,9 @@ const App = () => (
   >
     {permissions => (
       <>
-        {/* Event Management System Resources */}
-        <Resource name="event" {...event} options={{ menuGroup: 'events' }} icon={EventIcon} />
-        <Resource name="event_type" {...eventType} options={{ menuGroup: 'events' }} icon={CategoryIcon} />
-        <Resource name="event_note" {...eventNote} options={{ menuGroup: 'events' }} icon={CommentIcon} />
-        <Resource name="gift" {...gift} options={{ menuGroup: 'events' }} icon={CardGiftcardIcon} />
-        <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
-        <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
-        <Resource name="level_type" {...levelType} options={{ menuGroup: 'data' }} icon={RouteIcon} />
-        <Resource name="family_status_type" {...familyStatusType} options={{ menuGroup: 'data' }} icon={FavoriteIcon} />
-
-        {/* Keep Student and Teacher from original system */}
-        <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-        <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-        <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-        <Resource name="family" {...family} options={{ menuGroup: 'data' }} icon={PeopleIcon} />
-        <Resource name="tatnikit" {...tatnikit} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-        {isAdmin(permissions) && <Resource name="unreported_event" {...unreportedEvent} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />}
-        <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-        <Resource name="teacher_assignment_rule" {...teacherAssignmentRule} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
-        <Resource name="family_teacher_assignment" {...familyTeacherAssignment} options={{ menuGroup: 'data' }} icon={FamilyRestroomIcon} />
-
+        {buildResources(resources, permissions)}
         {CommonSettingsResources()}
         {CommonAdminResources({ permissions })}
-
         {CommonRoutes({ permissions, roadmapFeatures, settingsPage: <Settings /> })}
       </>
     )}
