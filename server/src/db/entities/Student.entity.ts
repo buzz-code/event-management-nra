@@ -33,7 +33,7 @@ export class Student implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([FamilyStatusType, Student, Family]);
+      dataSource = await getDataSource([FamilyStatusType, Student, Family, FamilyTeacherAssignment]);
 
       this.familyStatusReferenceId = await findOneAndAssignReferenceId(
         dataSource,
