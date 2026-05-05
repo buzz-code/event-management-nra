@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrayField, ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetMany, useRecordContext } from 'react-admin';
+import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetMany, useGetList, useRecordContext } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -8,6 +8,21 @@ import { filterByUserId } from '@shared/components/fields/CommonReferenceInputFi
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+
+const FamilyStudentsList = () => {
+    const record = useRecordContext();
+    const { data: students = [] } = useGetList('student', {
+        filter: { familyReferenceId: record?.familyReferenceId },
+        pagination: { page: 1, perPage: 100 },
+        sort: { field: 'name', order: 'ASC' },
+    }, { enabled: Boolean(record?.familyReferenceId) });
+
+    return (
+        <SingleFieldList linkType={false} data={students}>
+            <ChipField source="name" />
+        </SingleFieldList>
+    );
+};
 
 const HistoryList = () => {
     const record = useRecordContext();
@@ -59,11 +74,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <SelectField source="year" choices={yearChoices} />
-            <ArrayField source="students">
-                <SingleFieldList linkType={false}>
-                    <ChipField source="name" />
-                </SingleFieldList>
-            </ArrayField>
+            <FunctionField source="familyReferenceId" render={() => <FamilyStudentsList />} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="historyJson" render={r => {
                 const items = r.historyJson || [];
@@ -83,11 +94,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {isAdmin && <TextInput source="familyReferenceId" disabled />}
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" />
         {!isCreate && <Labeled source="students">
-            <ArrayField source="students">
-                <SingleFieldList linkType={false}>
-                    <ChipField source="name" />
-                </SingleFieldList>
-            </ArrayField>
+            <FamilyStudentsList />
         </Labeled>}
         {!isCreate && <Labeled source="historyJson">
             <HistoryList />

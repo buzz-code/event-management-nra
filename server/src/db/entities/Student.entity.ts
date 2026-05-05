@@ -20,7 +20,6 @@ import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { FamilyStatusType } from './FamilyStatusType.entity';
 import { Family } from '../view-entities/Family.entity';
-import { FamilyTeacherAssignment } from './FamilyTeacherAssignment.entity';
 
 @Entity('students')
 @Index('students_user_id_idx', ['userId'], {})
@@ -33,7 +32,7 @@ export class Student implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([FamilyStatusType, Student, Family, FamilyTeacherAssignment]);
+      dataSource = await getDataSource([FamilyStatusType, Student, Family]);
 
       this.familyStatusReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -146,10 +145,6 @@ export class Student implements IHasUserId {
   familyStatus: FamilyStatusType;
 
   @ManyToOne(() => Family, { nullable: true, createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'family_reference_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'family_reference_id' })
   family: Family;
-
-  @ManyToOne(() => FamilyTeacherAssignment, (fta) => fta.students, { nullable: true, createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'family_reference_id', referencedColumnName: 'familyReferenceId' })
-  familyTeacherAssignment: FamilyTeacherAssignment;
 }
