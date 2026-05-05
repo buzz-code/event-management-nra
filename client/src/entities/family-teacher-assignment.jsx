@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetMany, useGetList, useRecordContext } from 'react-admin';
+import { useCallback, useMemo } from 'react';
+import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, SelectField, SingleFieldList, TextField, TextInput, required, useChoicesContext, useGetList, useGetMany, useListContext, useRecordContext } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -21,6 +21,29 @@ const FamilyStudentsList = () => {
         <SingleFieldList linkType={false} data={students}>
             <ChipField source="name" />
         </SingleFieldList>
+    );
+};
+
+const FamilyRefAutocomplete = ({ label }) => {
+    const { allChoices = [] } = useChoicesContext();
+    const { filterValues, setFilters, displayedFilters } = useListContext();
+
+    const handleChange = useCallback((studentId) => {
+        const student = allChoices.find(s => s.id === studentId);
+        setFilters(
+            { ...filterValues, familyReferenceId: student?.familyReferenceId || undefined },
+            displayedFilters
+        );
+    }, [allChoices, filterValues, setFilters, displayedFilters]);
+
+    return <CommonAutocompleteInput label={label} onChange={handleChange} />;
+};
+
+const StudentFamilyFilter = ({ label }) => {
+    return (
+        <CommonReferenceInput source="_studentFamily" reference="student" dynamicFilter={filterByUserId} alwaysOn>
+            <FamilyRefAutocomplete label={label} />
+        </CommonReferenceInput>
     );
 };
 
@@ -57,9 +80,7 @@ const HistoryList = () => {
 const filters = [
     ...commonAdminFilters,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <CommonReferenceInput source="familyReferenceId:$eq" reference="student" dynamicFilter={filterByUserId} label="חיפוש לפי תלמידה">
-        <CommonAutocompleteInput optionValue="familyReferenceId" label="חיפוש לפי תלמידה" />
-    </CommonReferenceInput>,
+    <StudentFamilyFilter source="familyReferenceId" label="חיפוש לפי תלמידה" />,
     <CommonReferenceInput source="teacherReferenceId" reference="teacher" alwaysOn />,
 ];
 
