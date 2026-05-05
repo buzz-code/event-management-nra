@@ -57,9 +57,9 @@ const HistoryList = () => {
 const filters = [
     ...commonAdminFilters,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <ReferenceInput source="familyReferenceId:$eq" reference="student" filter={filterByUserId} label="חיפוש לפי תלמידה">
+    <CommonReferenceInput source="familyReferenceId:$eq" reference="student" dynamicFilter={filterByUserId} label="חיפוש לפי תלמידה">
         <CommonAutocompleteInput optionValue="familyReferenceId" label="חיפוש לפי תלמידה" />
-    </ReferenceInput>,
+    </CommonReferenceInput>,
     <CommonReferenceInput source="teacherReferenceId" reference="teacher" alwaysOn />,
 ];
 
@@ -74,7 +74,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <SelectField source="year" choices={yearChoices} />
-            <FunctionField source="familyReferenceId" render={() => <FamilyStudentsList />} />
+            <FunctionField source="students" render={() => <FamilyStudentsList />} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="historyJson" render={r => {
                 const items = r.historyJson || [];
