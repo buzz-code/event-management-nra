@@ -26,6 +26,7 @@ services:
         container_name: event-server-dev
         build:
             target: development
+        command: sh -c "yarn build && ./node_modules/.bin/typeorm -d dist/shared/config/migration.config.js migration:run && yarn start:dev"
         ports:
             - "3011:3000"
         volumes:
