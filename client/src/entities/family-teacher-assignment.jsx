@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetList, useGetMany, useListContext, useRecordContext } from 'react-admin';
+import { useCallback, useEffect, useMemo } from 'react';
+import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useChoicesContext, useGetList, useGetMany, useListContext, useRecordContext } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -25,12 +25,36 @@ const FamilyStudentsList = () => {
     );
 };
 
-const StudentFamilyFilter = ({ source, label }) => {
+const FamilyFilterAutocomplete = ({ label }) => {
+    const { allChoices = [] } = useChoicesContext();
+    const { filterValues, setFilters } = useListContext();
+
+    useEffect(() => {
+        if (!filterValues.familyReferenceId && filterValues._studentId != null) {
+            const { _studentId, ...rest } = filterValues;
+            setFilters(rest);
+        }
+    }, [filterValues.familyReferenceId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleChange = useCallback((studentId) => {
+        const { familyReferenceId: _a, _studentId: _b, ...rest } = filterValues;
+        if (studentId) {
+            const student = allChoices.find(s => s.id === studentId);
+            setFilters({ ...rest, familyReferenceId: student?.familyReferenceId, _studentId: studentId });
+        } else {
+            setFilters(rest);
+        }
+    }, [allChoices, filterValues, setFilters]);
+
+    return <CommonAutocompleteInput label={label} onChange={handleChange} />;
+};
+
+const StudentFamilyFilter = ({ label }) => {
     const { filterValues } = useListContext();
     const filter = useMemo(() => getDynamicFilter(filterByUserId, filterValues), [filterValues]);
     return (
-        <ReferenceInput source={source} reference="student" filter={filter} queryOptions={{ enabled: false }}>
-            <CommonAutocompleteInput label={label} optionValue="familyReferenceId" />
+        <ReferenceInput source="_studentId" reference="student" filter={filter}>
+            <FamilyFilterAutocomplete label={label} />
         </ReferenceInput>
     );
 };
