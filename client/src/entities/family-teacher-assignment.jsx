@@ -14,7 +14,7 @@ import { getDynamicFilter } from '@shared/utils/referenceUtil';
 const FamilyStudentsList = () => {
     const record = useRecordContext();
     const { data: students = [] } = useGetList('student', {
-        filter: { familyReferenceId: record?.familyReferenceId },
+        filter: { 'familyReferenceId:$eq': record?.familyReferenceId },
         pagination: { page: 1, perPage: 100 },
         sort: { field: 'name', order: 'ASC' },
     }, { enabled: Boolean(record?.familyReferenceId) });
