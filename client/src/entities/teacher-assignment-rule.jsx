@@ -26,7 +26,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="classRulesJson" render={r => {
                 const items = r.classRulesJson || [];
