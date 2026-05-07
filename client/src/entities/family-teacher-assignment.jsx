@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useChoicesContext, useGetList, useGetMany, useInput, useListContext, useRecordContext } from 'react-admin';
-import { Autocomplete, TextField as MuiTextField } from '@mui/material';
+import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetList, useGetMany, useListContext, useRecordContext } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -26,39 +25,12 @@ const FamilyStudentsList = () => {
     );
 };
 
-const FamilyRefAutocomplete = ({ label, source }) => {
-    const { allChoices = [] } = useChoicesContext();
-    const { field } = useInput({ source });
-
-    const options = useMemo(() => {
-        const seen = new Set();
-        return allChoices.filter(s => s.familyReferenceId && !seen.has(s.familyReferenceId) && seen.add(s.familyReferenceId));
-    }, [allChoices]);
-
-    const selectedValue = useMemo(
-        () => options.find(s => s.familyReferenceId === field.value) ?? null,
-        [options, field.value]
-    );
-
-    return (
-        <Autocomplete
-            options={options}
-            getOptionLabel={o => o.name ?? ''}
-            value={selectedValue}
-            onChange={(_, v) => field.onChange(v?.familyReferenceId ?? '')}
-            isOptionEqualToValue={(o, v) => o.familyReferenceId === v.familyReferenceId}
-            renderInput={(params) => <MuiTextField {...params} label={label} size="small" variant="filled" />}
-            sx={{ minWidth: 220 }}
-        />
-    );
-};
-
 const StudentFamilyFilter = ({ source, label }) => {
     const { filterValues } = useListContext();
     const filter = useMemo(() => getDynamicFilter(filterByUserId, filterValues), [filterValues]);
     return (
-        <ReferenceInput source={source} reference="student" filter={filter}>
-            <FamilyRefAutocomplete label={label} source={source} />
+        <ReferenceInput source={source} reference="student" filter={filter} queryOptions={{ enabled: false }}>
+            <CommonAutocompleteInput label={label} optionValue="familyReferenceId" />
         </ReferenceInput>
     );
 };
