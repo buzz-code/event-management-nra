@@ -26,7 +26,7 @@ services:
         container_name: event-server-dev
         build:
             target: development
-        command: sh -c "yarn typeorm:run:ts && yarn start:dev"
+        command: sh -c "yarn typeorm:run && yarn start:dev"
         ports:
             - "3011:3000"
         volumes:
