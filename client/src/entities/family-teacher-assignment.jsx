@@ -110,7 +110,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             <FunctionField source="students" render={() => <FamilyStudentsList />} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="historyJson" render={r => {

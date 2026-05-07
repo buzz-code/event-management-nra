@@ -1,4 +1,4 @@
-import { BooleanField, BooleanInput, DateField, DateTimeInput, FunctionField, NumberField, NumberInput, ReferenceField, TextField, TextInput, required, ArrayInput, SimpleFormIterator } from 'react-admin';
+import { BooleanField, BooleanInput, DateField, DateTimeInput, FunctionField, NumberField, NumberInput, ReferenceField, TextField, TextInput, required, ArrayInput, SimpleFormIterator, SelectField } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
