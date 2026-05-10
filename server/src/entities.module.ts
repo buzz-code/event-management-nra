@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BaseEntityModule } from '@shared/base-entity/base-entity.module';
 import { createSharedEntitiesImports } from '@shared/entities/createSharedEntitiesImports';
+import userConfig from '@shared/entities/configs/user.config';
 
 import { Student } from './db/entities/Student.entity';
 import { Teacher } from './db/entities/Teacher.entity';
@@ -37,7 +38,7 @@ registerEntityNameMap({
 
 @Module({
   imports: [
-    ...createSharedEntitiesImports(),
+    ...createSharedEntitiesImports(userConfig),
 
     // Event Management System entities
     BaseEntityModule.register(eventConfig),
