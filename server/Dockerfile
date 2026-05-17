@@ -28,9 +28,6 @@ COPY .yarnclean /app/
 
 RUN yarn install --frozen-lockfile
 
-# Copy shared directory first for better layer caching
-COPY shared /app/shared
-# Copy the rest of the application
 COPY . .
 
 RUN yarn build
