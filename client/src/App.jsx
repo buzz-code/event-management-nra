@@ -65,7 +65,7 @@ const App = () => (
         <Resource name="event_note" {...eventNote} options={{ menuGroup: 'events' }} icon={CommentIcon} />
         <Resource name="gift" {...gift} options={{ menuGroup: 'events' }} icon={CardGiftcardIcon} />
         <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
-        {isAdmin(permissions) && <Resource name="unreported_event" {...unreportedEvent} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />}
+        <Resource name="unreported_event" {...(isAdmin(permissions) ? unreportedEvent : {})} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
         <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
         <Resource name="level_type" {...levelType} options={{ menuGroup: 'data' }} icon={RouteIcon} />
         <Resource name="family_status_type" {...familyStatusType} options={{ menuGroup: 'data' }} icon={FavoriteIcon} />
