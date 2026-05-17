@@ -10,8 +10,6 @@ import CommonSettingsResources from '@shared/components/app/CommonSettingsResour
 
 import { Dashboard, Layout } from 'src/GeneralLayout';
 
-import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
-
 // Event Management System Entities
 import event from "src/entities/event";
 import eventType from "src/entities/event-type";
@@ -22,14 +20,13 @@ import classEntity from "src/entities/class";
 import levelType from "src/entities/level-type";
 import familyStatusType from "src/entities/family-status-type";
 import studentClass from './entities/student-class';
-import studentByYear from './entities/student-by-year'; // Added import
+import studentByYear from './entities/student-by-year';
 import family from './entities/family';
 import tatnikit from './entities/tatnikit';
 import unreportedEvent from './entities/unreported-event';
 import teacherAssignmentRule from './entities/teacher-assignment-rule';
 import familyTeacherAssignment from './entities/family-teacher-assignment';
 
-// Keep required shared entities
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
 
@@ -63,30 +60,25 @@ const App = () => (
   >
     {permissions => (
       <>
-        {/* Event Management System Resources */}
         <Resource name="event" {...event} options={{ menuGroup: 'events' }} icon={EventIcon} />
         <Resource name="event_type" {...eventType} options={{ menuGroup: 'events' }} icon={CategoryIcon} />
         <Resource name="event_note" {...eventNote} options={{ menuGroup: 'events' }} icon={CommentIcon} />
         <Resource name="gift" {...gift} options={{ menuGroup: 'events' }} icon={CardGiftcardIcon} />
         <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
+        <Resource name="unreported_event" {...(isAdmin(permissions) ? unreportedEvent : {})} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
         <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
         <Resource name="level_type" {...levelType} options={{ menuGroup: 'data' }} icon={RouteIcon} />
         <Resource name="family_status_type" {...familyStatusType} options={{ menuGroup: 'data' }} icon={FavoriteIcon} />
-
-        {/* Keep Student and Teacher from original system */}
         <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
         <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
         <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
         <Resource name="family" {...family} options={{ menuGroup: 'data' }} icon={PeopleIcon} />
         <Resource name="tatnikit" {...tatnikit} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-        {isAdmin(permissions) && <Resource name="unreported_event" {...unreportedEvent} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />}
         <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
         <Resource name="teacher_assignment_rule" {...teacherAssignmentRule} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
         <Resource name="family_teacher_assignment" {...familyTeacherAssignment} options={{ menuGroup: 'data' }} icon={FamilyRestroomIcon} />
-
         {CommonSettingsResources()}
         {CommonAdminResources({ permissions })}
-
         {CommonRoutes({ permissions, roadmapFeatures, settingsPage: <Settings /> })}
       </>
     )}

@@ -223,9 +223,9 @@ The YemotSimulator component allows testing call flows without requiring actual 
    ```
 
 5. Access the application:
-   - Frontend: http://localhost:30013
-   - Backend API: http://localhost:30014
-   - phpMyAdmin: http://localhost:30015
+   - Frontend: http://localhost:3010
+   - Backend API: http://localhost:3011
+   - phpMyAdmin: http://localhost:8081
 
 ### Development Process
 

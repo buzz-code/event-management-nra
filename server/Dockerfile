@@ -20,8 +20,6 @@ CMD ["yarn", "start:dev"]
 
 FROM node:16-alpine AS builder
 
-RUN  apk add curl bash
-
 WORKDIR /app
 
 COPY package*.json /app/
