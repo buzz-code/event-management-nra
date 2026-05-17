@@ -274,15 +274,21 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return selectedGifts;
   }
 
-  private async getEventDate(): Promise<Date> {
-    this.logger.log(`Getting event date`);
-
-    const year = getCurrentHebrewYear(false);
+  private async getValidatedDay(): Promise<number> {
     const day = await this.askForInputByKey('DATE.DAY_SELECTION', {}, {
       min_digits: 1,
       max_digits: 2,
     });
     const dayNumber = parseInt(day);
+    if (dayNumber > 30) return this.getValidatedDay();
+    return dayNumber;
+  }
+
+  private async getEventDate(): Promise<Date> {
+    this.logger.log(`Getting event date`);
+
+    const year = getCurrentHebrewYear(false);
+    const dayNumber = await this.getValidatedDay();
 
     const months = getHebrewMonthsList(year);
     const month = await this.askForMenu('DATE.MONTH_SELECTION', months);

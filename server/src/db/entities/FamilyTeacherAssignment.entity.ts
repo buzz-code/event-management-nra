@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
   Index,
   BeforeInsert,
@@ -18,7 +17,6 @@ import { IHasUserId } from '@shared/base-entity/interface';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 import { User } from './User.entity';
 import { Teacher } from './Teacher.entity';
-import { Student } from './Student.entity';
 
 @Entity('family_teacher_assignment')
 @Index('fta_user_id_idx', ['userId'], {})
@@ -73,7 +71,4 @@ export class FamilyTeacherAssignment implements IHasUserId {
   @ManyToOne(() => Teacher, { nullable: true })
   @JoinColumn({ name: 'teacherReferenceId' })
   teacher: Teacher;
-
-  @OneToMany(() => Student, (student) => student.familyTeacherAssignment)
-  students: Student[];
 }

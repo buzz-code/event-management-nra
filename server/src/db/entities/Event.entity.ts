@@ -34,6 +34,7 @@ import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
 import { fillDefaultYearValue, getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { Gift } from './Gift.entity';
 import { getCurrentUser } from '@shared/utils/validation/current-user.util';
+import { FamilyTeacherAssignment } from './FamilyTeacherAssignment.entity';
 
 export enum EventReportOrigin {
   ONLY_TATNIKIT = 'only_tatnikit',
@@ -60,7 +61,7 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift, FamilyStatusType, Family]);
+      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift, FamilyStatusType, Family, FamilyTeacherAssignment]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,

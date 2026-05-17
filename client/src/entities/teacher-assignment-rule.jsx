@@ -1,4 +1,4 @@
-import { BooleanField, BooleanInput, DateField, DateTimeInput, FunctionField, NumberField, NumberInput, ReferenceField, TextField, TextInput, required, ArrayInput, SimpleFormIterator } from 'react-admin';
+import { BooleanField, BooleanInput, DateField, DateTimeInput, FunctionField, NumberField, NumberInput, ReferenceField, TextField, TextInput, required, ArrayInput, SimpleFormIterator, SelectField } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -26,7 +26,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="classRulesJson" render={r => {
                 const items = r.classRulesJson || [];

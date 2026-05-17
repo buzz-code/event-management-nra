@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { ArrayField, ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useGetMany, useRecordContext } from 'react-admin';
+import { useCallback, useEffect, useMemo } from 'react';
+import { ChipField, DateField, DateTimeInput, FunctionField, Labeled, ReferenceField, ReferenceInput, SelectField, SingleFieldList, TextField, TextInput, required, useChoicesContext, useGetList, useGetMany, useListContext, useRecordContext } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -8,6 +8,56 @@ import { filterByUserId } from '@shared/components/fields/CommonReferenceInputFi
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { getDynamicFilter } from '@shared/utils/referenceUtil';
+
+const FamilyStudentsList = () => {
+    const record = useRecordContext();
+    const { data: students = [] } = useGetList('student', {
+        filter: { 'familyReferenceId:$eq': record?.familyReferenceId },
+        pagination: { page: 1, perPage: 100 },
+        sort: { field: 'name', order: 'ASC' },
+    }, { enabled: Boolean(record?.familyReferenceId) });
+
+    return (
+        <SingleFieldList linkType={false} data={students}>
+            <ChipField source="name" />
+        </SingleFieldList>
+    );
+};
+
+const FamilyFilterAutocomplete = ({ label }) => {
+    const { allChoices = [] } = useChoicesContext();
+    const { filterValues, setFilters } = useListContext();
+
+    useEffect(() => {
+        if (!filterValues.familyReferenceId && filterValues._studentId != null) {
+            const { _studentId, ...rest } = filterValues;
+            setFilters(rest);
+        }
+    }, [filterValues.familyReferenceId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleChange = useCallback((studentId) => {
+        const { familyReferenceId: _a, _studentId: _b, ...rest } = filterValues;
+        if (studentId) {
+            const student = allChoices.find(s => s.id === studentId);
+            setFilters({ ...rest, familyReferenceId: student?.familyReferenceId, _studentId: studentId });
+        } else {
+            setFilters(rest);
+        }
+    }, [allChoices, filterValues, setFilters]);
+
+    return <CommonAutocompleteInput label={label} onChange={handleChange} />;
+};
+
+const StudentFamilyFilter = ({ label }) => {
+    const { filterValues } = useListContext();
+    const filter = useMemo(() => getDynamicFilter(filterByUserId, filterValues), [filterValues]);
+    return (
+        <ReferenceInput source="_studentId" reference="student" filter={filter}>
+            <FamilyFilterAutocomplete label={label} />
+        </ReferenceInput>
+    );
+};
 
 const HistoryList = () => {
     const record = useRecordContext();
@@ -42,9 +92,7 @@ const HistoryList = () => {
 const filters = [
     ...commonAdminFilters,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <ReferenceInput source="familyReferenceId:$eq" reference="student" filter={filterByUserId} label="חיפוש לפי תלמידה">
-        <CommonAutocompleteInput optionValue="familyReferenceId" label="חיפוש לפי תלמידה" />
-    </ReferenceInput>,
+    <StudentFamilyFilter source="familyReferenceId" label="חיפוש לפי תלמידה" />,
     <CommonReferenceInput source="teacherReferenceId" reference="teacher" alwaysOn />,
 ];
 
@@ -59,11 +107,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <SelectField source="year" choices={yearChoices} />
-            <ArrayField source="students">
-                <SingleFieldList linkType={false}>
-                    <ChipField source="name" />
-                </SingleFieldList>
-            </ArrayField>
+            <FunctionField source="students" render={() => <FamilyStudentsList />} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField source="historyJson" render={r => {
                 const items = r.historyJson || [];
@@ -83,11 +127,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {isAdmin && <TextInput source="familyReferenceId" disabled />}
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" />
         {!isCreate && <Labeled source="students">
-            <ArrayField source="students">
-                <SingleFieldList linkType={false}>
-                    <ChipField source="name" />
-                </SingleFieldList>
-            </ArrayField>
+            <FamilyStudentsList />
         </Labeled>}
         {!isCreate && <Labeled source="historyJson">
             <HistoryList />
