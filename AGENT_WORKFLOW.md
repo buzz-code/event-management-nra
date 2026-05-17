@@ -45,7 +45,7 @@ cp docker-compose.override.yml.template docker-compose.override.yml
 ```bash
 docker compose up -d                    # Start all services
 docker compose logs -f [service]       # Check logs
-# Access: Client :30013, API :30014, phpMyAdmin :30015
+# Access: Client :3010, API :3011, phpMyAdmin :8081
 ```
 
 ### Development Commands
