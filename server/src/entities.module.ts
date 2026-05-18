@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BaseEntityModule } from '@shared/base-entity/base-entity.module';
+import { createSharedEntitiesImports } from '@shared/entities/createSharedEntitiesImports';
+import userConfig from '@shared/entities/configs/user.config';
 
 import { Student } from './db/entities/Student.entity';
 import { Teacher } from './db/entities/Teacher.entity';
@@ -22,19 +24,8 @@ import tatnikitConfig from './entity-modules/tatnikit.config';
 import unreportedEventConfig from './entity-modules/unreported-event.config';
 import teacherAssignmentRuleConfig from './entity-modules/teacher-assignment-rule.config';
 import familyTeacherAssignmentConfig from './entity-modules/family-teacher-assignment.config';
-
-// Shared entities
-import { YemotCall } from '@shared/entities/YemotCall.entity';
-import { TextByUser } from '@shared/view-entities/TextByUser.entity';
-import { RecievedMail } from '@shared/entities/RecievedMail.entity';
-import { Image } from '@shared/entities/Image.entity';
-import userConfig from '@shared/entities/configs/user.config';
-import pageConfig from '@shared/entities/configs/page.config';
-import textConfig from '@shared/entities/configs/text.config';
-import paymentTrackConfig from '@shared/entities/configs/payment-track.config';
 import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
-import importFileConfig, { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
-import mailAddressConfig from '@shared/utils/mail/mail-address.config';
+import { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
 
 registerEntityNameMap({
   student: 'תלמידות',
@@ -47,7 +38,7 @@ registerEntityNameMap({
 
 @Module({
   imports: [
-    BaseEntityModule.register(userConfig),
+    ...createSharedEntitiesImports(userConfig),
 
     // Event Management System entities
     BaseEntityModule.register(eventConfig),
@@ -68,22 +59,13 @@ registerEntityNameMap({
     BaseEntityModule.register(teacherAssignmentRuleConfig),
     BaseEntityModule.register(familyTeacherAssignmentConfig),
 
-    // Common entities and utilities
-    BaseEntityModule.register(textConfig),
+    // Audit log
     BaseEntityModule.register(
       createAuditLogConfig({
         student: Student,
         teacher: Teacher,
       }),
     ),
-    BaseEntityModule.register(importFileConfig),
-    BaseEntityModule.register({ entity: YemotCall }),
-    BaseEntityModule.register(mailAddressConfig),
-    BaseEntityModule.register({ entity: RecievedMail }),
-    BaseEntityModule.register(pageConfig),
-    BaseEntityModule.register({ entity: TextByUser }),
-    BaseEntityModule.register({ entity: Image }),
-    BaseEntityModule.register(paymentTrackConfig),
   ],
 })
-export class EntitiesModule {}
+export class EntitiesModule { }

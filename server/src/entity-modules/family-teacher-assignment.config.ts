@@ -9,6 +9,7 @@ function getConfig(): BaseEntityModuleOptions {
       join: {
         user: { eager: false },
         teacher: { eager: false },
+        students: { eager: true, allow: ['id', 'name'] },
       },
     },
     exporter: {

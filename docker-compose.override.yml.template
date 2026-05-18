@@ -2,26 +2,56 @@ version: "3"
 name: event-management-nra-dev
 services:
     client:
-        container_name: client-dev
+        container_name: event-client-dev
         build:
             target: development
+        environment:
+            PORT: 3010
+            REACT_APP_API_URL: http://localhost:3011
         ports:
-          - "30013:80"
+            - "3010:3010"
+            - "24678:24678"
+        healthcheck:
+            test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3010/"]
+            interval: 10s
+            timeout: 5s
+            start_period: 60s
+            retries: 3
+        volumes:
+            - ./client:/app
+            - ./client/node_modules:/app/node_modules
+        networks:
+            - private-network
 
     server:
-        container_name: server-dev
+        container_name: event-server-dev
         build:
             target: development
-            args:
-                CLIENT_PORT: 30013
+        command: sh -c "yarn typeorm:run && yarn start:dev"
         ports:
-          - "30014:3000"
+            - "3011:3000"
+        volumes:
+            - ./server:/app
+            - ./server/node_modules:/app/node_modules
+        networks:
+            - private-network
 
     database:
-        container_name: database-dev
+        container_name: event-database-dev
+        ports:
+            - "3316:3306"
 
     phpmyadmin:
-        container_name: phpmyadmin-dev
+        container_name: event-phpmyadmin-dev
+        profiles: [tools]
         ports:
-          - "30015:80"
+            - "8081:80"
+        networks:
+            - private-network
 
+networks:
+    private-network:
+    caddy:
+        external: false
+    elknet:
+        external: false

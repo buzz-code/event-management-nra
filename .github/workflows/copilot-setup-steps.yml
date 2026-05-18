@@ -1,0 +1,69 @@
+name: "Copilot Setup Steps"
+
+# Automatically run the setup steps when they are changed to allow for easy validation, and
+# allow manual testing through the repository's "Actions" tab
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Set the permissions to the lowest permissions possible needed for your steps.
+    # Copilot will be given its own token for its operations.
+    permissions:
+      # Clone the repository to install dependencies
+      contents: read
+
+    # Environment variables to configure development tools
+    env:
+      # Skip Chromium download for Puppeteer (firewall restrictions)
+      PUPPETEER_SKIP_DOWNLOAD: true
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Initialize git submodules for shared components
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: |
+            server/yarn.lock
+            client/yarn.lock
+
+      - name: Install server dependencies
+        working-directory: ./server
+        run: yarn install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: yarn install --frozen-lockfile
+
+      # - name: Build server
+      #   working-directory: ./server
+      #   run: yarn build
+
+      # - name: Build client
+      #   working-directory: ./client
+      #   run: yarn build
+
+      # - name: Verify server tests can run
+      #   working-directory: ./server
+      #   run: yarn test --passWithNoTests
+
+      # - name: Verify client tests can run
+      #   working-directory: ./client
+      #   run: yarn test --passWithNoTests
