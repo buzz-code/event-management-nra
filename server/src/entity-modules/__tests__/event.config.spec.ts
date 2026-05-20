@@ -22,7 +22,7 @@ describe('EventConfig', () => {
     expect(eventConfig.exporter).toBeDefined();
     expect(eventConfig.exporter.getExportHeaders).toBeInstanceOf(Function);
     expect(eventConfig.exporter.processReqForExport).toBeInstanceOf(Function);
-    
+
     // Test that headers are properly defined
     const mockEntityColumns = ['id', 'name', 'year'];
     const headers = eventConfig.exporter.getExportHeaders(mockEntityColumns);

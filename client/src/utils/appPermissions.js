@@ -1,7 +1,7 @@
 import { useHasPermission, hasPermissionLogic } from '@shared/utils/permissionsUtil';
 
 export const appPermissions = {
-  teacher: 'teacher',
+    teacher: 'teacher',
 };
 
 export const isTeacher = (permissions) => hasPermissionLogic(permissions, appPermissions.teacher);

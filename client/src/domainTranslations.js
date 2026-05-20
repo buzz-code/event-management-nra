@@ -1,5 +1,5 @@
-import { generalResourceFieldsTranslation } from "@shared/providers/i18nProvider"
-import { sharedEntityTranslations } from "@shared/entities/shared-entity.translations"
+import { generalResourceFieldsTranslation } from '@shared/providers/i18nProvider';
+import { sharedEntityTranslations } from '@shared/entities/shared-entity.translations';
 
 export default {
     menu_groups: {
@@ -52,14 +52,14 @@ export default {
                 reportedByTatnikit: 'דווח ע"י תתניקית',
                 reportOrigin: 'מקור הדיווח',
                 'reportOrigin:$eq': 'מקור הדיווח',
-            }
+            },
         },
         event_type: {
             name: 'סוג אירוע |||| סוגי אירועים',
             fields: {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
-            }
+            },
         },
         level_type: {
             name: 'סוג רמה |||| סוגי רמה',
@@ -67,13 +67,13 @@ export default {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
                 'description:$cont': 'חיפוש בתיאור',
-            }
+            },
         },
         family_status_type: {
             name: 'סוג מצב משפחתי |||| סוגי מצב משפחתי',
             fields: {
                 ...generalResourceFieldsTranslation,
-            }
+            },
         },
         event_note: {
             name: 'הערה לאירוע |||| הערות לאירועים',
@@ -82,14 +82,14 @@ export default {
                 eventReferenceId: 'אירוע',
                 noteText: 'הערה',
                 'noteText:$cont': 'חיפוש בהערה',
-            }
+            },
         },
         gift: {
             name: 'מתנה |||| מתנות',
             fields: {
                 ...generalResourceFieldsTranslation,
                 description: 'תיאור',
-            }
+            },
         },
         event_gift: {
             name: 'מתנה לאירוע |||| מתנות לאירועים',
@@ -98,7 +98,7 @@ export default {
                 eventReferenceId: 'אירוע',
                 giftReferenceId: 'מתנה',
                 giftKey: 'מפתח מתנה',
-            }
+            },
         },
         class: {
             name: 'כיתה |||| כיתות',
@@ -106,7 +106,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 gradeLevel: 'שכבה',
                 'gradeLevel:$cont': 'חיפוש בשכבה',
-            }
+            },
         },
         student_class: {
             name: 'שיוך תלמיד לכיתה |||| שיוכי תלמידים לכיתות',
@@ -116,7 +116,7 @@ export default {
                 studentTz: 'תלמיד',
                 classReferenceId: 'כיתה',
                 classKey: 'כיתה',
-            }
+            },
         },
         tatnikit: {
             name: 'תתניקית |||| תתניקיות',
@@ -126,7 +126,7 @@ export default {
                 studentTz: 'ת.ז. תלמידה',
                 classReferenceId: 'כיתה',
                 classKey: 'כיתה',
-            }
+            },
         },
         unreported_event: {
             name: 'אירוע לא מדווח |||| אירועים לא מדווחים',
@@ -140,7 +140,7 @@ export default {
                 reporterStudentTz: 'דווח ע"י',
                 classReferenceId: 'כיתה',
                 eventMonth: 'חודש',
-            }
+            },
         },
         student_by_year: {
             name: 'תלמידה לפי שנה |||| תלמידות לפי שנים',
@@ -152,7 +152,7 @@ export default {
                 year: 'שנה',
                 classNames: 'שמות כיתות',
                 classReferenceIds: 'מזהי כיתות',
-            }
+            },
         },
         student: {
             name: 'תלמידה |||| תלמידות',
@@ -174,7 +174,7 @@ export default {
                 familyStatusKey: 'מצב משפחתי',
                 familyStatusReferenceId: 'מצב משפחתי',
                 familyReferenceId: 'בנות במשפחה',
-            }
+            },
         },
         family: {
             name: 'משפחה |||| משפחות',
@@ -194,7 +194,7 @@ export default {
                 'motherContact:$cont': 'חיפוש בטלפון האם',
                 numberOfDaughters: 'מספר בנות',
                 representativeStudentId: 'תלמידה מייצגת',
-            }
+            },
         },
         teacher: {
             name: 'מורה |||| מורות',
@@ -202,7 +202,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 ownUserId: 'משתמש משויך',
                 tz: 'תעודת זהות',
-            }
+            },
         },
         teacher_assignment_rule: {
             name: 'כלל שיבוץ מורה |||| כללי שיבוץ מורות',
@@ -215,7 +215,7 @@ export default {
                 'gradeRulesJson.grade': 'שכבה',
                 customRatio: 'יחס מותאם',
                 isActive: 'פעיל?',
-            }
+            },
         },
         family_teacher_assignment: {
             name: 'שיבוץ מורה למשפחה |||| שיבוצי מורות למשפחות',
@@ -225,7 +225,7 @@ export default {
                 teacherReferenceId: 'מורה ברירת מחדל',
                 students: 'תלמידות',
                 historyJson: 'היסטוריית שיבוצים',
-            }
+            },
         },
 
         // Common Settings and Utilities - to keep as requested
@@ -240,8 +240,7 @@ export default {
                 'dashboardItems.filter': 'פילטר נוסף בפורמט JSON (אופציונלי, ללא שנה)',
                 'dashboardItems.title': 'כותרת',
                 maintainanceMessage: 'הודעה לסגירת המערכת הטלפונית',
-            }
+            },
         },
-
-    }
+    },
 };

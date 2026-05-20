@@ -10,7 +10,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MapIcon from '@mui/icons-material/Map';
 import PercentIcon from '@mui/icons-material/Percent';
 
-import BaseLayout from "@shared/components/layout/Layout";
+import BaseLayout from '@shared/components/layout/Layout';
 import BaseDashboard from '@shared/components/views/Dashboard';
 import { useDashboardItems } from './settings/settingsUtil';
 import { UpcomingEvents } from './dashboard/UpcomingEvents';
@@ -19,7 +19,10 @@ import { EventStatsContainer } from './dashboard/EventStatsContainer';
 const customMenuItems = [
     <MenuItemLink key="tutorial" to="/tutorial" primaryText="מדריך למשתמש" leftIcon={<HelpIcon />} />,
     <MenuItemLink key="pages-view" to="/pages-view" primaryText="הסברים נוספים" leftIcon={<ImportContactsIcon />} />,
-    ({ isAdmin }) => isAdmin && <MenuItemLink key="yemot-simulator" to="/yemot-simulator" primaryText="סימולטור" leftIcon={<CallIcon />} />,
+    ({ isAdmin }) =>
+        isAdmin && (
+            <MenuItemLink key="yemot-simulator" to="/yemot-simulator" primaryText="סימולטור" leftIcon={<CallIcon />} />
+        ),
     <MenuItemLink key="roadmap" to="/roadmap" primaryText="פיתוחים עתידיים" leftIcon={<MapIcon />} />,
     <MenuItemLink key="settings" to="/settings" primaryText="הגדרות משתמש" leftIcon={<SettingsIcon />} />,
     // <MenuItemLink key="profile" to="/profile" primaryText="פרופיל" leftIcon={<PersonIcon />} />,
@@ -41,9 +44,9 @@ export const Layout = ({ children }) => (
 export const Dashboard = () => {
     const dashboardItems = useDashboardItems();
     return (
-        <BaseDashboard dashboardItems={dashboardItems} >
+        <BaseDashboard dashboardItems={dashboardItems}>
             <UpcomingEvents />
             <EventStatsContainer />
         </BaseDashboard>
     );
-}
+};

@@ -1,4 +1,17 @@
-import { DateField, DateTimeInput, Labeled, maxLength, ReferenceField, required, TextField, TextInput, UrlField, useCreatePath, useRecordContext, useResourceContext } from 'react-admin';
+import {
+    DateField,
+    DateTimeInput,
+    Labeled,
+    maxLength,
+    ReferenceField,
+    required,
+    TextField,
+    TextInput,
+    UrlField,
+    useCreatePath,
+    useRecordContext,
+    useResourceContext,
+} from 'react-admin';
 import { Link } from 'react-router-dom';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
@@ -20,16 +33,14 @@ const FamilySizeField = ({ source, reference, ...props }) => {
     const filterValue = { [source]: get(record, source) };
 
     return (
-        <ReferenceField
-            source={source}
-            reference={reference}
-            link={false}
-            record={record}
-        >
-            <Link to={{
-                pathname: listUrl,
-                search: `filter=${JSON.stringify(filterValue)}`
-            }} onClick={e => e.stopPropagation()}>
+        <ReferenceField source={source} reference={reference} link={false} record={record}>
+            <Link
+                to={{
+                    pathname: listUrl,
+                    search: `filter=${JSON.stringify(filterValue)}`,
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
                 <TextField source="numberOfDaughters" />
             </Link>
         </ReferenceField>
@@ -46,7 +57,11 @@ const filters = [
     <TextInput source="fatherName:$cont" />,
     <TextInput source="fatherContact:$cont" />,
     <TextInput source="motherPreviousName:$cont" />,
-    <CommonReferenceInputFilter source="familyStatusReferenceId" reference="family_status_type" filterToQuery={filterByUserId} />,
+    <CommonReferenceInputFilter
+        source="familyStatusReferenceId"
+        reference="family_status_type"
+        filterToQuery={filterByUserId}
+    />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -69,33 +84,49 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
-}
+};
 
 const Inputs = ({ isCreate, isAdmin }) => {
     const unique = useUnique();
 
-    return <>
-        {!isCreate && isAdmin && <TextInput source="id" disabled />}
-        {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="tz" validate={[required(), maxLength(9), unique()]} />
-        <TextInput source="name" validate={[required(), maxLength(510)]} />
-        <TextInput source="address" validate={[maxLength(1000)]} multiline />
-        <TextInput source="motherName" validate={[maxLength(255)]} />
-        <TextInput source="motherContact" validate={[maxLength(255)]} />
-        <TextInput source="fatherName" validate={[maxLength(255)]} />
-        <TextInput source="fatherContact" validate={[maxLength(255)]} />
-        <TextInput source="motherPreviousName" validate={[maxLength(255)]} />
-        <CommonReferenceInput source="familyStatusReferenceId" reference="family_status_type" dynamicFilter={filterByUserId} />
-        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
-    </>
-}
+    return (
+        <>
+            {!isCreate && isAdmin && <TextInput source="id" disabled />}
+            {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
+            <TextInput source="tz" validate={[required(), maxLength(9), unique()]} />
+            <TextInput source="name" validate={[required(), maxLength(510)]} />
+            <TextInput source="address" validate={[maxLength(1000)]} multiline />
+            <TextInput source="motherName" validate={[maxLength(255)]} />
+            <TextInput source="motherContact" validate={[maxLength(255)]} />
+            <TextInput source="fatherName" validate={[maxLength(255)]} />
+            <TextInput source="fatherContact" validate={[maxLength(255)]} />
+            <TextInput source="motherPreviousName" validate={[maxLength(255)]} />
+            <CommonReferenceInput
+                source="familyStatusReferenceId"
+                reference="family_status_type"
+                dynamicFilter={filterByUserId}
+            />
+            {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+            {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
+        </>
+    );
+};
 
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'name', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName', 'familyStatusKey'],
-}
+    fields: [
+        'tz',
+        'name',
+        'address',
+        'motherName',
+        'motherContact',
+        'fatherName',
+        'fatherContact',
+        'motherPreviousName',
+        'familyStatusKey',
+    ],
+};
 
 const entity = {
     Datagrid,

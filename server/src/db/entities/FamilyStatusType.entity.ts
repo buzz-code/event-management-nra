@@ -20,7 +20,7 @@ import { IHasUserId } from '@shared/base-entity/interface';
 export class FamilyStatusType implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
-  fillFields() { }
+  fillFields() {}
 
   @PrimaryGeneratedColumn()
   id: number;

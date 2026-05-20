@@ -19,50 +19,50 @@ import { getConcatExpression } from '@shared/utils/entity/column-types.util';
           "'_'",
           'COALESCE(students.fatherContact, "")',
           "'_'",
-          'COALESCE(students.motherContact, "")'
+          'COALESCE(students.motherContact, "")',
         ),
-        'id'
+        'id',
       )
       .addSelect('students.userId', 'userId')
       .addSelect(
         // Extract family name from last name of students (assuming it's the family name)
-        'SUBSTRING_INDEX(MIN(students.name), \' \', -1)',
-        'familyName'
+        "SUBSTRING_INDEX(MIN(students.name), ' ', -1)",
+        'familyName',
       )
       .addSelect(
         // Get father name from first student (MIN by id ensures consistent selection)
         'MIN(students.fatherName)',
-        'fatherName'
+        'fatherName',
       )
       .addSelect(
         // Get mother name from first student
         'MIN(students.motherName)',
-        'motherName'
+        'motherName',
       )
       .addSelect(
         // Get mother previous name from first student
         'MIN(students.motherPreviousName)',
-        'motherPreviousName'
+        'motherPreviousName',
       )
       .addSelect(
         // Get father contact from first student
         'MIN(students.fatherContact)',
-        'fatherContact'
+        'fatherContact',
       )
       .addSelect(
         // Get mother contact from first student
         'MIN(students.motherContact)',
-        'motherContact'
+        'motherContact',
       )
       .addSelect(
         // Count number of daughters in family
         'COUNT(students.id)',
-        'numberOfDaughters'
+        'numberOfDaughters',
       )
       .addSelect(
         // Get representative student ID (first student by ID)
         'MIN(students.id)',
-        'representativeStudentId'
+        'representativeStudentId',
       )
       .from(Student, 'students')
       .groupBy('students.userId')

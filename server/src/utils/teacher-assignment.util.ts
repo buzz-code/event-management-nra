@@ -25,10 +25,7 @@ function getWeightedLoad(rule: TeacherAssignmentRule, loadCount: Map<number, num
  * Picks the lowest weighted-load teacher from a pool of rules.
  * Shuffles first so ties resolve randomly (not by DB order).
  */
-function pickBestRule(
-  rulesPool: TeacherAssignmentRule[],
-  loadCount: Map<number, number>,
-): TeacherAssignmentRule {
+function pickBestRule(rulesPool: TeacherAssignmentRule[], loadCount: Map<number, number>): TeacherAssignmentRule {
   const pool = shuffled(rulesPool);
   return pool.reduce((best, rule) =>
     getWeightedLoad(rule, loadCount) < getWeightedLoad(best, loadCount) ? rule : best,
@@ -56,12 +53,8 @@ function pickTeacher(
   loadCount: Map<number, number>,
 ): { rule: TeacherAssignmentRule; reason: string } {
   const matchingRules = eligibleRules.filter((rule) => {
-    const classMatch = rule.classRulesJson?.some(
-      (c) => c.classReferenceId === event.studentClassReferenceId,
-    );
-    const gradeMatch = rule.gradeRulesJson?.some(
-      (g) => g.grade === event.grade?.toString(),
-    );
+    const classMatch = rule.classRulesJson?.some((c) => c.classReferenceId === event.studentClassReferenceId);
+    const gradeMatch = rule.gradeRulesJson?.some((g) => g.grade === event.grade?.toString());
     return classMatch || gradeMatch;
   });
 
@@ -132,7 +125,7 @@ export function assignTeacher(
 
   const eligibleRules: TeacherAssignmentRule[] =
     allRules.length === 0 && candidateTeacherIds?.length
-      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 } as TeacherAssignmentRule))
+      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 }) as TeacherAssignmentRule)
       : allRules;
 
   const year = event.year ?? getCurrentHebrewYear();
@@ -145,7 +138,8 @@ export function assignTeacher(
     source = 'family_default';
     reason = `family_default: existing FTA (ftaId=${fta.id ?? 'new'}) has teacherReferenceId=${fta.teacherReferenceId}`;
   } else {
-    if (eligibleRules.length === 0) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no active rules and no FTA for this family' };
+    if (eligibleRules.length === 0)
+      return { chosenTeacherId: null, ftaUpdate: null, reason: 'no active rules and no FTA for this family' };
 
     const { rule, reason: pickReason } = pickTeacher(eligibleRules, event, loadCount);
     chosenTeacherId = rule.teacherReferenceId;
@@ -153,7 +147,8 @@ export function assignTeacher(
     reason = `rules: ${pickReason}`;
   }
 
-  if (!chosenTeacherId) return { chosenTeacherId: null, ftaUpdate: null, reason: 'pickTeacher returned null teacherReferenceId' };
+  if (!chosenTeacherId)
+    return { chosenTeacherId: null, ftaUpdate: null, reason: 'pickTeacher returned null teacherReferenceId' };
 
   const record: Partial<FamilyTeacherAssignment> = fta ?? {
     userId: event.userId,
@@ -201,17 +196,24 @@ export function assignTeachersBatch(
   const year = events[0].year ?? getCurrentHebrewYear();
   const now = new Date().toISOString();
 
-  const eligibleRules = allRules.length === 0 && candidateTeacherIds?.length
-    ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 } as TeacherAssignmentRule))
-    : allRules;
+  const eligibleRules =
+    allRules.length === 0 && candidateTeacherIds?.length
+      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 }) as TeacherAssignmentRule)
+      : allRules;
 
   // Group events by family; events with no familyId are marked unassigned immediately
-  const eventsByFamily = events.reduce((acc, event) => {
-    const familyId = event.student?.familyReferenceId ?? null;
-    if (!familyId) { assignmentMap.set(event.id, null); return acc; }
-    (acc[familyId] ??= []).push(event);
-    return acc;
-  }, {} as Record<string, Event[]>);
+  const eventsByFamily = events.reduce(
+    (acc, event) => {
+      const familyId = event.student?.familyReferenceId ?? null;
+      if (!familyId) {
+        assignmentMap.set(event.id, null);
+        return acc;
+      }
+      (acc[familyId] ??= []).push(event);
+      return acc;
+    },
+    {} as Record<string, Event[]>,
+  );
 
   // Track in-batch load: families processed earlier influence later families
   const batchLoadCount = new Map<number, number>();

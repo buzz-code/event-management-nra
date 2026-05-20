@@ -41,9 +41,9 @@ describe('student-class.config', () => {
     const mockReq = {
       options: {
         query: {
-          join: {}
-        }
-      }
+          join: {},
+        },
+      },
     };
 
     studentClassConfig.exporter.processReqForExport(mockReq as any, mockInnerFunc);

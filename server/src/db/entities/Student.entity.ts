@@ -51,7 +51,7 @@ export class Student implements IHasUserId {
           this.motherName || '',
           this.motherPreviousName || '',
           this.fatherContact || '',
-          this.motherContact || ''
+          this.motherContact || '',
         ].join('_');
 
         this.familyReferenceId = familyIdentifier;
@@ -127,7 +127,9 @@ export class Student implements IHasUserId {
   @Column({ nullable: true })
   familyStatusKey: number;
 
-  @ValidateIf((student: Student) => !Boolean(student.familyStatusKey) && Boolean(student.familyStatusReferenceId), { always: true })
+  @ValidateIf((student: Student) => !Boolean(student.familyStatusKey) && Boolean(student.familyStatusReferenceId), {
+    always: true,
+  })
   @Column('int', { name: 'family_status_reference_id', nullable: true })
   familyStatusReferenceId: number;
 
