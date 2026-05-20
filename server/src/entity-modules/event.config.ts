@@ -51,9 +51,7 @@ function getConfig(): BaseEntityModuleOptions {
           notes: { eager: true },
           eventGifts: { eager: true },
         };
-        req.options.query.sort = [
-          { field: 'student.familyReferenceId', order: 'ASC' },
-        ];
+        req.options.query.sort = [{ field: 'student.familyReferenceId', order: 'ASC' }];
         return innerFunc(req);
       },
       getExportHeaders(entityColumns: string[]): IHeader[] {
@@ -140,7 +138,9 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
               where: { userId, year, isActive: true, ...optionalInFilter(teacherIds, 'teacherReferenceId') },
             }),
             familyIds.length
-              ? this.dataSource.getRepository(FamilyTeacherAssignment).findBy({ userId, year, familyReferenceId: In(familyIds) })
+              ? this.dataSource
+                  .getRepository(FamilyTeacherAssignment)
+                  .findBy({ userId, year, familyReferenceId: In(familyIds) })
               : Promise.resolve([]),
           ]);
 
@@ -149,7 +149,9 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
           );
 
           const { assignmentMap, ftaUpdates } = assignTeachersBatch(
-            yearEvents, allRules, ftaMap,
+            yearEvents,
+            allRules,
+            ftaMap,
             teacherIds.length ? teacherIds : undefined,
           );
 

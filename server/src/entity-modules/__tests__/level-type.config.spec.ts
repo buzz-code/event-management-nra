@@ -40,9 +40,9 @@ describe('level-type.config', () => {
     const mockReq = {
       options: {
         query: {
-          join: {}
-        }
-      }
+          join: {},
+        },
+      },
     };
 
     levelTypeConfig.exporter.processReqForExport(mockReq as any, mockInnerFunc);

@@ -23,7 +23,6 @@
 //   { id: 'Georgia', name: 'Georgia' }
 // ].sort((a, b) => a.name.localeCompare(b.name));
 
-
 // export function ReportStylesInput() {
 //   return (
 //     <Accordion sx={{ width: '100%' }}>

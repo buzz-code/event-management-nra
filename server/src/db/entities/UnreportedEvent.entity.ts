@@ -117,7 +117,9 @@ export class UnreportedEvent implements IHasUserId {
   @Column({ nullable: true })
   eventTypeKey: number;
 
-  @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.eventTypeKey) && Boolean(obj.eventTypeReferenceId), { always: true })
+  @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.eventTypeKey) && Boolean(obj.eventTypeReferenceId), {
+    always: true,
+  })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @Column({ nullable: true })
   eventTypeReferenceId: number;
@@ -131,7 +133,9 @@ export class UnreportedEvent implements IHasUserId {
   @Column({ nullable: true })
   reporterStudentTz: string;
 
-  @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.reporterStudentTz) && Boolean(obj.reporterStudentReferenceId), { always: true })
+  @ValidateIf((obj: UnreportedEvent) => !Boolean(obj.reporterStudentTz) && Boolean(obj.reporterStudentReferenceId), {
+    always: true,
+  })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @Column({ nullable: true })
   reporterStudentReferenceId: number;

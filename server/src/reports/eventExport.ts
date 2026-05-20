@@ -19,7 +19,10 @@ export interface EventExportData extends IDataToExcelReportGenerator {
   events: Event[];
 }
 
-const getReportData: IGetReportDataFunction = async (params: EventExportParams, dataSource): Promise<EventExportData> => {
+const getReportData: IGetReportDataFunction = async (
+  params: EventExportParams,
+  dataSource,
+): Promise<EventExportData> => {
   const eventIds = getAsNumberArray(params.ids) ?? [];
 
   const [user, events] = await Promise.all([
@@ -41,9 +44,9 @@ const getReportData: IGetReportDataFunction = async (params: EventExportParams, 
       },
       order: {
         student: {
-          familyReferenceId: 'ASC'
-        }
-      }
+          familyReferenceId: 'ASC',
+        },
+      },
     }),
   ]);
 
@@ -67,14 +70,18 @@ const getReportData: IGetReportDataFunction = async (params: EventExportParams, 
     { value: 'student.motherPreviousName', label: 'שם משפחה קודם של האם', readOnly: true },
     { value: 'student.familyStatus.name', label: 'מצב משפחתי', readOnly: true },
     { value: 'student.family.numberOfDaughters', label: 'מספר בנות במשפחה', readOnly: true },
-    { value: (row: any) => row.notes?.map((note: any) => note.noteText).join('\r\n') || '', label: 'הערות', readOnly: true },
+    {
+      value: (row: any) => row.notes?.map((note: any) => note.noteText).join('\r\n') || '',
+      label: 'הערות',
+      readOnly: true,
+    },
     { value: (_) => '', label: 'הערה חדשה' },
   ];
 
   const headerRow = getHeaderNames(headers);
 
   const formatters = getHeaderFormatters(headers);
-  const formattedData = events.map(event => formatters.map(func => func(event)));
+  const formattedData = events.map((event) => formatters.map((func) => func(event)));
 
   return {
     fileTitle: 'ייצוא אירועים',

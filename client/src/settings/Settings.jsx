@@ -1,6 +1,16 @@
 import React from 'react';
 import { Card, CardContent } from '@mui/material';
-import { SimpleForm, Title, useNotify, useGetIdentity, useDataProvider, SaveButton, Toolbar, useAuthProvider, ResourceContextProvider } from 'react-admin';
+import {
+    SimpleForm,
+    Title,
+    useNotify,
+    useGetIdentity,
+    useDataProvider,
+    SaveButton,
+    Toolbar,
+    useAuthProvider,
+    ResourceContextProvider,
+} from 'react-admin';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultPageSize } from '@shared/utils/settingsUtil';
 import { getDashboardItems, getMaintainanceMessage } from './settingsUtil';
@@ -43,11 +53,7 @@ export default function Settings() {
             <Title title="הגדרות" />
             <CardContent>
                 <ResourceContextProvider value="settings">
-                    <SimpleForm
-                        onSubmit={handleSave}
-                        defaultValues={defaultValues}
-                        toolbar={<SettingsToolbar />}
-                    >
+                    <SimpleForm onSubmit={handleSave} defaultValues={defaultValues} toolbar={<SettingsToolbar />}>
                         <GeneralSettingsInput />
                         <DashboardItemsInput />
                     </SimpleForm>

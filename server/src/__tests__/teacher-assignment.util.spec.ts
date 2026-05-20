@@ -140,9 +140,7 @@ describe('assignTeachersBatch', () => {
       ]),
     );
     const events = [
-      ...Array.from({ length: 5 }, (_, i) =>
-        makeEvent({ id: i + 1, student: { familyReferenceId: `fam${i + 1}` } }),
-      ),
+      ...Array.from({ length: 5 }, (_, i) => makeEvent({ id: i + 1, student: { familyReferenceId: `fam${i + 1}` } })),
       makeEvent({ id: 6, student: { familyReferenceId: 'fam6' } }),
     ];
     const rules = [makeRule({ teacherReferenceId: 10 }), makeRule({ teacherReferenceId: 11 })];
@@ -180,9 +178,7 @@ describe('assignTeachersBatch', () => {
       ]),
     );
     const events = [
-      ...Array.from({ length: 5 }, (_, i) =>
-        makeEvent({ id: i + 1, student: { familyReferenceId: `fam${i + 1}` } }),
-      ),
+      ...Array.from({ length: 5 }, (_, i) => makeEvent({ id: i + 1, student: { familyReferenceId: `fam${i + 1}` } })),
       makeEvent({ id: 6, student: { familyReferenceId: 'fam6' } }),
     ];
     const rules = [
@@ -195,18 +191,31 @@ describe('assignTeachersBatch', () => {
 
   it('customRatio=null is treated as 1', () => {
     const event = makeEvent({ id: 1, student: { familyReferenceId: 'fam1' } });
-    const { assignmentMap } = assignTeachersBatch([event], [makeRule({ teacherReferenceId: 10, customRatio: null })], new Map());
+    const { assignmentMap } = assignTeachersBatch(
+      [event],
+      [makeRule({ teacherReferenceId: 10, customRatio: null })],
+      new Map(),
+    );
     expect(assignmentMap.get(1)).toBe(10);
   });
 
   it('customRatio=negative is treated as 1', () => {
     const event = makeEvent({ id: 1, student: { familyReferenceId: 'fam1' } });
-    const { assignmentMap } = assignTeachersBatch([event], [makeRule({ teacherReferenceId: 10, customRatio: -5 })], new Map());
+    const { assignmentMap } = assignTeachersBatch(
+      [event],
+      [makeRule({ teacherReferenceId: 10, customRatio: -5 })],
+      new Map(),
+    );
     expect(assignmentMap.get(1)).toBe(10);
   });
 
   it('class-matching rule wins over non-matching when equally loaded', () => {
-    const event = makeEvent({ id: 1, student: { familyReferenceId: 'fam1' }, studentClassReferenceId: 'classA', grade: null });
+    const event = makeEvent({
+      id: 1,
+      student: { familyReferenceId: 'fam1' },
+      studentClassReferenceId: 'classA',
+      grade: null,
+    });
     const rules = [
       makeRule({ teacherReferenceId: 10, classRulesJson: [{ classReferenceId: 'classA' }] }),
       makeRule({ teacherReferenceId: 11, classRulesJson: null, gradeRulesJson: null }),
@@ -216,7 +225,12 @@ describe('assignTeachersBatch', () => {
   });
 
   it('grade-matching rule wins over non-matching when equally loaded', () => {
-    const event = makeEvent({ id: 1, student: { familyReferenceId: 'fam1' }, studentClassReferenceId: null, grade: '9' });
+    const event = makeEvent({
+      id: 1,
+      student: { familyReferenceId: 'fam1' },
+      studentClassReferenceId: null,
+      grade: '9',
+    });
     const rules = [
       makeRule({ teacherReferenceId: 10, gradeRulesJson: [{ grade: '9' }] }),
       makeRule({ teacherReferenceId: 11, classRulesJson: null, gradeRulesJson: null }),

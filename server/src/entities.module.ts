@@ -68,4 +68,4 @@ registerEntityNameMap({
     ),
   ],
 })
-export class EntitiesModule { }
+export class EntitiesModule {}

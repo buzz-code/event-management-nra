@@ -61,7 +61,22 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift, FamilyStatusType, Family, FamilyTeacherAssignment]);
+      dataSource = await getDataSource([
+        EventType,
+        Teacher,
+        Student,
+        User,
+        LevelType,
+        StudentClass,
+        Class,
+        EventNote,
+        Event,
+        EventGift,
+        Gift,
+        FamilyStatusType,
+        Family,
+        FamilyTeacherAssignment,
+      ]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -106,9 +121,9 @@ export class Event implements IHasUserId {
           where: {
             studentReferenceId: this.studentReferenceId,
             year: this.year ?? getCurrentHebrewYear(),
-            userId: this.userId
+            userId: this.userId,
           },
-          order: { id: 'ASC' } // Get the first class (oldest entry)
+          order: { id: 'ASC' }, // Get the first class (oldest entry)
         });
 
         if (studentClass && studentClass.classReferenceId) {
@@ -136,7 +151,7 @@ export class Event implements IHasUserId {
 
       if (this.eventDate) {
         const exactHebrewDate = formatHebrewDate(this.eventDate);
-        this.eventHebrewMonth = exactHebrewDate.split(' ')[1];;
+        this.eventHebrewMonth = exactHebrewDate.split(' ')[1];
 
         if (this.reportOrigin === EventReportOrigin.ONLY_TATNIKIT && !this.id) {
           this.eventHebrewDate = this.eventHebrewMonth ? `${this.eventHebrewMonth} (משוער)` : exactHebrewDate;
@@ -264,7 +279,9 @@ export class Event implements IHasUserId {
   @Column({ nullable: true })
   reporterStudentTz: number;
 
-  @ValidateIf((event: Event) => !Boolean(event.reporterStudentTz) && Boolean(event.reporterStudentReferenceId), { always: true })
+  @ValidateIf((event: Event) => !Boolean(event.reporterStudentTz) && Boolean(event.reporterStudentReferenceId), {
+    always: true,
+  })
   @Column({ nullable: true })
   reporterStudentReferenceId: number;
 
