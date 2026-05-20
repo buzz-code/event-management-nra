@@ -16,15 +16,17 @@ export const EventStatsCard = ({ title, resource, icon }) => {
 
     const { mutate, isPending, data } = useMutation({
         mutationFn: () =>
-            dataProvider.getList(resource, {
-                pagination: { page: 1, perPage: 5 },
-                sort: { field: 'id', order: 'DESC' },
-            }),
+            dataProvider
+                .getList(resource, {
+                    pagination: { page: 1, perPage: 5 },
+                    sort: { field: 'id', order: 'DESC' },
+                })
+                .then(({ data }) => data),
     });
 
     useEffect(() => {
         mutate();
-    }, [resource]);
+    }, [resource, mutate]);
 
     const IconComponent = icon;
 

@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Chip from '@mui/material/Chip';
 import TableContainer from '@mui/material/TableContainer';
+import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
@@ -20,11 +21,13 @@ export const UpcomingEvents = () => {
     const dataProvider = useDataProvider();
     const { mutate, isPending, data } = useMutation({
         mutationFn: () =>
-            dataProvider.getList('event', {
-                pagination: { page: 1, perPage: 5 },
-                sort: { field: 'eventDate', order: 'ASC' },
-                filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] },
-            }),
+            dataProvider
+                .getList('event', {
+                    pagination: { page: 1, perPage: 5 },
+                    sort: { field: 'eventDate', order: 'ASC' },
+                    filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] },
+                })
+                .then(({ data }) => data),
     });
     const createPath = useCreatePath();
     const getPathForRecord = useGetPathForRecordCallback();
@@ -32,7 +35,7 @@ export const UpcomingEvents = () => {
 
     useEffect(() => {
         mutate();
-    }, []);
+    }, [mutate]);
 
     return (
         <Grid item xs={12} mt={3}>
