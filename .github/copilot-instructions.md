@@ -1,61 +1,54 @@
-# Coding Guidelines
+# event-management-nra
 
-These guidelines apply to every coding task. They are derived from Andrej Karpathy's observations on common LLM coding pitfalls.
+Event management system: events, event types, event notes, gifts.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+## Stack
 
-## 1. Think Before Coding
+- **Frontend**: React-Admin (JSX) + Vite — `/client`
+- **Backend**: NestJS (TypeScript) + TypeORM — `/server`
+- **Database**: MySQL
+- **Shared submodules**: `client/shared` -> `nra-client`, `server/shared` -> `nra-server`
 
-**Do not assume. Do not hide confusion. Surface tradeoffs.**
+Initialize before first use: `git submodule update --init --recursive`
+Never modify code in `client/shared` or `server/shared` directly — those are separate repos.
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them — do not pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what is confusing. Ask.
+## Testing
 
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that was not requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Do not "improve" adjacent code, comments, or formatting.
-- Do not refactor things that are not broken.
-- Match existing style, even if you would do it differently.
-- If you notice unrelated dead code, mention it — do not delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Do not remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
 ```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
+cd server && yarn test   # Jest + ts-jest
+cd client && yarn test   # Jest + jsdom
 ```
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+Start via Docker (from the multi-repo-codespace bootstrap, one project at a time):
+```
+cp .env.template .env
+cp docker-compose.override.yml.template docker-compose.override.yml
+docker-compose up -d client server database
+```
+
+## Code Patterns
+
+**Server entity (NestJS/TypeORM):**
+1. Create TypeORM entity in `server/src/db/entities/`
+2. Create config in `server/src/entity-modules/<name>.config.ts`
+3. Register in `server/src/entities.module.ts`
+
+**Client entity (React-Admin):**
+1. Create `client/src/entities/<name>.jsx` with List/Create/Edit/Show
+2. Register resource in `client/src/App.jsx`
+3. Add translations to `client/src/domainTranslations.js`
+
+Use shared components from `client/shared/components/` and utilities from `client/shared/utils/`.
+Auth: JWT via `server/shared/auth/`. Permissions: `client/shared/utils/permissionsUtil.js`.
+
+## Coding Guidelines
+
+> Derived from Andrej Karpathy's observations on common LLM coding pitfalls.
+
+**1. Think Before Coding** — Surface assumptions and tradeoffs before writing code. If something is unclear, ask — do not guess silently.
+
+**2. Simplicity First** — Write the minimum code that solves the problem. No speculative features, abstractions, or flexibility that was not requested. If 200 lines could be 50, rewrite it.
+
+**3. Surgical Changes** — Touch only what is necessary. Do not improve adjacent code or formatting. Match existing style. Every changed line must trace to the user's request.
+
+**4. Goal-Driven Execution** — Define verifiable success criteria before starting. For multi-step tasks, write a brief plan with checkpoints and verify each one.
