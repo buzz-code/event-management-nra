@@ -3,8 +3,8 @@ import { TextField, TextInput } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { adminUserFilter } from '@shared/components/fields/PermissionFilter';
-import { yearChoices, defaultYearFilter } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { MultiReferenceArrayField } from '@shared/components/fields/CommonReferenceField';
 
@@ -12,7 +12,7 @@ const filters = [
     adminUserFilter,
     <CommonReferenceInputFilter source="studentReferenceId" reference="student" dynamicFilter={filterByUserId} />,
     <TextInput source="studentName:$cont" alwaysOn />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
 ];
 
 const filterDefaultValues = {

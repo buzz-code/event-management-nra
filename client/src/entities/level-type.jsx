@@ -8,23 +8,22 @@ import {
     TextInput,
     NumberInput,
     NumberField,
-    ReferenceField,
-    SelectField,
+    ReferenceField
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 
 const filters = [
     ...commonAdminFilters,
     <NumberInput source="key" />,
     <TextInput source="name:$cont" alwaysOn />,
     <TextInput source="description:$cont" />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
 ];
 
 const filterDefaultValues = {
@@ -40,7 +39,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <NumberField source="key" />
             <TextField source="name" />
             <TextField source="description" />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -55,7 +54,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
             <NumberInput source="key" validate={[required(), number()]} />
             <TextInput source="name" validate={[required(), maxLength(255)]} />
             <TextInput source="description" validate={[maxLength(1000)]} multiline />
-            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            <CommonYearInput />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
         </>

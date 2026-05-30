@@ -9,8 +9,8 @@ import {
     filterByUserIdAndYear,
 } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { yearChoices, defaultYearFilter } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { CommonHebrewMonthField, CommonHebrewMonthInputFilter } from '@shared/components/fields/CommonHebrewMonth';
 
@@ -30,7 +30,7 @@ const filters = [
     />,
     <CommonReferenceInputFilter source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />,
     <CommonHebrewMonthInputFilter source="eventMonth:$eq" label="חודש" />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
 ];
 
 const filterDefaultValues = {
@@ -92,7 +92,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                 label="דווח ע״י"
             />
             <DateField showDate source="createdAt" label="תאריך דיווח" />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -123,12 +123,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
                 dynamicFilter={filterByUserId}
                 label="דווח ע״י"
             />
-            <CommonAutocompleteInput
-                source="year"
-                choices={yearChoices}
-                defaultValue={defaultYearFilter.year}
-                validate={required()}
-            />
+            <CommonYearInput validate={required()} />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
         </>
