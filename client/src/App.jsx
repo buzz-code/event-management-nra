@@ -32,9 +32,11 @@ import familyTeacherAssignment from './entities/family-teacher-assignment';
 // Keep required shared entities
 import student from 'src/entities/student';
 import teacher from 'src/entities/teacher';
+import phoneCampaign from '@shared/components/common-entities/phone-campaign';
+import phoneTemplate from '@shared/components/common-entities/phone-template';
 
 import Settings from 'src/settings/Settings';
-import { isAdmin } from '@shared/utils/permissionsUtil';
+import { isAdmin, isPhoneCampaign } from '@shared/utils/permissionsUtil';
 
 // Icons
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -50,6 +52,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
+import PhoneIcon from '@mui/icons-material/Phone';
 
 const themeOptions = { primary: teal[700], secondary: orange[600] };
 
@@ -112,6 +115,12 @@ const App = () => (
                 />
 
                 {CommonSettingsResources()}
+                {isPhoneCampaign(permissions) && (
+                    <>
+                        <Resource name="phone_template" {...phoneTemplate} options={{ menuGroup: 'phone' }} icon={PhoneIcon} />
+                        <Resource name="phone_campaign" {...phoneCampaign} options={{ menuGroup: 'phone' }} icon={PhoneIcon} />
+                    </>
+                )}
                 {CommonAdminResources({ permissions })}
 
                 {CommonRoutes({ permissions, roadmapFeatures, settingsPage: <Settings /> })}

@@ -16,6 +16,7 @@ import { getDefaultPageSize } from '@shared/utils/settingsUtil';
 import { getDashboardItems, getMaintainanceMessage } from './settingsUtil';
 import { DashboardItemsInput } from './DashboardItemsInput';
 import { GeneralSettingsInput } from './GeneralSettingsInput';
+import { YemotSettingsInput } from '@shared/components/phone/YemotSettingsInput';
 
 const SettingsToolbar = () => (
     <Toolbar>
@@ -56,6 +57,7 @@ export default function Settings() {
                     <SimpleForm onSubmit={handleSave} defaultValues={defaultValues} toolbar={<SettingsToolbar />}>
                         <GeneralSettingsInput />
                         <DashboardItemsInput />
+                        <YemotSettingsInput />
                     </SimpleForm>
                 </ResourceContextProvider>
             </CardContent>

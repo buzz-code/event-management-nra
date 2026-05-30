@@ -26,6 +26,8 @@ import teacherAssignmentRuleConfig from './entity-modules/teacher-assignment-rul
 import familyTeacherAssignmentConfig from './entity-modules/family-teacher-assignment.config';
 import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
 import { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
+import phoneTemplateConfig from '@shared/entities/configs/phone-template.config';
+import phoneCampaignConfig from '@shared/entities/configs/phone-campaign.config';
 
 registerEntityNameMap({
   student: 'תלמידות',
@@ -58,6 +60,8 @@ registerEntityNameMap({
     BaseEntityModule.register(unreportedEventConfig),
     BaseEntityModule.register(teacherAssignmentRuleConfig),
     BaseEntityModule.register(familyTeacherAssignmentConfig),
+    BaseEntityModule.register(phoneTemplateConfig),
+    BaseEntityModule.register(phoneCampaignConfig),
 
     // Audit log
     BaseEntityModule.register(
