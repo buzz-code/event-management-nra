@@ -7,7 +7,6 @@ import {
     Labeled,
     ReferenceField,
     ReferenceInput,
-    SelectField,
     SingleFieldList,
     TextField,
     TextInput,
@@ -16,7 +15,7 @@ import {
     useGetList,
     useGetMany,
     useListContext,
-    useRecordContext,
+    useRecordContext
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
@@ -24,8 +23,9 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { getDynamicFilter } from '@shared/utils/referenceUtil';
 
 const FamilyStudentsList = () => {
@@ -110,7 +110,7 @@ const HistoryList = () => {
 
 const filters = [
     ...commonAdminFilters,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
     <StudentFamilyFilter source="familyReferenceId" label="חיפוש לפי תלמידה" />,
     <CommonReferenceInput source="teacherReferenceId" reference="teacher" alwaysOn />,
 ];
@@ -125,7 +125,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             <FunctionField source="students" render={() => <FamilyStudentsList />} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField
@@ -146,7 +146,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <>
             {!isCreate && isAdmin && <TextInput source="id" disabled />}
             {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            <CommonYearInput />
             {isAdmin && <TextInput source="familyReferenceId" disabled />}
             <CommonReferenceInput source="teacherReferenceId" reference="teacher" />
             {!isCreate && (

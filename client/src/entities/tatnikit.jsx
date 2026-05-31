@@ -5,15 +5,15 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { yearChoices, defaultYearFilter } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 
 const filters = [
     ...commonAdminFilters,
     <CommonReferenceInputFilter source="studentReferenceId" reference="student" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
 ];
 
 const filterDefaultValues = {
@@ -47,7 +47,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                 optionalSource="classKey"
                 optionalTarget="key"
             />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -71,12 +71,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
                 validate={required()}
                 dynamicFilter={filterByUserId}
             />
-            <CommonAutocompleteInput
-                source="year"
-                choices={yearChoices}
-                defaultValue={defaultYearFilter.year}
-                validate={required()}
-            />
+            <CommonYearInput validate={required()} />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
         </>

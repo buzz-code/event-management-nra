@@ -33,8 +33,8 @@ import {
 import { MultiReferenceField } from '@shared/components/fields/CommonReferenceField';
 import { commonAdminFilters, notPermissionFilter } from '@shared/components/fields/PermissionFilter';
 import { isTeacher } from '../utils/appPermissions';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
 import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
 import { BulkReportButton } from '@shared/components/crudContainers/BulkReportButton';
@@ -83,7 +83,7 @@ const filters = [
     <TextInput source="eventHebrewMonth:$cont" alwaysOn />,
     <BooleanInput source="lotteryName:$isnull" label="ללא מסלול הגרלה" defaultValue={true} />,
     <TextInput source="lotteryName:$cont" label="שם הגרלה" />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
     <SelectInput source="reportOrigin:$eq" choices={reportOriginChoices} />,
 ];
 
@@ -106,7 +106,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
             <TextInput source="lotteryName" label="שם הגרלה" />
         </BulkActionButton>,
         <BulkActionButton label="שינוי שנה" icon={<EditIcon />} name="yearUpdate" reloadOnEnd>
-            <CommonAutocompleteInput source="year" choices={yearChoices} label="שנה" />
+            <CommonYearInput label="שנה" />
         </BulkActionButton>,
         <BulkReportButton label="ייצוא אירועים למורה" icon={<GetAppIcon />} name="eventExport" />,
         isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך כיתות" />,
@@ -177,7 +177,7 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
                     </SingleFieldList>
                 </ReferenceManyField>
             )}
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             <ReferenceField source="studentClassReferenceId" reference="class" />
             <BooleanField source="completed" />
             <BooleanField source="reportedByTatnikit" />
@@ -251,7 +251,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
             {/* <NumberInput source="fulfillmentQuestion11" /> */}
             <NumberInput source="lotteryTrack" />
             <TextInput source="lotteryName" validate={[maxLength(255)]} />
-            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            <CommonYearInput />
             <TextInput source="description" multiline validate={[maxLength(1000)]} />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

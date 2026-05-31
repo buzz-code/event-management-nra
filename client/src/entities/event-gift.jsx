@@ -8,8 +8,8 @@ import {
     filterByUserIdAndYear,
 } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 
 const filters = [
     ...commonAdminFilters,
@@ -20,7 +20,7 @@ const filters = [
         dynamicFilter={filterByUserIdAndYear}
     />,
     <CommonReferenceInputFilter source="giftReferenceId" reference="gift" dynamicFilter={filterByUserIdAndYear} />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
 ];
 
 const filterDefaultValues = {
@@ -35,7 +35,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <ReferenceField source="eventReferenceId" reference="event" />
             <ReferenceField source="giftReferenceId" reference="gift" />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -54,7 +54,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
                 dynamicFilter={filterByUserIdAndYear}
             />
             <CommonReferenceInput source="giftReferenceId" reference="gift" dynamicFilter={filterByUserIdAndYear} />
-            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            <CommonYearInput />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
         </>
