@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessThan, MoreThan, Raw } from 'typeorm';
+import { LessThan, Raw } from 'typeorm';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Student } from 'src/db/entities/Student.entity';
 import { EventType } from 'src/db/entities/EventType.entity';
@@ -825,36 +825,18 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       const months = getHebrewMonthsList(currentYear);
       const monthSelection = await this.askForMenu('TATNIKIT.ENTER_MONTH', months);
 
-      // Check for existing event
-      const existingEvent = await this.findExistingEventForStudent(student, eventType);
+      // Check for existing event in the selected month
+      const existingEvent = await this.findExistingEventForStudent(student, eventType, monthSelection.name);
 
       if (existingEvent) {
-        // Event exists - ask for confirmation
+        // Event already exists - do not allow creating a duplicate report
         const hebrewDate = formatHebrewDateForIVR(existingEvent.eventDate);
 
-        const confirmed = await this.askConfirmation('TATNIKIT.EVENT_EXISTS', {
+        await this.sendMessageByKey('TATNIKIT.EVENT_ALREADY_EXISTS', {
           name: student.name,
           eventType: eventType.name,
           date: hebrewDate,
         });
-
-        if (confirmed) {
-          // Mark as reported by tatnikit
-          existingEvent.reportedByTatnikit = true;
-          existingEvent.reportOrigin = this.mergeReportOriginWithTatnikitReport(existingEvent.reportOrigin);
-          existingEvent.reporterStudentReferenceId = existingEvent.reporterStudentReferenceId || tatnikitStudent.id;
-          await this.dataSource.getRepository(Event).save(existingEvent);
-          await this.sendMessageByKey('TATNIKIT.EVENT_CONFIRMED');
-        } else {
-          // Create new tatnikit-only event
-          await this.createTatnikitOnlyEvent(
-            student,
-            tatnikitStudent,
-            eventType,
-            classReferenceId,
-            monthSelection.index,
-          );
-        }
       } else {
         // No existing event - create tatnikit-only event
         await this.createTatnikitOnlyEvent(student, tatnikitStudent, eventType, classReferenceId, monthSelection.index);
@@ -885,14 +867,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return !!studentClass;
   }
 
-  private async findExistingEventForStudent(student: Student, eventType: EventType): Promise<Event | null> {
-    this.logger.log(`Finding existing event for student ${student.name} and type ${eventType.name}`);
+  private async findExistingEventForStudent(
+    student: Student,
+    eventType: EventType,
+    monthName: string,
+  ): Promise<Event | null> {
+    this.logger.log(
+      `Finding existing event for student ${student.name}, type ${eventType.name}, month ${monthName}`,
+    );
 
     const currentYear = getCurrentHebrewYear();
     const eventRepo = this.dataSource.getRepository(Event);
-
-    const searchDate = this.getStartOfDay();
-    searchDate.setMonth(searchDate.getMonth() - 2);
 
     const event = await eventRepo.findOne({
       where: {
@@ -900,8 +885,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         studentReferenceId: student.id,
         eventTypeReferenceId: eventType.id,
         year: currentYear,
-        reportOrigin: EventReportOrigin.ONLY_STUDENT,
-        eventDate: MoreThan(searchDate),
+        eventHebrewMonth: monthName,
       },
       order: {
         eventDate: 'DESC',
