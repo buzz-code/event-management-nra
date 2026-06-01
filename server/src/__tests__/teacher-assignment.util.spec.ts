@@ -55,8 +55,8 @@ describe('assignTeacher', () => {
   });
 
   it('picks teacher from rules when no FTA', () => {
-    const event = makeEvent();
-    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42 })], null, new Map());
+    const event = makeEvent({ studentClassReferenceId: 'classA' });
+    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42, classRulesJson: [{ classReferenceId: 'classA' }] })], null, new Map());
     expect(result.chosenTeacherId).toBe(42);
   });
 
@@ -67,8 +67,8 @@ describe('assignTeacher', () => {
   });
 
   it('records a history entry on ftaUpdate', () => {
-    const event = makeEvent({ id: 7 });
-    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42 })], null, new Map());
+    const event = makeEvent({ id: 7, studentClassReferenceId: 'classA' });
+    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42, classRulesJson: [{ classReferenceId: 'classA' }] })], null, new Map());
     expect(result.ftaUpdate?.historyJson).toHaveLength(1);
     expect(result.ftaUpdate?.historyJson[0].eventId).toBe(7);
     expect(result.ftaUpdate?.historyJson[0].teacherReferenceId).toBe(42);
@@ -93,8 +93,8 @@ describe('assignTeacher', () => {
   });
 
   it('ignores candidateTeacherIds when allRules is non-empty', () => {
-    const event = makeEvent();
-    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42 })], null, new Map(), [99]);
+    const event = makeEvent({ studentClassReferenceId: 'classA' });
+    const result = assignTeacher(event, [makeRule({ teacherReferenceId: 42, classRulesJson: [{ classReferenceId: 'classA' }] })], null, new Map(), [99]);
     expect(result.chosenTeacherId).toBe(42);
   });
 });
@@ -118,7 +118,7 @@ describe('assignTeachersBatch', () => {
       makeEvent({ id: 2, student: { familyReferenceId: 'fam1' } }),
       makeEvent({ id: 3, student: { familyReferenceId: 'fam1' } }),
     ];
-    const { assignmentMap } = assignTeachersBatch(events, [makeRule({ teacherReferenceId: 10 })], new Map());
+    const { assignmentMap } = assignTeachersBatch(events, [makeRule({ teacherReferenceId: 10, classRulesJson: [{ classReferenceId: 'class1' }] })], new Map());
     expect(assignmentMap.get(1)).toBe(assignmentMap.get(2));
     expect(assignmentMap.get(2)).toBe(assignmentMap.get(3));
   });
@@ -143,7 +143,10 @@ describe('assignTeachersBatch', () => {
       ...Array.from({ length: 5 }, (_, i) => makeEvent({ id: i + 1, student: { familyReferenceId: `fam${i + 1}` } })),
       makeEvent({ id: 6, student: { familyReferenceId: 'fam6' } }),
     ];
-    const rules = [makeRule({ teacherReferenceId: 10 }), makeRule({ teacherReferenceId: 11 })];
+    const rules = [
+      makeRule({ teacherReferenceId: 10, classRulesJson: [{ classReferenceId: 'class1' }] }),
+      makeRule({ teacherReferenceId: 11, classRulesJson: [{ classReferenceId: 'class1' }] })
+    ];
     const { assignmentMap } = assignTeachersBatch(events, rules, ftaMap);
     expect(assignmentMap.get(6)).toBe(10);
   });
@@ -161,8 +164,8 @@ describe('assignTeachersBatch', () => {
       makeEvent({ id: 3, student: { familyReferenceId: 'fam3' } }),
     ];
     const rules = [
-      makeRule({ teacherReferenceId: 10, customRatio: 1 }),
-      makeRule({ teacherReferenceId: 11, customRatio: 2 }),
+      makeRule({ teacherReferenceId: 10, customRatio: 1, classRulesJson: [{ classReferenceId: 'class1' }] }),
+      makeRule({ teacherReferenceId: 11, customRatio: 2, classRulesJson: [{ classReferenceId: 'class1' }] }),
     ];
     const { assignmentMap } = assignTeachersBatch(events, rules, ftaMap);
     expect(assignmentMap.get(3)).toBe(10);
@@ -182,8 +185,8 @@ describe('assignTeachersBatch', () => {
       makeEvent({ id: 6, student: { familyReferenceId: 'fam6' } }),
     ];
     const rules = [
-      makeRule({ teacherReferenceId: 10, customRatio: 0 }),
-      makeRule({ teacherReferenceId: 11, customRatio: 1 }),
+      makeRule({ teacherReferenceId: 10, customRatio: 0, classRulesJson: [{ classReferenceId: 'class1' }] }),
+      makeRule({ teacherReferenceId: 11, customRatio: 1, classRulesJson: [{ classReferenceId: 'class1' }] }),
     ];
     const { assignmentMap } = assignTeachersBatch(events, rules, ftaMap);
     expect(assignmentMap.get(6)).toBe(11);
@@ -193,7 +196,7 @@ describe('assignTeachersBatch', () => {
     const event = makeEvent({ id: 1, student: { familyReferenceId: 'fam1' } });
     const { assignmentMap } = assignTeachersBatch(
       [event],
-      [makeRule({ teacherReferenceId: 10, customRatio: null })],
+      [makeRule({ teacherReferenceId: 10, customRatio: null, classRulesJson: [{ classReferenceId: 'class1' }] })],
       new Map(),
     );
     expect(assignmentMap.get(1)).toBe(10);
@@ -203,7 +206,7 @@ describe('assignTeachersBatch', () => {
     const event = makeEvent({ id: 1, student: { familyReferenceId: 'fam1' } });
     const { assignmentMap } = assignTeachersBatch(
       [event],
-      [makeRule({ teacherReferenceId: 10, customRatio: -5 })],
+      [makeRule({ teacherReferenceId: 10, customRatio: -5, classRulesJson: [{ classReferenceId: 'class1' }] })],
       new Map(),
     );
     expect(assignmentMap.get(1)).toBe(10);
@@ -239,9 +242,9 @@ describe('assignTeachersBatch', () => {
     expect(assignmentMap.get(1)).toBe(10);
   });
 
-  it('overflow: non-matching teacher absorbs event when strictly less loaded', () => {
+  it('no overflow: non-matching teacher does NOT absorb event even when strictly less loaded', () => {
     // teacher 10 matches class1 but has 5 events → load 5
-    // teacher 11 matches nothing, has 0 events → load 0 → absorbs overflow for fam6
+    // teacher 11 matches nothing, has 0 events → load 0 → does NOT absorb overflow because of strict matching rules
     const ftaMap = new Map<string, any>(
       Array.from({ length: 5 }, (_, i) => [
         `fam${i + 1}`,
@@ -259,12 +262,36 @@ describe('assignTeachersBatch', () => {
       makeRule({ teacherReferenceId: 11, classRulesJson: null, gradeRulesJson: null }),
     ];
     const { assignmentMap } = assignTeachersBatch(events, rules, ftaMap);
-    expect(assignmentMap.get(6)).toBe(11);
+    expect(assignmentMap.get(6)).toBe(10);
+  });
+
+  it('does not assign a student if they have no matching teacher rules', () => {
+    const event = makeEvent({ studentClassReferenceId: 'class1', grade: '9' });
+    const rules = [
+      makeRule({ teacherReferenceId: 10, classRulesJson: [{ classReferenceId: 'class2' }] }),
+      makeRule({ teacherReferenceId: 11, gradeRulesJson: [{ grade: '10' }] }),
+    ];
+    const { assignmentMap } = assignTeachersBatch([event], rules, new Map());
+    expect(assignmentMap.get(1)).toBeNull();
+  });
+
+  it('assigns the entire family to a teacher if at least one sister student matches their rules (multi-sister family)', () => {
+    const events = [
+      makeEvent({ id: 1, student: { familyReferenceId: 'fam1' }, studentClassReferenceId: 'class1', grade: '9' }), // matches teacher 10
+      makeEvent({ id: 2, student: { familyReferenceId: 'fam1' }, studentClassReferenceId: 'class2', grade: '11' }), // matches nothing
+    ];
+    const rules = [
+      makeRule({ teacherReferenceId: 10, classRulesJson: [{ classReferenceId: 'class1' }] }),
+      makeRule({ teacherReferenceId: 11, classRulesJson: [{ classReferenceId: 'class3' }] }),
+    ];
+    const { assignmentMap } = assignTeachersBatch(events, rules, new Map());
+    expect(assignmentMap.get(1)).toBe(10);
+    expect(assignmentMap.get(2)).toBe(10); // sister student got assigned too because of family grouping!
   });
 
   it('produces ftaUpdate records for newly assigned families', () => {
     const events = [makeEvent({ id: 1, student: { familyReferenceId: 'fam1' } })];
-    const { ftaUpdates } = assignTeachersBatch(events, [makeRule({ teacherReferenceId: 10 })], new Map());
+    const { ftaUpdates } = assignTeachersBatch(events, [makeRule({ teacherReferenceId: 10, classRulesJson: [{ classReferenceId: 'class1' }] })], new Map());
     expect(ftaUpdates).toHaveLength(1);
     expect(ftaUpdates[0].teacherReferenceId).toBe(10);
     expect(ftaUpdates[0].familyReferenceId).toBe('fam1');
