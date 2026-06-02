@@ -1,6 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { useDataProvider, useCreatePath, useGetPathForRecordCallback } from 'react-admin';
+import { useCreatePath, useGetList, useGetPathForRecordCallback } from 'react-admin';
 import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -18,24 +16,14 @@ import TableCell from '@mui/material/TableCell';
 import EventIcon from '@mui/icons-material/Event';
 
 export const UpcomingEvents = () => {
-    const dataProvider = useDataProvider();
-    const { mutate, isPending, data } = useMutation({
-        mutationFn: () =>
-            dataProvider
-                .getList('event', {
-                    pagination: { page: 1, perPage: 5 },
-                    sort: { field: 'eventDate', order: 'ASC' },
-                    filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] },
-                })
-                .then(({ data }) => data),
+    const { data, isPending } = useGetList('event', {
+        pagination: { page: 1, perPage: 5 },
+        sort: { field: 'eventDate', order: 'ASC' },
+        filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] },
     });
     const createPath = useCreatePath();
     const getPathForRecord = useGetPathForRecordCallback();
     const resource = 'event';
-
-    useEffect(() => {
-        mutate();
-    }, [mutate]);
 
     return (
         <Grid item xs={12} mt={3}>

@@ -1,6 +1,4 @@
-import { useEffect } from 'react';
-import { useCreatePath, useDataProvider } from 'react-admin';
-import { useMutation } from '@tanstack/react-query';
+import { useCreatePath, useGetList } from 'react-admin';
 import { Link } from 'react-router-dom';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
@@ -10,23 +8,13 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 
 export const EventStatsCard = ({ title, resource, icon }) => {
-    const dataProvider = useDataProvider();
     const createPath = useCreatePath();
     const resourcePath = createPath({ resource, type: 'list' });
 
-    const { mutate, isPending, data } = useMutation({
-        mutationFn: () =>
-            dataProvider
-                .getList(resource, {
-                    pagination: { page: 1, perPage: 5 },
-                    sort: { field: 'id', order: 'DESC' },
-                })
-                .then(({ data }) => data),
+    const { data, isPending } = useGetList(resource, {
+        pagination: { page: 1, perPage: 5 },
+        sort: { field: 'id', order: 'DESC' },
     });
-
-    useEffect(() => {
-        mutate();
-    }, [resource, mutate]);
 
     const IconComponent = icon;
 
