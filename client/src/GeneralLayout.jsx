@@ -15,6 +15,7 @@ import BaseDashboard from '@shared/components/views/Dashboard';
 import { useDashboardItems } from './settings/settingsUtil';
 import { UpcomingEvents } from './dashboard/UpcomingEvents';
 import { EventStatsContainer } from './dashboard/EventStatsContainer';
+import { DashboardErrorBoundary } from './dashboard/DashboardErrorBoundary';
 
 const customMenuItems = [
     <MenuItemLink key="tutorial" to="/tutorial" primaryText="מדריך למשתמש" leftIcon={<HelpIcon />} />,
@@ -45,8 +46,12 @@ export const Dashboard = () => {
     const dashboardItems = useDashboardItems();
     return (
         <BaseDashboard dashboardItems={dashboardItems}>
-            <UpcomingEvents />
-            <EventStatsContainer />
+            <DashboardErrorBoundary fallbackMessage="אירעה שגיאה בטעינת האירועים הקרובים">
+                <UpcomingEvents />
+            </DashboardErrorBoundary>
+            <DashboardErrorBoundary fallbackMessage="אירעה שגיאה בטעינת סטטיסטיקות האירועים">
+                <EventStatsContainer />
+            </DashboardErrorBoundary>
         </BaseDashboard>
     );
 };
