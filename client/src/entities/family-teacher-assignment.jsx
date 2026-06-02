@@ -17,6 +17,7 @@ import {
     useListContext,
     useRecordContext
 } from 'react-admin';
+import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -27,6 +28,7 @@ import { defaultYearFilter } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { getDynamicFilter } from '@shared/utils/referenceUtil';
+import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
 
 const FamilyStudentsList = () => {
     const record = useRecordContext();
@@ -120,13 +122,19 @@ const filterDefaultValues = {
 };
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
+    const additionalBulkButtons = [
+        <BulkActionButton label="שיוך מורה" icon={<SupervisedUserCircleIcon />} name="bulkAssignTeacher" reloadOnEnd>
+            <CommonReferenceInput source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />
+        </BulkActionButton>,
+    ];
+
     return (
-        <CommonDatagrid {...props}>
+        <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <CommonYearField />
-            <FunctionField source="students" render={() => <FamilyStudentsList />} />
+            <FunctionField source="students" sortable={false} render={() => <FamilyStudentsList />} />
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <FunctionField
                 source="historyJson"
