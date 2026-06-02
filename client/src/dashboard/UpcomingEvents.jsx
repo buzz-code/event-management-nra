@@ -46,13 +46,13 @@ export const UpcomingEvents = () => {
                                     תאריך
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
-                                    מיקום
+                                    תלמידה
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
-                                    סוג אירוע
+                                    מורה
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
-                                    משתתפים צפויים
+                                    שנה
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
                                     פעולות
@@ -68,16 +68,9 @@ export const UpcomingEvents = () => {
                                     <TableCell align="right">
                                         {new Date(event.eventDate).toLocaleDateString('he-IL')}
                                     </TableCell>
-                                    <TableCell align="right">{event.location}</TableCell>
-                                    <TableCell align="right">
-                                        <Chip
-                                            label={event.eventTypeName || 'כללי'}
-                                            size="small"
-                                            color="primary"
-                                            variant="outlined"
-                                        />
-                                    </TableCell>
-                                    <TableCell align="right">{event.expectedParticipants || 'לא צוין'}</TableCell>
+                                    <TableCell align="right">{event.studentName || '—'}</TableCell>
+                                    <TableCell align="right">{event.teacherName || '—'}</TableCell>
+                                    <TableCell align="right">{event.year || '—'}</TableCell>
                                     <TableCell align="right">
                                         <Link to={createPath({ resource, type: 'show', id: event.id })}>
                                             <Chip label="צפה בפרטים" size="small" color="secondary" clickable />
