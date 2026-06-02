@@ -72,9 +72,9 @@ export const UpcomingEvents = () => {
                                         {new Date(event.eventDate).toLocaleDateString('he-IL')}
                                     </TableCell>
                                     <TableCell align="right">{event.eventHebrewDate || '—'}</TableCell>
-                                    <TableCell align="right">{event.teacherName || '—'}</TableCell>
+                                    <TableCell align="right">{event.teacher?.name || '—'}</TableCell>
                                     <TableCell align="right">{event.grade ?? '—'}</TableCell>
-                                    <TableCell align="right">{event.studentClassName || '—'}</TableCell>
+                                    <TableCell align="right">{event.studentClass?.name || '—'}</TableCell>
                                     <TableCell align="right">
                                         <Link to={createPath({ resource, type: 'show', id: event.id })}>
                                             <Chip label="צפה בפרטים" size="small" color="secondary" clickable />
