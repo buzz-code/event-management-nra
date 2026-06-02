@@ -1,4 +1,4 @@
-import { useCreatePath, useGetList, useGetPathForRecordCallback } from 'react-admin';
+import { useCreatePath, useGetList } from 'react-admin';
 import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -16,13 +16,13 @@ import TableCell from '@mui/material/TableCell';
 import EventIcon from '@mui/icons-material/Event';
 
 export const UpcomingEvents = () => {
+    const createPath = useCreatePath();
+    const todayStr = new Date().toISOString().split('T')[0];
     const { data, isPending } = useGetList('event', {
         pagination: { page: 1, perPage: 5 },
         sort: { field: 'eventDate', order: 'ASC' },
-        filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] },
+        filter: { 'eventDate:$gte': todayStr },
     });
-    const createPath = useCreatePath();
-    const getPathForRecord = useGetPathForRecordCallback();
     const resource = 'event';
 
     return (
@@ -79,7 +79,7 @@ export const UpcomingEvents = () => {
                                     </TableCell>
                                     <TableCell align="right">{event.expectedParticipants || 'לא צוין'}</TableCell>
                                     <TableCell align="right">
-                                        <Link to={getPathForRecord({ resource, record: event })}>
+                                        <Link to={createPath({ resource, type: 'show', id: event.id })}>
                                             <Chip label="צפה בפרטים" size="small" color="secondary" clickable />
                                         </Link>
                                     </TableCell>
