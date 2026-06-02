@@ -46,13 +46,16 @@ export const UpcomingEvents = () => {
                                     תאריך
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
-                                    תלמידה
+                                    תאריך עברי
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
                                     מורה
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
-                                    שנה
+                                    ציון
+                                </TableCell>
+                                <TableCell align="right" sx={{ color: 'white' }}>
+                                    כיתה
                                 </TableCell>
                                 <TableCell align="right" sx={{ color: 'white' }}>
                                     פעולות
@@ -68,9 +71,10 @@ export const UpcomingEvents = () => {
                                     <TableCell align="right">
                                         {new Date(event.eventDate).toLocaleDateString('he-IL')}
                                     </TableCell>
-                                    <TableCell align="right">{event.studentName || '—'}</TableCell>
+                                    <TableCell align="right">{event.eventHebrewDate || '—'}</TableCell>
                                     <TableCell align="right">{event.teacherName || '—'}</TableCell>
-                                    <TableCell align="right">{event.year || '—'}</TableCell>
+                                    <TableCell align="right">{event.grade ?? '—'}</TableCell>
+                                    <TableCell align="right">{event.studentClassName || '—'}</TableCell>
                                     <TableCell align="right">
                                         <Link to={createPath({ resource, type: 'show', id: event.id })}>
                                             <Chip label="צפה בפרטים" size="small" color="secondary" clickable />
