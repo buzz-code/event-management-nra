@@ -13,6 +13,10 @@ export class DashboardErrorBoundary extends Component {
         return { hasError: true };
     }
 
+    componentDidCatch(error, info) {
+        console.error('DashboardErrorBoundary caught an error:', error, info.componentStack);
+    }
+
     render() {
         if (this.state.hasError) {
             return (
