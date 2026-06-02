@@ -7,6 +7,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 
+const chipLabels = {
+    gift: 'מתנה',
+    class: 'כיתה',
+    teacher: 'מורה אחראית',
+};
+
 export const EventStatsCard = ({ title, resource, icon }) => {
     const createPath = useCreatePath();
     const resourcePath = createPath({ resource, type: 'list' });
@@ -46,7 +52,7 @@ export const EventStatsCard = ({ title, resource, icon }) => {
                                 <Typography variant="body2">{item.name}</Typography>
                                 <Chip
                                     size="small"
-                                    label={resource === 'gift' ? 'מתנה' : resource === 'class' ? 'מיקום' : 'מארגן'}
+                                    label={chipLabels[resource]}
                                     color="primary"
                                     variant="outlined"
                                 />
