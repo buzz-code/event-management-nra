@@ -189,7 +189,9 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
               ],
               select: ['id'],
             }).then(events => events.map(e => e.id));
-          await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
+          if (eventIds.length > 0) {
+            await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
+          }
         }
         return 'שם הגרלה עודכן בהצלחה';
       }
