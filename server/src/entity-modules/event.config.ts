@@ -1,4 +1,4 @@
-import { DeepPartial, In, Repository } from 'typeorm';
+import { DeepPartial, In, IsNull, Repository } from 'typeorm';
 import { CrudRequest } from '@dataui/crud';
 import { CrudAuthCustomFilter, getUserIdFilter } from '@shared/auth/crud-auth.filter';
 import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
@@ -78,7 +78,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'fulfillmentQuestion6', label: 'שאלת הגשמה 6' },
           { value: 'fulfillmentQuestion7', label: 'שאלת הגשמה 7' },
           { value: 'fulfillmentQuestion8', label: 'שאלת הגשמה 8' },
-          { value: 'lotteryTrack', label: 'מסלול הגרלה' },
+          { value: 'lotteryName', label: 'מסלול הגרלה' },
           { value: 'createdAt', label: 'תאריך יצירה' },
         ];
       },
@@ -139,8 +139,8 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
             }),
             familyIds.length
               ? this.dataSource
-                  .getRepository(FamilyTeacherAssignment)
-                  .findBy({ userId, year, familyReferenceId: In(familyIds) })
+                .getRepository(FamilyTeacherAssignment)
+                .findBy({ userId, year, familyReferenceId: In(familyIds) })
               : Promise.resolve([]),
           ]);
 
@@ -179,8 +179,16 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
       }
       case 'lotteryNameUpdate': {
         const lotteryName = getAsString(extra.lotteryName);
-        const eventIds = getAsArray(extra.ids) ?? [];
-        if (eventIds.length > 0) {
+        const ids = getAsArray(extra.ids) ?? [];
+        if (ids.length > 0) {
+          const eventIds = await this.dataSource.getRepository(Event)
+            .find({
+              where: [
+                { id: In(ids), lotteryName: IsNull() },
+                { id: In(ids), lotteryName: '' },
+              ],
+              select: ['id'],
+            }).then(events => events.map(e => e.id));
           await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
         }
         return 'שם הגרלה עודכן בהצלחה';
