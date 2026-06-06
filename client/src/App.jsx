@@ -27,7 +27,6 @@ import family from './entities/family';
 import tatnikit from './entities/tatnikit';
 import unreportedEvent from './entities/unreported-event';
 import teacherAssignmentRule from './entities/teacher-assignment-rule';
-import familyTeacherAssignment from './entities/family-teacher-assignment';
 
 // Keep required shared entities
 import student from 'src/entities/student';
@@ -50,7 +49,6 @@ import CommentIcon from '@mui/icons-material/Comment';
 import RouteIcon from '@mui/icons-material/Route';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import PeopleIcon from '@mui/icons-material/People';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 import PhoneIcon from '@mui/icons-material/Phone';
 
@@ -104,12 +102,6 @@ const App = () => (
                 <Resource
                     name="teacher_assignment_rule"
                     {...teacherAssignmentRule}
-                    options={{ menuGroup: 'data' }}
-                    icon={AssignmentIcon}
-                />
-                <Resource
-                    name="family_teacher_assignment"
-                    {...familyTeacherAssignment}
                     options={{ menuGroup: 'data' }}
                     icon={FamilyRestroomIcon}
                 />

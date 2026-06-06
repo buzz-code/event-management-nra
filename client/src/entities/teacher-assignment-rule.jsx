@@ -11,7 +11,7 @@ import {
     TextInput,
     required,
     ArrayInput,
-    SimpleFormIterator
+    SimpleFormIterator,
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
@@ -25,7 +25,6 @@ import { filterByUserId } from '@shared/components/fields/CommonReferenceInputFi
 const filters = [
     ...commonAdminFilters,
     <CommonYearInputFilter />,
-    <CommonReferenceInput source="teacherReferenceId" reference="teacher" alwaysOn />,
     <BooleanInput source="isActive" />,
 ];
 
@@ -41,27 +40,15 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <CommonYearField />
-            <ReferenceField source="teacherReferenceId" reference="teacher" />
+            <NumberField source="order" />
+            <TextField source="gradeLevelKey" />
             <FunctionField
-                source="classRulesJson"
+                source="teacherReferenceIds"
                 render={(r) => {
-                    const items = r.classRulesJson || [];
-                    return items.length ? `${items.length} כיתות` : '—';
+                    const ids = r.teacherReferenceIds || [];
+                    return ids.length ? `${ids.length} מורות` : '—';
                 }}
             />
-            <FunctionField
-                source="gradeRulesJson"
-                render={(r) => {
-                    const items = r.gradeRulesJson || [];
-                    if (!items.length) return '—';
-                    const grades = items
-                        .map((i) => i.grade)
-                        .filter(Boolean)
-                        .join(', ');
-                    return grades || `${items.length} שכבות`;
-                }}
-            />
-            <NumberField source="customRatio" />
             <BooleanField source="isActive" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -75,18 +62,13 @@ const Inputs = ({ isCreate, isAdmin }) => {
             {!isCreate && isAdmin && <TextInput source="id" disabled />}
             {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
             <CommonYearInput />
-            <CommonReferenceInput source="teacherReferenceId" reference="teacher" validate={required()} />
-            <ArrayInput source="classRulesJson">
-                <SimpleFormIterator inline>
-                    <CommonReferenceInput source="classReferenceId" reference="class" dynamicFilter={filterByUserId} />
+            <NumberInput source="order" validate={required()} />
+            <TextInput source="gradeLevelKey" validate={required()} helperText="שכבה אחת בלבד (לדוג׳ יג, יב, יא)" />
+            <ArrayInput source="teacherReferenceIds" validate={required()}>
+                <SimpleFormIterator inline disableReordering>
+                    <CommonReferenceInput source="" reference="teacher" dynamicFilter={filterByUserId} label="מורה" />
                 </SimpleFormIterator>
             </ArrayInput>
-            <ArrayInput source="gradeRulesJson">
-                <SimpleFormIterator inline>
-                    <TextInput source="grade" />
-                </SimpleFormIterator>
-            </ArrayInput>
-            <NumberInput source="customRatio" />
             <BooleanInput source="isActive" defaultValue={true} />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

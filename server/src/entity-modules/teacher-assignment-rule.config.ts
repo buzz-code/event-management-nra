@@ -8,17 +8,15 @@ function getConfig(): BaseEntityModuleOptions {
     query: {
       join: {
         user: { eager: false },
-        teacher: { eager: false },
       },
     },
     exporter: {
       getExportHeaders(): IHeader[] {
         return [
           { value: 'year', label: 'שנה' },
-          { value: 'teacherReferenceId', label: 'מורה' },
-          { value: 'classRulesJson', label: 'כללי כיתה' },
-          { value: 'gradeRulesJson', label: 'כללי שכבה' },
-          { value: 'customRatio', label: 'יחס מותאם' },
+          { value: 'order', label: 'סדר עדיפות' },
+          { value: 'gradeLevelKey', label: 'שכבה' },
+          { value: 'teacherReferenceIds', label: 'מורות' },
           { value: 'isActive', label: 'פעיל?' },
         ];
       },

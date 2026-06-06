@@ -1,251 +1,215 @@
-import { Event } from 'src/db/entities/Event.entity';
+import { In } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
-import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
+import { Event } from 'src/db/entities/Event.entity';
+import { StudentClass } from 'src/db/entities/StudentClass.entity';
+import { Student } from 'src/db/entities/Student.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-
-function shuffled<T>(arr: T[]): T[] {
-  const copy = [...arr];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}
-
-function getSafeCustomRatio(rule: TeacherAssignmentRule): number {
-  const ratio = rule.customRatio;
-  return typeof ratio === 'number' && Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
-}
-
-function getWeightedLoad(rule: TeacherAssignmentRule, loadCount: Map<number, number>): number {
-  return (loadCount.get(rule.teacherReferenceId) ?? 0) / getSafeCustomRatio(rule);
-}
+import { groupDataByKeyFn, groupDataByKeyFnAndCalc } from '@shared/utils/reportData.util';
 
 /**
- * Picks the lowest weighted-load teacher from a pool of rules.
- * Shuffles first so ties resolve randomly (not by DB order).
+ * Picks the teacher with the lowest family-level load from a pool of teacher IDs.
+ * Shuffles first so ties resolve randomly (not by array order).
  */
-function pickBestRule(rulesPool: TeacherAssignmentRule[], loadCount: Map<number, number>): TeacherAssignmentRule {
-  const pool = shuffled(rulesPool);
-  return pool.reduce((best, rule) =>
-    getWeightedLoad(rule, loadCount) < getWeightedLoad(best, loadCount) ? rule : best,
+function pickTeacherByLoad(teacherIds: number[], familyLoadCount: Map<number, number>): number {
+  const shuffled = [...teacherIds].sort(() => Math.random() - 0.5);
+  return shuffled.reduce((best, id) =>
+    (familyLoadCount.get(id) ?? 0) < (familyLoadCount.get(best) ?? 0) ? id : best,
   );
 }
 
-function fmtLoad(rule: TeacherAssignmentRule, loadCount: Map<number, number>): string {
-  const raw = loadCount.get(rule.teacherReferenceId) ?? 0;
-  const ratio = getSafeCustomRatio(rule);
-  return `teacher=${rule.teacherReferenceId} load=${raw}/${ratio}=${(raw / ratio).toFixed(2)}`;
-}
-
-/**
- * Picks the teacher for a family's events.
- * When strictMatching=true (real rules exist), only rules matching at least one event are eligible.
- * When strictMatching=false (synthetic rules from candidateTeacherIds), all rules are eligible.
- * No fallbacks or overflows to non-matching teachers are allowed.
- * @returns chosen rule + human-readable reason string (rule is null when no match found)
- */
-function pickTeacher(
-  eligibleRules: TeacherAssignmentRule[],
-  events: Event[],
-  loadCount: Map<number, number>,
-  strictMatching: boolean,
-): { rule: TeacherAssignmentRule | null; reason: string } {
-  const matchingRules = strictMatching
-    ? eligibleRules.filter((rule) =>
-        events.some(
-          (e) =>
-            rule.classRulesJson?.some((c) => c.classReferenceId === e.studentClassReferenceId) ||
-            rule.gradeRulesJson?.some((g) => g.grade === e.grade?.toString()),
-        ),
-      )
-    : eligibleRules;
-
-  const details = events.map((e) => `class=${e.studentClassReferenceId ?? 'none'} grade=${e.grade ?? 'none'}`).join(', ');
-
-  if (matchingRules.length === 0) {
-    return { rule: null, reason: `no class/grade match for events ([${details}]); no fallbacks allowed` };
-  }
-
-  const bestMatch = pickBestRule(matchingRules, loadCount);
-  const matchLoads = matchingRules.map((r) => fmtLoad(r, loadCount)).join(', ');
-  return {
-    rule: bestMatch,
-    reason: `matched ${matchingRules.length} rules for events ([${details}]); winner ${fmtLoad(bestMatch, loadCount)}; matching=[${matchLoads}]`,
-  };
-}
-
-/**
- * Assigns a teacher to a single event using the rules engine.
- * Pure synchronous function — no DB calls. The caller loads all data
- * upfront and is responsible for saving the returned ftaUpdate.
- *
- * The event must have the `student` relation loaded (event.student).
- * Load balancing uses the provided loadCount map (caller controls scope,
- * e.g. all yearly events or just the current batch).
- *
- * Resolution order:
- * 1. Existing family default (fta.teacherReferenceId)
- * 2. Active rules matching event class or grade, balanced by loadCount
- * 3. No assignment when no rules match (no fallbacks)
- *
- * @param event               Event to assign (must have .student loaded).
- * @param allRules            Active TeacherAssignmentRule rows for this user+year.
- * @param fta                 Existing FamilyTeacherAssignment for this family, or null.
- * @param loadCount           Map of teacherId → current event count for balancing.
- * @param candidateTeacherIds Optional filter: only rules whose teacher is in this list are eligible.
- *                            When no rules exist but this list is provided, synthetic equal-weight
- *                            rules are created for each candidate (same behaviour as assignTeachersBatch).
- * @returns chosenTeacherId: number | null
- *          ftaUpdate: FamilyTeacherAssignment record to save, or null if no assignment made.
- *          reason: human-readable string explaining why this teacher was chosen (for logging).
- */
-export function assignTeacher(
-  event: Event,
-  allRules: TeacherAssignmentRule[],
-  fta: FamilyTeacherAssignment | null,
-  loadCount: Map<number, number>,
-  candidateTeacherIds?: number[],
-): { chosenTeacherId: number | null; ftaUpdate: Partial<FamilyTeacherAssignment> | null; reason: string } {
-  const familyId = event.student?.familyReferenceId ?? null;
-  if (!familyId) return { chosenTeacherId: null, ftaUpdate: null, reason: 'no familyReferenceId on student' };
-
-  const eligibleRules: TeacherAssignmentRule[] =
-    allRules.length === 0 && candidateTeacherIds?.length
-      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 }) as TeacherAssignmentRule)
-      : allRules;
-
-  const year = event.year ?? getCurrentHebrewYear();
-  let chosenTeacherId: number;
-  let source: string;
-  let reason: string;
-
-  if (fta?.teacherReferenceId) {
-    chosenTeacherId = fta.teacherReferenceId;
-    source = 'family_default';
-    reason = `family_default: existing FTA (ftaId=${fta.id ?? 'new'}) has teacherReferenceId=${fta.teacherReferenceId}`;
-  } else {
-    if (eligibleRules.length === 0)
-      return { chosenTeacherId: null, ftaUpdate: null, reason: 'no active rules and no FTA for this family' };
-
-    const { rule, reason: pickReason } = pickTeacher(eligibleRules, [event], loadCount, allRules.length > 0);
-    if (!rule) return { chosenTeacherId: null, ftaUpdate: null, reason: `rules: ${pickReason}` };
-
-    chosenTeacherId = rule.teacherReferenceId;
-    source = 'rules';
-    reason = `rules: ${pickReason}`;
-  }
-
-  const record: Partial<FamilyTeacherAssignment> = fta ?? {
-    userId: event.userId,
-    year,
-    familyReferenceId: familyId,
-    historyJson: [],
-  };
-  record.teacherReferenceId = chosenTeacherId;
-  record.historyJson = [
-    ...(record.historyJson ?? []),
-    { eventId: event.id, teacherReferenceId: chosenTeacherId, assignedAt: new Date().toISOString(), source },
-  ];
-
-  return { chosenTeacherId, ftaUpdate: record, reason };
-}
-
-/**
- * Assigns teachers to a batch of events using the rules engine.
- * Pure synchronous function — no DB calls. The caller loads all data
- * upfront and is responsible for saving the returned ftaUpdates.
- *
- * Events must have the `student` relation loaded (event.student).
- * Events in the same family always get the same teacher.
- * Load balancing counts only assignments made within this batch.
- *
- * @param events              Events to assign (must have .student loaded).
- * @param allRules            Active TeacherAssignmentRule rows for this user+year.
- * @param ftaMap              Pre-loaded map of familyReferenceId → FamilyTeacherAssignment.
- * @param candidateTeacherIds Optional filter: only rules whose teacher is in this list are eligible.
- * @returns assignmentMap: Map<eventId, chosenTeacherId | null>
- *          ftaUpdates: FamilyTeacherAssignment records to save (both new and updated).
- */
-export function assignTeachersBatch(
-  events: Event[],
-  allRules: TeacherAssignmentRule[],
-  ftaMap: Map<string, FamilyTeacherAssignment>,
-  candidateTeacherIds?: number[],
-): { assignmentMap: Map<number, number | null>; ftaUpdates: Partial<FamilyTeacherAssignment>[] } {
-  const assignmentMap = new Map<number, number | null>();
-  const ftaUpdates: Partial<FamilyTeacherAssignment>[] = [];
-
-  if (events.length === 0) return { assignmentMap, ftaUpdates };
-
-  const userId = events[0].userId;
-  const year = events[0].year ?? getCurrentHebrewYear();
-  const now = new Date().toISOString();
-
-  const eligibleRules =
-    allRules.length === 0 && candidateTeacherIds?.length
-      ? candidateTeacherIds.map((id) => ({ teacherReferenceId: id, customRatio: 1 }) as TeacherAssignmentRule)
-      : allRules;
-
-  // Group events by family; events with no familyId are marked unassigned immediately
-  const eventsByFamily = events.reduce(
-    (acc, event) => {
-      const familyId = event.student?.familyReferenceId ?? null;
-      if (!familyId) {
-        assignmentMap.set(event.id, null);
-        return acc;
-      }
-      (acc[familyId] ??= []).push(event);
-      return acc;
-    },
-    {} as Record<string, Event[]>,
-  );
-
-  // Track in-batch load: families processed earlier influence later families
-  const batchLoadCount = new Map<number, number>();
+function processRule(
+  rule: TeacherAssignmentRule,
+  eventsByFamily: Record<string, Event[]>,
+  gradesByFamily: Record<string, Set<string>>,
+  assignedFamilies: Set<string>,
+  familyLoadCount: Map<number, number>,
+  result: Map<number, number | null>,
+) {
+  const grade = rule.gradeLevelKey?.trim();
+  const teacherIds = rule.teacherReferenceIds ?? [];
+  if (!grade || !teacherIds.length) return;
 
   for (const [familyId, familyEvents] of Object.entries(eventsByFamily)) {
-    const fta = ftaMap.get(familyId);
-    let chosenTeacherId: number | null = null;
-    let source: string;
+    if (assignedFamilies.has(familyId)) continue;
 
-    if (fta?.teacherReferenceId) {
-      chosenTeacherId = fta.teacherReferenceId;
-      source = 'family_default';
-    } else if (eligibleRules.length > 0) {
-      const { rule } = pickTeacher(eligibleRules, familyEvents, batchLoadCount, allRules.length > 0);
-      if (rule) {
-        chosenTeacherId = rule.teacherReferenceId;
-        source = 'rules';
-      }
-    }
+    // Does this family have any student in this rule's grade?
+    if (!gradesByFamily[familyId]?.has(grade)) continue;
 
-    if (!chosenTeacherId) {
-      for (const ev of familyEvents) assignmentMap.set(ev.id, null);
-      continue;
-    }
+    const chosenTeacherId = pickTeacherByLoad(teacherIds, familyLoadCount);
+    familyLoadCount.set(chosenTeacherId, (familyLoadCount.get(chosenTeacherId) ?? 0) + 1);
+    assignedFamilies.add(familyId);
 
-    batchLoadCount.set(chosenTeacherId, (batchLoadCount.get(chosenTeacherId) ?? 0) + familyEvents.length);
-    for (const ev of familyEvents) assignmentMap.set(ev.id, chosenTeacherId);
+    for (const ev of familyEvents) result.set(ev.id, chosenTeacherId);
+  }
+}
 
-    const record: Partial<FamilyTeacherAssignment> = fta ?? {
-      userId,
-      year,
-      familyReferenceId: familyId,
-      historyJson: [],
-    };
-    record.teacherReferenceId = chosenTeacherId;
-    record.historyJson = [
-      ...(record.historyJson ?? []),
-      ...familyEvents.map((ev) => ({
-        eventId: ev.id,
-        teacherReferenceId: chosenTeacherId!,
-        assignedAt: now,
-        source,
-      })),
-    ];
-    ftaUpdates.push(record);
+/**
+ * Assigns teachers to a batch of selected events using the sequential grade-by-grade rules engine.
+ *
+ * Algorithm (grade-by-grade with sister propagation):
+ *  For each rule (ordered by `order` ASC):
+ *    1. Find all unassigned families that have at least one student enrolled in rule.gradeLevelKey.
+ *    2. Assign the entire family (all selected events for that family) to the lowest-loaded teacher
+ *       among rule.teacherReferenceIds.
+ *    3. Increment that teacher's family load count.
+ *    4. Move to the next rule — already-assigned families are skipped automatically.
+ *
+ * @param eventIds   IDs of the selected events to assign. Existing assignments are overwritten.
+ * @param dataSource TypeORM DataSource for DB queries.
+ * @param userId     Current user ID (scoping).
+ * @returns Map of eventId → chosen teacherReferenceId (null if no rule matched).
+ */
+export async function assignTeachersByRules(
+  eventIds: number[],
+  dataSource: DataSource,
+  userId: number,
+): Promise<Map<number, number | null>> {
+  if (!eventIds.length) return new Map();
+
+  const eventRepo = dataSource.getRepository(Event);
+
+  // 1. Load selected events with their student relation
+  const events = await eventRepo.find({
+    where: { id: In(eventIds), userId },
+    relations: ['student', 'studentClass'],
+  });
+
+  const year = events[0]?.year ?? getCurrentHebrewYear();
+
+  // 2. Group events by familyReferenceId and pre-calculate which families have students in which grade levels
+  const eventsByFamily = groupDataByKeyFn(events, (e) => e.student?.familyReferenceId ?? null);
+  const gradesByFamily = groupDataByKeyFnAndCalc(events, (e) => e.student?.familyReferenceId ?? null, evs => new Set(evs.map(ev => ev.studentClass?.gradeLevel)));
+  const result = new Map<number, number | null>();
+  const familyLoadCount = new Map<number, number>();
+
+  // 3. Load active rules ordered by execution sequence (ignoring any rules without gradeLevelKey)
+  const rules = await dataSource.getRepository(TeacherAssignmentRule).find({
+    where: { userId, year, isActive: true },
+    order: { order: 'ASC' },
+  });
+
+  // 4. Track which families have been assigned
+  const assignedFamilies = new Set<string>();
+
+  for (const rule of rules) {
+    processRule(rule, eventsByFamily, gradesByFamily, assignedFamilies, familyLoadCount, result);
   }
 
-  return { assignmentMap, ftaUpdates };
+  return result;
+}
+
+/**
+ * For the yemot auto-assign path: given a single newly created event,
+ * determine the teacher using the rules engine.
+ *
+ * Multi-Stage Resolution:
+ *  1. Query active same-family events of the SAME type with event dates within +/- 30 days.
+ *     If an event with an assigned teacher is found, reuse that teacher.
+ *  2. If none, determine the matching rule on the student's class grade level.
+ *  3. Once the matching rule is found:
+ *     - If the rule specifies exactly one teacher, assign her.
+ *     - If the rule specifies multiple teachers, compare the worksheets of those teachers
+ *       within the +/- 30 days window and assign the teacher carrying the lowest workload.
+ *
+ * @returns chosen teacherReferenceId or null.
+ */
+export async function autoAssignTeacherForEvent(
+  event: Event,
+  student: Student,
+  dataSource: DataSource,
+): Promise<number | null> {
+  const familyId = event.student?.familyReferenceId ?? null;
+  if (!familyId) return null;
+
+  const userId = event.userId;
+  const year = event.year ?? getCurrentHebrewYear();
+
+  // Convert eventDate to date range (relative math +/- 30 days)
+  const pivotDate = event.eventDate ? new Date(event.eventDate) : new Date();
+  const start = new Date(pivotDate);
+  const end = new Date(pivotDate);
+  start.setDate(pivotDate.getDate() - 30);
+  end.setDate(pivotDate.getDate() + 30);
+
+  // 1. Same-family, same-type, +/- 30 days window search
+  const existingSameTypeEvent = await dataSource
+    .getRepository(Event)
+    .createQueryBuilder('e')
+    .innerJoin('e.student', 's')
+    .select('e.teacherReferenceId', 'teacherReferenceId')
+    .where('e.userId = :userId', { userId })
+    .andWhere('s.familyReferenceId = :familyId', { familyId })
+    .andWhere('e.eventTypeReferenceId = :eventTypeId', { eventTypeId: event.eventTypeReferenceId })
+    .andWhere('e.teacherReferenceId IS NOT NULL')
+    .andWhere('e.eventDate BETWEEN :start AND :end', { start, end })
+    .limit(1)
+    .getRawOne<{ teacherReferenceId: number }>();
+
+  if (existingSameTypeEvent?.teacherReferenceId) {
+    return existingSameTypeEvent.teacherReferenceId;
+  }
+
+  // Find student's grade level for this event/year
+  let studentClass: StudentClass | null = null;
+  if (event.studentClassReferenceId) {
+    studentClass = await dataSource.getRepository(StudentClass).findOne({
+      where: { id: event.studentClassReferenceId },
+      relations: ['class'],
+    });
+  }
+
+  if (!studentClass) {
+    studentClass = await dataSource.getRepository(StudentClass).findOne({
+      where: { studentReferenceId: student.id, year, userId },
+      relations: ['class'],
+    });
+  }
+
+  const gradeLevel = studentClass?.class?.gradeLevel;
+  if (!gradeLevel) {
+    return null;
+  }
+
+  // 2. Load active rules ordered by priority sequence and find first matching rule for student's grade level
+  const rules = await dataSource.getRepository(TeacherAssignmentRule).find({
+    where: { userId, year, isActive: true },
+    order: { order: 'ASC' },
+  });
+
+  const matchedRule = rules.find((r) => r.gradeLevelKey?.trim() === gradeLevel.trim());
+
+  if (!matchedRule || !matchedRule.teacherReferenceIds?.length) {
+    return null;
+  }
+
+  const teacherIds = matchedRule.teacherReferenceIds;
+
+  // 3. If there is only one teacher in the rule, assign her directly
+  if (teacherIds.length === 1) {
+    return teacherIds[0];
+  }
+
+  // 4. If there are multiple teachers under the rule, query worksheets of candidate teachers in the 60-day window
+  const loadRows = await dataSource
+    .getRepository(Event)
+    .createQueryBuilder('e')
+    .select('e.teacherReferenceId', 'teacherReferenceId')
+    .addSelect('COUNT(*)', 'count')
+    .where('e.userId = :userId', { userId })
+    .andWhere('e.teacherReferenceId IN (:...teacherIds)', { teacherIds })
+    .andWhere('e.eventDate BETWEEN :start AND :end', { start, end })
+    .groupBy('e.teacherReferenceId')
+    .getRawMany<{ teacherReferenceId: number; count: string }>();
+
+  const loadMap = new Map<number, number>();
+  for (const row of loadRows) {
+    loadMap.set(Number(row.teacherReferenceId), Number(row.count));
+  }
+
+  // Choose the candidate teacher with the lowest workload within the +/- 30 days window
+  const shuffled = [...teacherIds].sort(() => Math.random() - 0.5);
+  return shuffled.reduce((best, id) =>
+    (loadMap.get(id) ?? 0) < (loadMap.get(best) ?? 0) ? id : best,
+  );
 }

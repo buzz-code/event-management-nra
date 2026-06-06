@@ -15,9 +15,7 @@ import {
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
 import { Tatnikit } from 'src/db/entities/Tatnikit.entity';
-import { TeacherAssignmentRule } from 'src/db/entities/TeacherAssignmentRule.entity';
-import { FamilyTeacherAssignment } from 'src/db/entities/FamilyTeacherAssignment.entity';
-import { assignTeacher } from 'src/utils/teacher-assignment.util';
+import { autoAssignTeacherForEvent } from 'src/utils/teacher-assignment.util';
 
 const MAX_GIFTS = 5;
 
@@ -942,58 +940,16 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         return;
       }
 
-      const familyReferenceId = student.familyReferenceId;
-      if (!familyReferenceId) {
-        this.logger.log(`${ctx} → skip: student has no familyReferenceId`);
-        return;
-      }
-
-      const userId = this.user.id;
-      const year = savedEvent.year ?? getCurrentHebrewYear();
-
-      const [allRules, fta, teacherLoadRows] = await Promise.all([
-        this.dataSource.getRepository(TeacherAssignmentRule).find({ where: { userId, year, isActive: true } }),
-        this.dataSource.getRepository(FamilyTeacherAssignment).findOneBy({ userId, year, familyReferenceId }),
-        this.dataSource
-          .getRepository(Event)
-          .createQueryBuilder('event')
-          .select('event.teacherReferenceId', 'teacherReferenceId')
-          .addSelect('COUNT(*)', 'count')
-          .where('event.userId = :userId', { userId })
-          .andWhere('event.year = :year', { year })
-          .andWhere('event.teacherReferenceId IS NOT NULL')
-          .groupBy('event.teacherReferenceId')
-          .getRawMany<{ teacherReferenceId: string; count: string }>(),
-      ]);
-
-      const loadSnapshot = Object.fromEntries(
-        teacherLoadRows.map(({ teacherReferenceId, count }) => [teacherReferenceId, Number(count)]),
-      );
-      this.logger.log(
-        `${ctx} | rules=${allRules.length} fta=${fta ? `teacherId=${fta.teacherReferenceId}(id=${fta.id})` : 'none'} loads=${JSON.stringify(loadSnapshot)}`,
-      );
-
-      if (allRules.length === 0 && !fta?.teacherReferenceId) {
-        this.logger.log(`${ctx} → skip: no active rules and no existing FTA`);
-        return;
-      }
-
-      const loadCount = new Map<number, number>(
-        teacherLoadRows.map(({ teacherReferenceId, count }) => [Number(teacherReferenceId), Number(count)]),
-      );
 
       savedEvent.student = student;
-      const { chosenTeacherId, ftaUpdate, reason } = assignTeacher(savedEvent, allRules, fta, loadCount);
+      const chosenTeacherId = await autoAssignTeacherForEvent(savedEvent, student, this.dataSource);
       if (!chosenTeacherId) {
-        this.logger.log(`${ctx} → skip: ${reason}`);
+        this.logger.log(`${ctx} → skip: no rule matched`);
         return;
       }
 
-      await Promise.all([
-        this.dataSource.getRepository(Event).update({ id: savedEvent.id }, { teacherReferenceId: chosenTeacherId }),
-        ftaUpdate ? this.dataSource.getRepository(FamilyTeacherAssignment).save(ftaUpdate) : Promise.resolve(),
-      ]);
-      this.logger.log(`${ctx} → assigned teacher=${chosenTeacherId} reason: ${reason}`);
+      await this.dataSource.getRepository(Event).update({ id: savedEvent.id }, { teacherReferenceId: chosenTeacherId });
+      this.logger.log(`${ctx} → assigned teacher=${chosenTeacherId}`);
     } catch (err) {
       const e = err as Error;
       this.logger.error(`${ctx} → ERROR: ${e?.message}`, e?.stack);

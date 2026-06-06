@@ -35,7 +35,6 @@ import { commonAdminFilters, notPermissionFilter } from '@shared/components/fiel
 import { isTeacher } from '../utils/appPermissions';
 import { defaultYearFilter } from '@shared/utils/yearFilter';
 import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
-import CommonReferenceArrayInput from '@shared/components/fields/CommonReferenceArrayInput';
 import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
 import { BulkReportButton } from '@shared/components/crudContainers/BulkReportButton';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
@@ -93,13 +92,14 @@ const filterDefaultValues = {
 
 const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
     const additionalBulkButtons = [
-        <BulkActionButton label="שיוך למורה" icon={<SupervisedUserCircleIcon />} name="teacherAssociation">
-            <CommonReferenceArrayInput
-                source="teacherReferenceIds"
+        <BulkActionButton label="שיוך למורה לפי כללים" icon={<SupervisedUserCircleIcon />} name="teacherAssociation" reloadOnEnd />,
+        <BulkActionButton label="קביעת מורה ידנית" icon={<EditIcon />} name="manualTeacherAssignment" reloadOnEnd>
+            <CommonReferenceInput
+                source="teacherReferenceId"
                 reference="teacher"
-                label="מורה"
+                label="מורה (ריק = הסרת שיוך)"
                 dynamicFilter={filterByUserId}
-                validate={required()}
+                allowEmpty
             />
         </BulkActionButton>,
         <BulkActionButton label="עדכון שם הגרלה" icon={<EditIcon />} name="lotteryNameUpdate" reloadOnEnd>

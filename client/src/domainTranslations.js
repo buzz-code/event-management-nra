@@ -208,23 +208,10 @@ export default {
             name: 'כלל שיבוץ מורה |||| כללי שיבוץ מורות',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherReferenceId: 'מורה',
-                classRulesJson: 'כיתות',
-                'classRulesJson.classReferenceId': 'כיתה',
-                gradeRulesJson: 'שכבות',
-                'gradeRulesJson.grade': 'שכבה',
-                customRatio: 'יחס מותאם',
+                order: 'סדר עדיפות',
+                gradeLevelKey: 'שכבה',
+                teacherReferenceIds: 'מורות',
                 isActive: 'פעיל?',
-            },
-        },
-        family_teacher_assignment: {
-            name: 'שיבוץ מורה למשפחה |||| שיבוצי מורות למשפחות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                familyReferenceId: 'מזהה משפחה',
-                teacherReferenceId: 'מורה ברירת מחדל',
-                students: 'תלמידות',
-                historyJson: 'היסטוריית שיבוצים',
             },
         },
 

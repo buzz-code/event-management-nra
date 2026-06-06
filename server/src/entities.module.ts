@@ -23,7 +23,6 @@ import familyConfig from './entity-modules/family.config';
 import tatnikitConfig from './entity-modules/tatnikit.config';
 import unreportedEventConfig from './entity-modules/unreported-event.config';
 import teacherAssignmentRuleConfig from './entity-modules/teacher-assignment-rule.config';
-import familyTeacherAssignmentConfig from './entity-modules/family-teacher-assignment.config';
 import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
 import { registerEntityNameMap } from '@shared/entities/configs/import-file.config';
 import phoneTemplateConfig from '@shared/entities/configs/phone-template.config';
@@ -59,7 +58,6 @@ registerEntityNameMap({
     BaseEntityModule.register(tatnikitConfig),
     BaseEntityModule.register(unreportedEventConfig),
     BaseEntityModule.register(teacherAssignmentRuleConfig),
-    BaseEntityModule.register(familyTeacherAssignmentConfig),
     BaseEntityModule.register(phoneTemplateConfig),
     BaseEntityModule.register(phoneCampaignConfig),
 

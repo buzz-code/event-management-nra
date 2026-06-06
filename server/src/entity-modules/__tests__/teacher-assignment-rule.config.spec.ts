@@ -6,10 +6,9 @@ createEntityConfigTests('TeacherAssignmentRuleConfig', config, {
   entity: TeacherAssignmentRule,
   expectedJoins: {
     user: { eager: false },
-    teacher: { eager: false },
   },
   expectedExportHeaders: {
-    count: 6,
+    count: 5,
     first: { value: 'year', label: 'שנה' },
   },
 });
