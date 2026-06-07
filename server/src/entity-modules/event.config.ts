@@ -131,7 +131,7 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
       case 'manualTeacherAssignment': {
         const eventIds: number[] = getAsNumberArray(extra.ids) ?? [];
         const userId = getUserIdFromUser(req.auth);
-        const rawTeacherId = getAsString(extra.teacherReferenceId);
+        const rawTeacherId = getAsNumber(extra.teacherReferenceId);
         const teacherReferenceId = rawTeacherId ? Number(rawTeacherId) : null;
 
         await this.dataSource
