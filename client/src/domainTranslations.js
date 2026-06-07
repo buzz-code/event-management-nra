@@ -52,6 +52,8 @@ export default {
                 reportedByTatnikit: 'דווח ע"י תתניקית',
                 reportOrigin: 'מקור הדיווח',
                 'reportOrigin:$eq': 'מקור הדיווח',
+                'previousSimcha.previousSimchaDescription': 'שמחה קודמת',
+                'previousSimcha.previousTeacherName': 'מורה בשמחה קודמת',
             },
         },
         event_type: {
@@ -128,6 +130,7 @@ export default {
                 classKey: 'כיתה',
             },
         },
+
         unreported_event: {
             name: 'אירוע לא מדווח |||| אירועים לא מדווחים',
             fields: {

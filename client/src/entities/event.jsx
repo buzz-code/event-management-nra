@@ -158,6 +158,8 @@ const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
                 optionalSource="teacherTz"
                 optionalTarget="tz"
             />
+            <TextField source="previousSimcha.previousSimchaDescription" />
+            <TextField source="previousSimcha.previousTeacherName" />
             {/* <TextField source="name" />
             <TextField source="description" /> */}
             <DateField source="eventDate" />
@@ -231,6 +233,8 @@ const Inputs = ({ isCreate, isAdmin }) => {
                 dynamicFilter={filterByUserIdAndYear}
             />
             <CommonReferenceInput source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />
+            <TextField source="previousSimcha.previousSimchaDescription" label="שמחה קודמת" />
+            <TextField source="previousSimcha.previousTeacherName" label="מורה בשמחה קודמת" />
             <TextInput source="name" validate={[maxLength(255)]} />
             <TextInput source="description" validate={[maxLength(1000)]} />
             <DateTimeInput source="eventDate" validate={[required()]} />

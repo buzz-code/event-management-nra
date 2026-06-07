@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToOne,
   OneToMany,
   JoinColumn,
   Index,
@@ -35,6 +36,7 @@ import { fillDefaultYearValue, getCurrentHebrewYear } from '@shared/utils/entity
 import { Gift } from './Gift.entity';
 import { getCurrentUser } from '@shared/utils/validation/current-user.util';
 import { FamilyTeacherAssignment } from './FamilyTeacherAssignment.entity';
+import { EventPreviousSimcha } from '../view-entities/EventPreviousSimcha.entity';
 
 export enum EventReportOrigin {
   ONLY_TATNIKIT = 'only_tatnikit',
@@ -76,6 +78,7 @@ export class Event implements IHasUserId {
         FamilyStatusType,
         Family,
         FamilyTeacherAssignment,
+        EventPreviousSimcha,
       ]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
@@ -468,6 +471,10 @@ export class Event implements IHasUserId {
 
   @OneToMany(() => EventGift, (eventGift) => eventGift.event, { onDelete: 'CASCADE', cascade: true })
   eventGifts: EventGift[];
+
+  @OneToOne(() => EventPreviousSimcha, { nullable: true, createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'id', referencedColumnName: 'id' })
+  previousSimcha: EventPreviousSimcha;
 
   newNote: string;
 }

@@ -41,6 +41,7 @@ const getReportData: IGetReportDataFunction = async (
         levelType: true,
         notes: true,
         eventGifts: true,
+        previousSimcha: true,
       },
       order: {
         student: {
@@ -54,6 +55,8 @@ const getReportData: IGetReportDataFunction = async (
     { value: 'id', label: 'מזהה', readOnly: true },
     { value: 'teacher.tz', label: 'תז מורה' },
     { value: 'teacher.name', label: 'שם מורה', readOnly: true },
+    { value: (row: any) => row.previousSimcha?.previousSimchaDescription || '', label: 'שמחה קודמת', readOnly: true },
+    { value: (row: any) => row.previousSimcha?.previousTeacherName || '', label: 'מורה בשמחה קודמת', readOnly: true },
     { value: 'student.tz', label: 'תז תלמיד' },
     { value: 'student.name', label: 'שם תלמידה', readOnly: true },
     { value: 'reporterStudent.name', label: 'דווח ע"י', readOnly: true },

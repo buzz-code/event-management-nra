@@ -34,6 +34,7 @@ function getConfig(): BaseEntityModuleOptions {
         levelType: { eager: false },
         notes: { eager: false },
         eventGifts: { eager: false },
+        previousSimcha: { eager: true },
       },
     },
     exporter: {
@@ -47,6 +48,7 @@ function getConfig(): BaseEntityModuleOptions {
           levelType: { eager: true },
           notes: { eager: true },
           eventGifts: { eager: true },
+          previousSimcha: { eager: true },
         };
         req.options.query.sort = [{ field: 'student.familyReferenceId', order: 'ASC' }];
         return innerFunc(req);
@@ -59,6 +61,8 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'eventType.name', label: 'סוג אירוע' },
           { value: 'levelType.name', label: 'רמה' },
           { value: 'teacher.name', label: 'שם מורה' },
+          { value: (row: any) => row.previousSimcha?.previousSimchaDescription || '', label: 'שמחה קודמת' },
+          { value: (row: any) => row.previousSimcha?.previousTeacherName || '', label: 'מורה בשמחה קודמת' },
           { value: getISODateFormatter('eventDate'), label: 'תאריך אירוע' },
           { value: 'eventHebrewDate', label: 'תאריך עברי', readOnly: true },
           { value: (row: any) => row.notes?.map((note: any) => note.noteText).join(', ') || '', label: 'הערות' },
