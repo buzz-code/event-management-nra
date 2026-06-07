@@ -114,30 +114,14 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
       case 'teacherAssociation': {
         const eventIds: number[] = getAsNumberArray(extra.ids) ?? [];
         const userId = getUserIdFromUser(req.auth);
-
-        const assignmentMap = await assignTeachersByRules(eventIds, this.dataSource, userId);
-
-        const updates: Promise<any>[] = [];
-        for (const [eventId, teacherReferenceId] of assignmentMap) {
-          if (teacherReferenceId != null) {
-            updates.push(
-              this.dataSource.getRepository(Event).update({ id: eventId, userId }, { teacherReferenceId }),
-            );
-          }
-        }
-        await Promise.all(updates);
-        return 'האירועים עודכנו בהצלחה';
+        return this.setTeacherAssociation(eventIds, userId);
       }
       case 'manualTeacherAssignment': {
         const eventIds: number[] = getAsNumberArray(extra.ids) ?? [];
         const userId = getUserIdFromUser(req.auth);
         const rawTeacherId = getAsNumber(extra.teacherReferenceId);
         const teacherReferenceId = rawTeacherId ? Number(rawTeacherId) : null;
-
-        await this.dataSource
-          .getRepository(Event)
-          .update({ id: In(eventIds), userId }, { teacherReferenceId });
-        return 'האירועים עודכנו בהצלחה';
+        return this.manualTeacherAssignment(eventIds, userId, teacherReferenceId);
       }
       case 'fixReferences': {
         const ids = getAsNumberArray(extra.ids) ?? [];
@@ -145,32 +129,62 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
       }
       case 'lotteryNameUpdate': {
         const lotteryName = getAsString(extra.lotteryName);
-        const ids = getAsArray(extra.ids) ?? [];
-        if (ids.length > 0) {
-          const eventIds = await this.dataSource.getRepository(Event)
-            .find({
-              where: [
-                { id: In(ids), lotteryName: IsNull() },
-                { id: In(ids), lotteryName: '' },
-              ],
-              select: ['id'],
-            }).then(events => events.map(e => e.id));
-          if (eventIds.length > 0) {
-            await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
-          }
-        }
-        return 'שם הגרלה עודכן בהצלחה';
+        const ids = getAsNumberArray(extra.ids) ?? [];
+        return this.updateLotteryName(lotteryName, ids);
       }
       case 'yearUpdate': {
         const year = getAsNumber(extra.year);
-        const eventIds = getAsArray(extra.ids) ?? [];
-        if (eventIds.length > 0 && year) {
-          await this.dataSource.getRepository(Event).update(eventIds, { year });
-        }
-        return 'השנה עודכנה בהצלחה';
+        const eventIds = getAsNumberArray(extra.ids) ?? [];
+        return this.updateYearForEvents(eventIds, year);
       }
     }
     return super.doAction(req, body);
+  }
+
+  private async setTeacherAssociation(eventIds: number[], userId: number): Promise<string> {
+    const assignmentMap = await assignTeachersByRules(eventIds, this.dataSource, userId);
+
+    const updates: Promise<any>[] = [];
+    for (const [eventId, teacherReferenceId] of assignmentMap) {
+      if (teacherReferenceId != null) {
+        updates.push(
+          this.dataSource.getRepository(Event).update({ id: eventId, userId }, { teacherReferenceId }),
+        );
+      }
+    }
+    await Promise.all(updates);
+    return 'האירועים עודכנו בהצלחה';
+  }
+
+  private async manualTeacherAssignment(eventIds: number[], userId: number, teacherReferenceId: number | null): Promise<string> {
+    await this.dataSource
+      .getRepository(Event)
+      .update({ id: In(eventIds), userId }, { teacherReferenceId });
+    return 'האירועים עודכנו בהצלחה';
+  }
+
+  private async updateLotteryName(lotteryName: string, ids: number[]): Promise<string> {
+    if (ids.length > 0) {
+      const eventIds = await this.dataSource.getRepository(Event)
+        .find({
+          where: [
+            { id: In(ids), lotteryName: IsNull() },
+            { id: In(ids), lotteryName: '' },
+          ],
+          select: ['id'],
+        }).then(events => events.map(e => e.id));
+      if (eventIds.length > 0) {
+        await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
+      }
+    }
+    return 'שם הגרלה עודכן בהצלחה';
+  }
+
+  private async updateYearForEvents(eventIds: number[], year: number): Promise<string> {
+    if (eventIds.length > 0 && year) {
+      await this.dataSource.getRepository(Event).update(eventIds, { year });
+    }
+    return 'השנה עודכנה בהצלחה';
   }
 }
 
