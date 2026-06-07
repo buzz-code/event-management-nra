@@ -52,6 +52,7 @@ export enum EventReportOrigin {
 @Index('events_student_id_idx', ['studentReferenceId'], {})
 @Index('events_level_type_id_idx', ['levelTypeReferenceId'], {})
 @Index('events_event_date_idx', ['eventDate'], {})
+@Index('events_student_user_date_idx', ['studentReferenceId', 'userId', 'eventDate', 'id'], {})
 @Index('events_event_hebrew_month_idx', ['eventHebrewMonth'], {})
 @Index('events_student_class_reference_id_idx', ['studentClassReferenceId'], {})
 export class Event implements IHasUserId {
