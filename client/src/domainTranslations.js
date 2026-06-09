@@ -53,6 +53,7 @@ export default {
                 reportOrigin: 'מקור הדיווח',
                 'reportOrigin:$eq': 'מקור הדיווח',
                 'previousSimcha.previousSimchaDescription': 'שמחה קודמת',
+                'previousSimcha.previousEventHebrewDate': 'תאריך שמחה קודמת',
                 'previousSimcha.previousTeacherName': 'מורה בשמחה קודמת',
             },
         },

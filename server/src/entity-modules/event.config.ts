@@ -63,6 +63,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'teacher.name', label: 'שם מורה' },
           { value: (row: any) => row.previousSimcha?.previousSimchaDescription || '', label: 'שמחה קודמת' },
           { value: (row: any) => row.previousSimcha?.previousTeacherName || '', label: 'מורה בשמחה קודמת' },
+          { value: (row: any) => row.previousSimcha?.previousEventHebrewDate || '', label: 'תאריך שמחה קודמת' },
           { value: getISODateFormatter('eventDate'), label: 'תאריך אירוע' },
           { value: 'eventHebrewDate', label: 'תאריך עברי', readOnly: true },
           { value: (row: any) => row.notes?.map((note: any) => note.noteText).join(', ') || '', label: 'הערות' },
