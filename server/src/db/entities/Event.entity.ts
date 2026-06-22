@@ -27,6 +27,7 @@ import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsDate, IsNumber, Min } from '@shared/utils/validation/class-validator-he';
 import { StringType, DateType, NumberType } from '@shared/utils/entity/class-transformer';
+import { DateColumn } from '@shared/utils/entity/column-types.util';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { User } from './User.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
@@ -201,7 +202,7 @@ export class Event implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @DateType
   @IsDate({ always: true })
-  @Column()
+  @DateColumn()
   eventDate: Date;
 
   @IsOptional({ always: true })
@@ -323,7 +324,7 @@ export class Event implements IHasUserId {
   @IsOptional({ always: true })
   @DateType
   @IsDate({ always: true })
-  @Column({ nullable: true })
+  @DateColumn({ nullable: true })
   completionReportDate: Date;
 
   @IsOptional({ always: true })
