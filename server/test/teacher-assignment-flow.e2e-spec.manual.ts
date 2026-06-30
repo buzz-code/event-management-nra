@@ -57,11 +57,7 @@ async function registerUser(username: string, password: string): Promise<string>
 }
 
 async function loginUser(username: string, password: string): Promise<string> {
-  const res = await axios.post(
-    `${BASE_URL}/auth/login`,
-    { username, password },
-    { validateStatus: () => true },
-  );
+  const res = await axios.post(`${BASE_URL}/auth/login`, { username, password }, { validateStatus: () => true });
   if (res.status !== 200) {
     throw new Error(`Login failed (${res.status}): ${JSON.stringify(res.data)}`);
   }
@@ -131,8 +127,8 @@ function buildRules(
     { order: 2, gradeLevelKey: 'יג', teacherReferenceIds: [T1] },
     { order: 3, gradeLevelKey: 'יב', teacherReferenceIds: [T2, T3] },
     { order: 4, gradeLevelKey: 'יא', teacherReferenceIds: [T2, T3, T4] },
-    { order: 5, gradeLevelKey: 'י',  teacherReferenceIds: [T2, T3, T4] },
-    { order: 6, gradeLevelKey: 'ט',  teacherReferenceIds: [T2, T3, T4] },
+    { order: 5, gradeLevelKey: 'י', teacherReferenceIds: [T2, T3, T4] },
+    { order: 6, gradeLevelKey: 'ט', teacherReferenceIds: [T2, T3, T4] },
   ];
 }
 
@@ -178,10 +174,7 @@ describe('Teacher Assignment Flow (E2E – live server)', () => {
    *  poolAlone2 : single student in יב (family B for load-balance test)
    *  rescued    : siblings in ט  + יד  → whole family should get T1 (rescued by יד)
    */
-  let families: Record<
-    'highLow' | 'midLow' | 'poolMixed' | 'poolAlone' | 'poolAlone2' | 'rescued',
-    FamilyData
-  >;
+  let families: Record<'highLow' | 'midLow' | 'poolMixed' | 'poolAlone' | 'poolAlone2' | 'rescued', FamilyData>;
 
   // ── Setup ──────────────────────────────────────────────────────────────────
 
@@ -265,10 +258,7 @@ describe('Teacher Assignment Flow (E2E – live server)', () => {
 
     let tzCounter = 90; // offset to avoid collisions with solo tzs
 
-    async function createFamily(
-      familyLabel: string,
-      grades: Grade[],
-    ): Promise<FamilyData> {
+    async function createFamily(familyLabel: string, grades: Grade[]): Promise<FamilyData> {
       const fatherName = `אב_${familyLabel}_${RUN_ID}`;
       const motherName = `אם_${familyLabel}_${RUN_ID}`;
       const sIds: number[] = [];
@@ -306,12 +296,12 @@ describe('Teacher Assignment Flow (E2E – live server)', () => {
     }
 
     families = {
-      highLow:    await createFamily('highLow',    ['יד', 'יב']),
-      midLow:     await createFamily('midLow',     ['יג', 'יב']),
-      poolMixed:  await createFamily('poolMixed',  ['יב', 'יא']),
-      poolAlone:  await createFamily('poolAlone',  ['יב']),
+      highLow: await createFamily('highLow', ['יד', 'יב']),
+      midLow: await createFamily('midLow', ['יג', 'יב']),
+      poolMixed: await createFamily('poolMixed', ['יב', 'יא']),
+      poolAlone: await createFamily('poolAlone', ['יב']),
       poolAlone2: await createFamily('poolAlone2', ['יב']),
-      rescued:    await createFamily('rescued',    ['ט', 'יד']),
+      rescued: await createFamily('rescued', ['ט', 'יד']),
     };
 
     // --- TeacherAssignmentRules ---

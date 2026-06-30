@@ -870,9 +870,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     eventType: EventType,
     monthName: string,
   ): Promise<Event | null> {
-    this.logger.log(
-      `Finding existing event for student ${student.name}, type ${eventType.name}, month ${monthName}`,
-    );
+    this.logger.log(`Finding existing event for student ${student.name}, type ${eventType.name}, month ${monthName}`);
 
     const currentYear = getCurrentHebrewYear();
     const eventRepo = this.dataSource.getRepository(Event);
@@ -939,7 +937,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         this.logger.log(`${ctx} → skip: event already has teacher=${savedEvent.teacherReferenceId}`);
         return;
       }
-
 
       savedEvent.student = student;
       const chosenTeacherId = await autoAssignTeacherForEvent(savedEvent, student, this.dataSource);

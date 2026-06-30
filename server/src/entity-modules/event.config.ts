@@ -152,32 +152,34 @@ class EventService<T extends Entity | Event> extends BaseEntityService<T> {
     const updates: Promise<any>[] = [];
     for (const [eventId, teacherReferenceId] of assignmentMap) {
       if (teacherReferenceId != null) {
-        updates.push(
-          this.dataSource.getRepository(Event).update({ id: eventId, userId }, { teacherReferenceId }),
-        );
+        updates.push(this.dataSource.getRepository(Event).update({ id: eventId, userId }, { teacherReferenceId }));
       }
     }
     await Promise.all(updates);
     return 'האירועים עודכנו בהצלחה';
   }
 
-  private async manualTeacherAssignment(eventIds: number[], userId: number, teacherReferenceId: number | null): Promise<string> {
-    await this.dataSource
-      .getRepository(Event)
-      .update({ id: In(eventIds), userId }, { teacherReferenceId });
+  private async manualTeacherAssignment(
+    eventIds: number[],
+    userId: number,
+    teacherReferenceId: number | null,
+  ): Promise<string> {
+    await this.dataSource.getRepository(Event).update({ id: In(eventIds), userId }, { teacherReferenceId });
     return 'האירועים עודכנו בהצלחה';
   }
 
   private async updateLotteryName(lotteryName: string, ids: number[]): Promise<string> {
     if (ids.length > 0) {
-      const eventIds = await this.dataSource.getRepository(Event)
+      const eventIds = await this.dataSource
+        .getRepository(Event)
         .find({
           where: [
             { id: In(ids), lotteryName: IsNull() },
             { id: In(ids), lotteryName: '' },
           ],
           select: ['id'],
-        }).then(events => events.map(e => e.id));
+        })
+        .then((events) => events.map((e) => e.id));
       if (eventIds.length > 0) {
         await this.dataSource.getRepository(Event).update(eventIds, { lotteryName });
       }

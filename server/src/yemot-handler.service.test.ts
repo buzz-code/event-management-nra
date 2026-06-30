@@ -18,7 +18,12 @@ describe('YemotHandlerService — event-management-nra', () => {
     { userId: 0, name: 'STUDENT.TZ_PROMPT', description: '', value: 'Enter student ID' },
     { userId: 0, name: 'STUDENT.NOT_FOUND', description: '', value: 'Student not found, try again' },
     { userId: 0, name: 'GENERAL.WELCOME', description: '', value: 'Welcome {name}' },
-    { userId: 0, name: 'GENERAL.MAIN_MENU', description: '', value: 'Press 1 to report, 2 for fulfillment, 3 for lottery, 4 for song' },
+    {
+      userId: 0,
+      name: 'GENERAL.MAIN_MENU',
+      description: '',
+      value: 'Press 1 to report, 2 for fulfillment, 3 for lottery, 4 for song',
+    },
     { userId: 0, name: 'GENERAL.INVALID_INPUT', description: '', value: 'Invalid input' },
     { userId: 0, name: 'GENERAL.GOODBYE', description: '', value: 'Goodbye' },
     { userId: 0, name: 'GENERAL.SONG_MESSAGE', description: '', value: 'Song playing' },
@@ -63,7 +68,12 @@ describe('YemotHandlerService — event-management-nra', () => {
     { userId: 0, name: 'TATNIKIT.STUDENT_NOT_IN_CLASS', description: '', value: 'Student not in class' },
     { userId: 0, name: 'TATNIKIT.STUDENT_SELECTED', description: '', value: 'Student: {name}' },
     { userId: 0, name: 'TATNIKIT.ENTER_MONTH', description: '', value: 'Select month' },
-    { userId: 0, name: 'TATNIKIT.EVENT_ALREADY_EXISTS', description: '', value: 'Event exists: {name} {eventType} {date}' },
+    {
+      userId: 0,
+      name: 'TATNIKIT.EVENT_ALREADY_EXISTS',
+      description: '',
+      value: 'Event exists: {name} {eventType} {date}',
+    },
     { userId: 0, name: 'TATNIKIT.EVENT_SAVED', description: '', value: 'Event saved' },
     { userId: 0, name: 'TATNIKIT.ANOTHER_STUDENT', description: '', value: 'Another student?' },
     { userId: 0, name: 'TATNIKIT.GOODBYE', description: '', value: 'Goodbye' },
@@ -72,9 +82,19 @@ describe('YemotHandlerService — event-management-nra', () => {
     { userId: 0, name: 'CELEBRATIONS.INVALID_GRADE', description: '', value: 'Invalid grade' },
     { userId: 0, name: 'CELEBRATIONS.CLASS_PROMPT', description: '', value: 'Enter class number' },
     { userId: 0, name: 'CELEBRATIONS.INVALID_CLASS', description: '', value: 'Invalid class' },
-    { userId: 0, name: 'CELEBRATIONS.NO_CELEBRATIONS_FOUND', description: '', value: 'No celebrations for {className} {month}' },
+    {
+      userId: 0,
+      name: 'CELEBRATIONS.NO_CELEBRATIONS_FOUND',
+      description: '',
+      value: 'No celebrations for {className} {month}',
+    },
     { userId: 0, name: 'CELEBRATIONS.GOODBYE', description: '', value: 'Goodbye' },
-    { userId: 0, name: 'CELEBRATIONS.READING_START', description: '', value: 'Reading {count} celebrations for {className} {month}' },
+    {
+      userId: 0,
+      name: 'CELEBRATIONS.READING_START',
+      description: '',
+      value: 'Reading {count} celebrations for {className} {month}',
+    },
     { userId: 0, name: 'CELEBRATIONS.STUDENT_NAME', description: '', value: 'Student: {name}' },
     { userId: 0, name: 'CELEBRATIONS.EVENT_DETAIL', description: '', value: '{eventType} on {date}' },
     { userId: 0, name: 'CELEBRATIONS.READING_COMPLETE', description: '', value: 'Reading complete' },
@@ -83,8 +103,13 @@ describe('YemotHandlerService — event-management-nra', () => {
   // ---- Shared data ----
 
   const baseEvent = {
-    id: 1, userId: 1, studentReferenceId: 100, eventTypeReferenceId: 1,
-    eventDate: new Date('2020-01-01'), name: 'Test Student - Birthday', year: 5780,
+    id: 1,
+    userId: 1,
+    studentReferenceId: 100,
+    eventTypeReferenceId: 1,
+    eventDate: new Date('2020-01-01'),
+    name: 'Test Student - Birthday',
+    year: 5780,
   };
 
   const tatnikitStudent = { ...baseStudent, id: 105, tz: '888888888', name: 'Tatnikit Reporter' };
@@ -157,14 +182,22 @@ describe('YemotHandlerService — event-management-nra', () => {
   /** Answer 8 fulfillment questions with valid levels */
   function answerFulfillmentQuestions(b: YemotScenarioBuilder): YemotScenarioBuilder {
     return b
-      .systemAsks('Question 1').userResponds('1')
-      .systemAsks('Question 2').userResponds('2')
-      .systemAsks('Question 3').userResponds('3')
-      .systemAsks('Question 4').userResponds('1')
-      .systemAsks('Question 5').userResponds('2')
-      .systemAsks('Question 6').userResponds('3')
-      .systemAsks('Question 7').userResponds('1')
-      .systemAsks('Question 8').userResponds('2');
+      .systemAsks('Question 1')
+      .userResponds('1')
+      .systemAsks('Question 2')
+      .userResponds('2')
+      .systemAsks('Question 3')
+      .userResponds('3')
+      .systemAsks('Question 4')
+      .userResponds('1')
+      .systemAsks('Question 5')
+      .userResponds('2')
+      .systemAsks('Question 6')
+      .userResponds('3')
+      .systemAsks('Question 7')
+      .userResponds('1')
+      .systemAsks('Question 8')
+      .userResponds('2');
   }
 
   // ---- Tests ----
@@ -186,7 +219,9 @@ describe('YemotHandlerService — event-management-nra', () => {
   describe('Student lookup', () => {
     it('invalid TZ — error message then retry with valid TZ', async () => {
       const scenario = new YemotScenarioBuilder('Invalid TZ retry')
-        .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+        .seed('User', [baseUser])
+        .seed('Student', [baseStudent])
+        .seed('Text', baseTexts)
         .systemAsks('Enter student ID')
         .userResponds('999')
         .systemSends('Student not found, try again')
@@ -207,7 +242,9 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('song menu option (4) — hangup with song message', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Song option')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts),
       )
         .userResponds('4')
         .systemHangsUp('Song playing')
@@ -221,7 +258,9 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('invalid selection — no action, call ends without hangup', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Main menu invalid')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts),
       )
         .userResponds('9')
         .build();
@@ -236,7 +275,9 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('no event found, hangup', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Fulfillment no event')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts),
       )
         .userResponds('2')
         .systemSends('Fulfillment for Test Student')
@@ -252,18 +293,17 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('happy path, answer 8 questions, save and hangup', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Fulfillment happy path')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
-          .seed('Event', [{ ...baseEvent, fulfillmentQuestion1: 0 }])
+          .seed('Event', [{ ...baseEvent, fulfillmentQuestion1: 0 }]),
       )
         .userResponds('2')
         .systemSends('Fulfillment for Test Student');
 
       const result = await runner.run(
-        answerFulfillmentQuestions(scenario)
-          .systemSends('Data saved')
-          .systemHangsUp('Goodbye')
-          .build()
+        answerFulfillmentQuestions(scenario).systemSends('Data saved').systemHangsUp('Goodbye').build(),
       );
       expect(result.passed).toBe(true);
       expect(result.hungup).toBe(true);
@@ -272,9 +312,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('invalid level 5, error then retry with valid level', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Fulfillment invalid level')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
-          .seed('Event', [{ ...baseEvent, fulfillmentQuestion1: 0 }])
+          .seed('Event', [{ ...baseEvent, fulfillmentQuestion1: 0 }]),
       )
         .userResponds('2')
         .systemSends('Fulfillment for Test Student')
@@ -283,10 +325,7 @@ describe('YemotHandlerService — event-management-nra', () => {
         .systemSends('Invalid level');
 
       const result = await runner.run(
-        answerFulfillmentQuestions(scenario)
-          .systemSends('Data saved')
-          .systemHangsUp('Goodbye')
-          .build()
+        answerFulfillmentQuestions(scenario).systemSends('Data saved').systemHangsUp('Goodbye').build(),
       );
       expect(result.passed).toBe(true);
       expect(result.hungup).toBe(true);
@@ -297,7 +336,9 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('no event found, hangup', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Lottery no event')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts),
       )
         .userResponds('3')
         .systemSends('Lottery for Test Student')
@@ -313,9 +354,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('happy path, select track 2, confirm, save and hangup', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Lottery happy path')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
-          .seed('Event', [{ ...baseEvent, lotteryTrack: 0 }])
+          .seed('Event', [{ ...baseEvent, lotteryTrack: 0 }]),
       )
         .userResponds('3')
         .systemSends('Lottery for Test Student')
@@ -335,9 +378,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('invalid track 9, error then retry with valid track', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Lottery invalid track')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
-          .seed('Event', [{ ...baseEvent, lotteryTrack: 0 }])
+          .seed('Event', [{ ...baseEvent, lotteryTrack: 0 }]),
       )
         .userResponds('3')
         .systemSends('Lottery for Test Student')
@@ -360,9 +405,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('track not confirmed, re-select and confirm', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Lottery not confirmed')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
-          .seed('Event', [{ ...baseEvent, lotteryTrack: 0 }])
+          .seed('Event', [{ ...baseEvent, lotteryTrack: 0 }]),
       )
         .userResponds('3')
         .systemSends('Lottery for Test Student')
@@ -389,11 +436,24 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('full flow with events found', async () => {
       const scenario = new YemotScenarioBuilder('Class celebrations listener')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('EventType', eventType)
         .seed('Class', [classEntity])
         .seed('Student', [{ id: 101, userId: 1, tz: '111111111', name: 'Class Student' }])
         .seed('StudentClass', [{ id: 1, userId: 1, studentReferenceId: 101, classReferenceId: 10, year: 5786 }])
-        .seed('Event', [{ id: 5, userId: 1, studentReferenceId: 101, eventTypeReferenceId: 1, eventDate: new Date('2020-01-01'), name: 'Class Student - Birthday', year: 5780, eventHebrewMonth: 'תשרי' }])
+        .seed('Event', [
+          {
+            id: 5,
+            userId: 1,
+            studentReferenceId: 101,
+            eventTypeReferenceId: 1,
+            eventDate: new Date('2020-01-01'),
+            name: 'Class Student - Birthday',
+            year: 5780,
+            eventHebrewMonth: 'תשרי',
+          },
+        ])
         .systemSends('Celebrations welcome')
         .systemAsks('Enter grade')
         .userResponds('9')
@@ -415,7 +475,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('invalid grade < 9, retry with valid grade', async () => {
       const scenario = new YemotScenarioBuilder('Celebrations invalid grade low')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('Class', [classEntity])
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('Class', [classEntity])
         .systemSends('Celebrations welcome')
         .systemAsks('Enter grade')
         .userResponds('5')
@@ -436,7 +498,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('invalid grade > 14, retry with valid grade', async () => {
       const scenario = new YemotScenarioBuilder('Celebrations invalid grade high')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('Class', [classEntity])
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('Class', [classEntity])
         .systemSends('Celebrations welcome')
         .systemAsks('Enter grade')
         .userResponds('20')
@@ -457,7 +521,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('invalid class number, retry with valid class', async () => {
       const scenario = new YemotScenarioBuilder('Celebrations invalid class')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('Class', [classEntity])
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('Class', [classEntity])
         .systemSends('Celebrations welcome')
         .systemAsks('Enter grade')
         .userResponds('9')
@@ -478,7 +544,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('invalid month, retry with valid month', async () => {
       const scenario = new YemotScenarioBuilder('Celebrations invalid month')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('Class', [classEntity])
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('Class', [classEntity])
         .systemSends('Celebrations welcome')
         .systemAsks('Enter grade')
         .userResponds('9')
@@ -499,7 +567,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('no celebrations found for class and month, hangup', async () => {
       const scenario = new YemotScenarioBuilder('Celebrations none found')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('Class', [classEntity])
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('Class', [classEntity])
         .systemSends('Celebrations welcome')
         .systemAsks('Enter grade')
         .userResponds('9')
@@ -519,7 +589,9 @@ describe('YemotHandlerService — event-management-nra', () => {
   describe('Secret tatnikit (4451114)', () => {
     it('tatnikit flow, report for class', async () => {
       const scenario = new YemotScenarioBuilder('Secret tatnikit code')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('EventType', eventType)
         .seed('Student', [
           { id: 200, userId: 1, tz: '222222222', name: 'Tatnikit Student' },
           { id: 201, userId: 1, tz: '333333333', name: 'Report Student' },
@@ -554,7 +626,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('TZ not found, retry with valid TZ', async () => {
       const scenario = new YemotScenarioBuilder('Secret tatnikit TZ not found')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('EventType', eventType)
         .seed('Student', [
           { id: 200, userId: 1, tz: '222222222', name: 'Tatnikit Student' },
           { id: 201, userId: 1, tz: '333333333', name: 'Report Student' },
@@ -592,7 +666,8 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('no class found, hangup with GOODBYE', async () => {
       const scenario = new YemotScenarioBuilder('Secret tatnikit no class')
-        .seed('User', [baseUser]).seed('Text', baseTexts)
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
         .seed('Student', [{ id: 200, userId: 1, tz: '222222222', name: 'Tatnikit Student' }])
         .systemAsks('Enter your TZ')
         .userResponds('222222222')
@@ -609,7 +684,8 @@ describe('YemotHandlerService — event-management-nra', () => {
   describe('Tatnikit menu', () => {
     it('option 1 — report for self, continue to main menu', async () => {
       const scenario = new YemotScenarioBuilder('Tatnikit menu option 1')
-        .seed('User', [baseUser]).seed('Text', baseTexts)
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
         .seed('Student', [{ ...baseStudent, id: 102, tz: '555555555', name: 'Tatnikit Self' }])
         .seed('Class', [{ id: 30, userId: 1, key: 3, name: 'ט2', gradeLevel: 'ט' }])
         .seed('Tatnikit', [{ id: 1, userId: 1, studentReferenceId: 102, classReferenceId: 30, year: 5786 }])
@@ -632,7 +708,9 @@ describe('YemotHandlerService — event-management-nra', () => {
 
     it('option 2 — report class celebrations', async () => {
       const scenario = new YemotScenarioBuilder('Tatnikit menu option 2')
-        .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+        .seed('User', [baseUser])
+        .seed('Text', baseTexts)
+        .seed('EventType', eventType)
         .seed('Student', [
           { ...baseStudent, id: 103, tz: '666666666', name: 'Tatnikit Class' },
           { id: 104, userId: 1, tz: '777777777', name: 'Report Student 2' },
@@ -673,22 +751,22 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('student not found, continue to next', async () => {
       const scenario = tatnikitClassPrefix(
         new YemotScenarioBuilder('Tatnikit student not found')
-          .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
           .seed('Student', [tatnikitStudent, tatnikitReportStudent])
           .seed('Class', [tatnikitClass])
           .seed('Tatnikit', [{ id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 }])
           .seed('StudentClass', [
             { id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 },
             { id: 2, userId: 1, studentReferenceId: 106, classReferenceId: 50, year: 5786 },
-          ])
+          ]),
       )
         .systemAsks('Enter student TZ')
         .userResponds('000')
         .systemSends('Student not found, try again');
 
-      const result = await runner.run(
-        tatnikitClassReport(scenario, '999999999', 'Valid Student').build()
-      );
+      const result = await runner.run(tatnikitClassReport(scenario, '999999999', 'Valid Student').build());
       expect(result.passed).toBe(true);
       expect(result.hungup).toBe(true);
     });
@@ -697,35 +775,42 @@ describe('YemotHandlerService — event-management-nra', () => {
       const notInClassStudent = { id: 107, userId: 1, tz: '111222333', name: 'Not In Class Student' };
       const scenario = tatnikitClassPrefix(
         new YemotScenarioBuilder('Tatnikit student not in class')
-          .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
           .seed('Student', [tatnikitStudent, tatnikitReportStudent, notInClassStudent])
           .seed('Class', [tatnikitClass])
           .seed('Tatnikit', [{ id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 }])
           .seed('StudentClass', [
             { id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 },
             { id: 2, userId: 1, studentReferenceId: 106, classReferenceId: 50, year: 5786 },
-          ])
+          ]),
       )
         .systemAsks('Enter student TZ')
         .userResponds('111222333')
         .systemSends('Student not in class');
 
-      const result = await runner.run(
-        tatnikitClassReport(scenario, '999999999', 'Valid Student').build()
-      );
+      const result = await runner.run(tatnikitClassReport(scenario, '999999999', 'Valid Student').build());
       expect(result.passed).toBe(true);
       expect(result.hungup).toBe(true);
     });
 
     it('event already exists, message and continue', async () => {
       const existingEvent = {
-        id: 60, userId: 1, studentReferenceId: 106, eventTypeReferenceId: 1,
-        eventDate: new Date('2025-09-01'), name: 'Existing Student - Birthday',
-        year: 5786, eventHebrewMonth: 'תשרי',
+        id: 60,
+        userId: 1,
+        studentReferenceId: 106,
+        eventTypeReferenceId: 1,
+        eventDate: new Date('2025-09-01'),
+        name: 'Existing Student - Birthday',
+        year: 5786,
+        eventHebrewMonth: 'תשרי',
       };
       const scenario = tatnikitClassPrefix(
         new YemotScenarioBuilder('Tatnikit event exists')
-          .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
           .seed('Student', [tatnikitStudent, { ...tatnikitReportStudent, name: 'Existing Student' }])
           .seed('Class', [tatnikitClass])
           .seed('Tatnikit', [{ id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 }])
@@ -733,7 +818,7 @@ describe('YemotHandlerService — event-management-nra', () => {
             { id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 },
             { id: 2, userId: 1, studentReferenceId: 106, classReferenceId: 50, year: 5786 },
           ])
-          .seed('Event', [existingEvent])
+          .seed('Event', [existingEvent]),
       )
         .systemAsks('Enter student TZ')
         .userResponds('999999999')
@@ -758,19 +843,19 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('create new tatnikit-only event', async () => {
       const scenario = tatnikitClassPrefix(
         new YemotScenarioBuilder('Tatnikit create event')
-          .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
           .seed('Student', [tatnikitStudent, { ...tatnikitReportStudent, name: 'New Student' }])
           .seed('Class', [tatnikitClass])
           .seed('Tatnikit', [{ id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 }])
           .seed('StudentClass', [
             { id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 },
             { id: 2, userId: 1, studentReferenceId: 106, classReferenceId: 50, year: 5786 },
-          ])
+          ]),
       );
 
-      const result = await runner.run(
-        tatnikitClassReport(scenario, '999999999', 'New Student').build()
-      );
+      const result = await runner.run(tatnikitClassReport(scenario, '999999999', 'New Student').build());
       expect(result.passed).toBe(true);
       expect(result.hungup).toBe(true);
     });
@@ -778,19 +863,19 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('no more students, hangup with GOODBYE', async () => {
       const scenario = tatnikitClassPrefix(
         new YemotScenarioBuilder('Tatnikit no more students')
-          .seed('User', [baseUser]).seed('Text', baseTexts).seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
           .seed('Student', [tatnikitStudent, { ...tatnikitReportStudent, name: 'One Student' }])
           .seed('Class', [tatnikitClass])
           .seed('Tatnikit', [{ id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 }])
           .seed('StudentClass', [
             { id: 1, userId: 1, studentReferenceId: 105, classReferenceId: 50, year: 5786 },
             { id: 2, userId: 1, studentReferenceId: 106, classReferenceId: 50, year: 5786 },
-          ])
+          ]),
       );
 
-      const result = await runner.run(
-        tatnikitClassReport(scenario, '999999999', 'One Student').build()
-      );
+      const result = await runner.run(tatnikitClassReport(scenario, '999999999', 'One Student').build());
       expect(result.passed).toBe(true);
       expect(result.hungup).toBe(true);
     });
@@ -801,9 +886,12 @@ describe('YemotHandlerService — event-management-nra', () => {
       const scenario = createEventFlow(
         studentToMenu(
           new YemotScenarioBuilder('Create event happy path')
-            .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-            .seed('EventType', eventType).seed('Gift', gift)
-        )
+            .seed('User', [baseUser])
+            .seed('Student', [baseStudent])
+            .seed('Text', baseTexts)
+            .seed('EventType', eventType)
+            .seed('Gift', gift),
+        ),
       ).build();
 
       const result = await runner.run(scenario);
@@ -814,8 +902,10 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('event type — invalid menu selection, hangup with INVALID_INPUT', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Event type invalid')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -831,8 +921,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('event type — not confirmed, re-select and confirm', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Event type not confirmed')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType).seed('Gift', gift)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
+          .seed('Gift', gift),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -867,8 +960,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('gift selection — invalid menu selection, hangup with INVALID_INPUT', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Gift invalid')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType).seed('Gift', gift)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
+          .seed('Gift', gift),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -894,12 +990,14 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('gifts — select additional gift after first selection', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Gifts additional')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
           .seed('Gift', [
             { id: 1, userId: 1, key: 1, name: 'Book' },
             { id: 2, userId: 1, key: 2, name: 'Pen' },
-          ])
+          ]),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -934,7 +1032,9 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('gifts — select 5 gifts, loop exits at max', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Gifts max 5')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
           .seed('EventType', eventType)
           .seed('Gift', [
             { id: 1, userId: 1, key: 1, name: 'G1' },
@@ -942,7 +1042,7 @@ describe('YemotHandlerService — event-management-nra', () => {
             { id: 3, userId: 1, key: 3, name: 'G3' },
             { id: 4, userId: 1, key: 4, name: 'G4' },
             { id: 5, userId: 1, key: 5, name: 'G5' },
-          ])
+          ]),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -987,8 +1087,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('gifts — not confirmed, restart selection', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Gifts not confirmed')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType).seed('Gift', gift)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
+          .seed('Gift', gift),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -1025,8 +1128,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('event date — day > 30, retry with valid day', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Date day > 30')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType).seed('Gift', gift)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
+          .seed('Gift', gift),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -1059,8 +1165,10 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('event date — invalid month selection, hangup with INVALID_INPUT', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Date invalid month')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -1082,8 +1190,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('event date — not confirmed, re-enter and confirm', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Date not confirmed')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType).seed('Gift', gift)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
+          .seed('Gift', gift),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -1120,8 +1231,11 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('event date — more than 100 days ago, uses next year', async () => {
       const scenario = studentToMenu(
         new YemotScenarioBuilder('Date next year adjustment')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-          .seed('EventType', eventType).seed('Gift', gift)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts)
+          .seed('EventType', eventType)
+          .seed('Gift', gift),
       )
         .userResponds('1')
         .systemAsks('Select event type')
@@ -1153,14 +1267,25 @@ describe('YemotHandlerService — event-management-nra', () => {
       const scenario = createEventFlow(
         studentToMenu(
           new YemotScenarioBuilder('Merge tatnikit event')
-            .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-            .seed('EventType', eventType).seed('Gift', gift)
-            .seed('Event', [{
-              id: 50, userId: 1, studentReferenceId: 100, eventTypeReferenceId: 1,
-              eventDate: new Date('2025-01-01'), name: 'Test Student - Birthday',
-              year: 5786, reportOrigin: 'only_tatnikit', reportedByTatnikit: true,
-            }])
-        )
+            .seed('User', [baseUser])
+            .seed('Student', [baseStudent])
+            .seed('Text', baseTexts)
+            .seed('EventType', eventType)
+            .seed('Gift', gift)
+            .seed('Event', [
+              {
+                id: 50,
+                userId: 1,
+                studentReferenceId: 100,
+                eventTypeReferenceId: 1,
+                eventDate: new Date('2025-01-01'),
+                name: 'Test Student - Birthday',
+                year: 5786,
+                reportOrigin: 'only_tatnikit',
+                reportedByTatnikit: true,
+              },
+            ]),
+        ),
       ).build();
 
       const result = await runner.run(scenario);
@@ -1172,9 +1297,12 @@ describe('YemotHandlerService — event-management-nra', () => {
       const scenario = createEventFlow(
         studentToMenu(
           new YemotScenarioBuilder('No matching tatnikit event')
-            .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-            .seed('EventType', eventType).seed('Gift', gift)
-        )
+            .seed('User', [baseUser])
+            .seed('Student', [baseStudent])
+            .seed('Text', baseTexts)
+            .seed('EventType', eventType)
+            .seed('Gift', gift),
+        ),
       ).build();
 
       const result = await runner.run(scenario);
@@ -1187,7 +1315,9 @@ describe('YemotHandlerService — event-management-nra', () => {
     it('student found via ApiEnterID — skip TZ prompt', async () => {
       const customRunner = new YemotScenarioRunner(YemotHandlerService as any, '123456789');
       const scenario = new YemotScenarioBuilder('ApiEnterID student found')
-        .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+        .seed('User', [baseUser])
+        .seed('Student', [baseStudent])
+        .seed('Text', baseTexts)
         .systemSends('Welcome Test Student')
         .systemAsks('Press 1 to report, 2 for fulfillment, 3 for lottery, 4 for song')
         .userResponds('4')
@@ -1203,7 +1333,9 @@ describe('YemotHandlerService — event-management-nra', () => {
       const customRunner = new YemotScenarioRunner(YemotHandlerService as any, 'abc999');
       const scenario = studentToMenu(
         new YemotScenarioBuilder('ApiEnterID no match')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts),
       )
         .userResponds('4')
         .systemHangsUp('Song playing')
@@ -1217,7 +1349,9 @@ describe('YemotHandlerService — event-management-nra', () => {
       const customRunner = new YemotScenarioRunner(YemotHandlerService as any, 'abc');
       const scenario = studentToMenu(
         new YemotScenarioBuilder('ApiEnterID no digits')
-          .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
+          .seed('User', [baseUser])
+          .seed('Student', [baseStudent])
+          .seed('Text', baseTexts),
       )
         .userResponds('4')
         .systemHangsUp('Song playing')
@@ -1233,16 +1367,27 @@ describe('YemotHandlerService — event-management-nra', () => {
       const scenario = createEventFlow(
         studentToMenu(
           new YemotScenarioBuilder('AutoAssign already has teacher')
-            .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-            .seed('EventType', eventType).seed('Gift', gift)
+            .seed('User', [baseUser])
+            .seed('Student', [baseStudent])
+            .seed('Text', baseTexts)
+            .seed('EventType', eventType)
+            .seed('Gift', gift)
             .seed('Teacher', [{ id: 5, userId: 1, name: 'Test Teacher', tz: '444444444' }])
-            .seed('Event', [{
-              id: 70, userId: 1, studentReferenceId: 100, eventTypeReferenceId: 1,
-              eventDate: new Date('2025-01-01'), name: 'Test Student - Birthday',
-              year: 5786, reportOrigin: 'only_tatnikit', reportedByTatnikit: true,
-              teacherReferenceId: 5,
-            }])
-        )
+            .seed('Event', [
+              {
+                id: 70,
+                userId: 1,
+                studentReferenceId: 100,
+                eventTypeReferenceId: 1,
+                eventDate: new Date('2025-01-01'),
+                name: 'Test Student - Birthday',
+                year: 5786,
+                reportOrigin: 'only_tatnikit',
+                reportedByTatnikit: true,
+                teacherReferenceId: 5,
+              },
+            ]),
+        ),
       ).build();
 
       const result = await runner.run(scenario);
@@ -1254,9 +1399,12 @@ describe('YemotHandlerService — event-management-nra', () => {
       const scenario = createEventFlow(
         studentToMenu(
           new YemotScenarioBuilder('AutoAssign no rule matched')
-            .seed('User', [baseUser]).seed('Student', [baseStudent]).seed('Text', baseTexts)
-            .seed('EventType', eventType).seed('Gift', gift)
-        )
+            .seed('User', [baseUser])
+            .seed('Student', [baseStudent])
+            .seed('Text', baseTexts)
+            .seed('EventType', eventType)
+            .seed('Gift', gift),
+        ),
       ).build();
 
       const result = await runner.run(scenario);
@@ -1268,10 +1416,12 @@ describe('YemotHandlerService — event-management-nra', () => {
       const scenario = createEventFlow(
         studentToMenu(
           new YemotScenarioBuilder('AutoAssign error continues')
-            .seed('User', [baseUser]).seed('Text', baseTexts)
+            .seed('User', [baseUser])
+            .seed('Text', baseTexts)
             .seed('Student', [{ ...baseStudent, familyReferenceId: '1_father_mother' }])
-            .seed('EventType', eventType).seed('Gift', gift)
-        )
+            .seed('EventType', eventType)
+            .seed('Gift', gift),
+        ),
       ).build();
 
       const result = await runner.run(scenario);

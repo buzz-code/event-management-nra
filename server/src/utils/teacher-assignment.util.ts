@@ -31,9 +31,7 @@ interface BulkAssignmentState {
  */
 function pickLeastLoadedTeacher(teacherIds: number[], loadCount: Map<number, number>): number {
   const shuffled = [...teacherIds].sort(() => Math.random() - 0.5);
-  return shuffled.reduce((best, id) =>
-    (loadCount.get(id) ?? 0) < (loadCount.get(best) ?? 0) ? id : best,
-  );
+  return shuffled.reduce((best, id) => ((loadCount.get(id) ?? 0) < (loadCount.get(best) ?? 0) ? id : best));
 }
 
 /** Returns a ±`days`-day window around `pivot`. */
@@ -47,11 +45,7 @@ function getDateRange(pivot: Date, days: number): { start: Date; end: Date } {
 
 // ─── Bulk-assignment helpers ──────────────────────────────────────────────────
 
-async function loadEventsWithRelations(
-  eventIds: number[],
-  userId: number,
-  dataSource: DataSource,
-): Promise<Event[]> {
+async function loadEventsWithRelations(eventIds: number[], userId: number, dataSource: DataSource): Promise<Event[]> {
   return dataSource.getRepository(Event).find({
     where: { id: In(eventIds), userId },
     relations: ['student', 'studentClass'],
@@ -74,11 +68,7 @@ function buildFamilyMap(events: Event[]): Record<string, FamilyData> {
   );
 }
 
-async function loadActiveRules(
-  userId: number,
-  year: number,
-  dataSource: DataSource,
-): Promise<TeacherAssignmentRule[]> {
+async function loadActiveRules(userId: number, year: number, dataSource: DataSource): Promise<TeacherAssignmentRule[]> {
   return dataSource.getRepository(TeacherAssignmentRule).find({
     where: { userId, year, isActive: true },
     order: { order: 'ASC' },
@@ -149,9 +139,7 @@ async function findStudentGradeLevel(
   dataSource: DataSource,
 ): Promise<string | null> {
   if (event.studentClassReferenceId) {
-    const cls = await dataSource
-      .getRepository(Class)
-      .findOne({ where: { id: event.studentClassReferenceId } });
+    const cls = await dataSource.getRepository(Class).findOne({ where: { id: event.studentClassReferenceId } });
     if (cls?.gradeLevel) return cls.gradeLevel;
   }
 
