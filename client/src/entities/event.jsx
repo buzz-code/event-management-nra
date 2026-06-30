@@ -92,7 +92,12 @@ const filterDefaultValues = {
 
 const Datagrid = ({ isAdmin, children, isPreview, ...props }) => {
     const additionalBulkButtons = [
-        <BulkActionButton label="שיוך למורה לפי כללים" icon={<SupervisedUserCircleIcon />} name="teacherAssociation" reloadOnEnd />,
+        <BulkActionButton
+            label="שיוך למורה לפי כללים"
+            icon={<SupervisedUserCircleIcon />}
+            name="teacherAssociation"
+            reloadOnEnd
+        />,
         <BulkActionButton label="קביעת מורה ידנית" icon={<EditIcon />} name="manualTeacherAssignment" reloadOnEnd>
             <CommonReferenceInput
                 source="teacherReferenceId"

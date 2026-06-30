@@ -50,12 +50,7 @@ export const EventStatsCard = ({ title, resource, icon }) => {
                         {data.map((item) => (
                             <Box key={item.id} display="flex" justifyContent="space-between" alignItems="center">
                                 <Typography variant="body2">{item.name}</Typography>
-                                <Chip
-                                    size="small"
-                                    label={chipLabels[resource]}
-                                    color="primary"
-                                    variant="outlined"
-                                />
+                                <Chip size="small" label={chipLabels[resource]} color="primary" variant="outlined" />
                             </Box>
                         ))}
                     </Stack>

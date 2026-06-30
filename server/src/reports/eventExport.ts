@@ -57,7 +57,11 @@ const getReportData: IGetReportDataFunction = async (
     { value: 'teacher.name', label: 'שם מורה', readOnly: true },
     { value: (row: any) => row.previousSimcha?.previousSimchaDescription || '', label: 'שמחה קודמת', readOnly: true },
     { value: (row: any) => row.previousSimcha?.previousTeacherName || '', label: 'מורה בשמחה קודמת', readOnly: true },
-    { value: (row: any) => row.previousSimcha?.previousEventHebrewDate || '', label: 'תאריך שמחה קודמת', readOnly: true },
+    {
+      value: (row: any) => row.previousSimcha?.previousEventHebrewDate || '',
+      label: 'תאריך שמחה קודמת',
+      readOnly: true,
+    },
     { value: 'student.tz', label: 'תז תלמיד' },
     { value: 'student.name', label: 'שם תלמידה', readOnly: true },
     { value: 'reporterStudent.name', label: 'דווח ע"י', readOnly: true },

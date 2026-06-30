@@ -22,11 +22,7 @@ import { defaultYearFilter } from '@shared/utils/yearFilter';
 import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 
-const filters = [
-    ...commonAdminFilters,
-    <CommonYearInputFilter />,
-    <BooleanInput source="isActive" />,
-];
+const filters = [...commonAdminFilters, <CommonYearInputFilter />, <BooleanInput source="isActive" />];
 
 const filterDefaultValues = {
     ...defaultYearFilter,

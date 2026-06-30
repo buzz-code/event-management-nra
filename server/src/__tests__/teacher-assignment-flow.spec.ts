@@ -54,8 +54,8 @@ const GRADE_YD = 'יד';
 const GRADE_YG = 'יג';
 const GRADE_YB = 'יב';
 const GRADE_YA = 'יא';
-const GRADE_Y  = 'י';
-const GRADE_T  = 'ט';
+const GRADE_Y = 'י';
+const GRADE_T = 'ט';
 
 // ─── Builders ────────────────────────────────────────────────────────────────
 
@@ -73,11 +73,7 @@ function makeEvent(familyId: string, gradeLevel: string, id?: number): Partial<E
   };
 }
 
-function makeRule(
-  order: number,
-  gradeLevelKey: string,
-  teacherReferenceIds: number[],
-): TeacherAssignmentRule {
+function makeRule(order: number, gradeLevelKey: string, teacherReferenceIds: number[]): TeacherAssignmentRule {
   return {
     id: order,
     userId: USER_ID,
@@ -96,8 +92,8 @@ function standardRules(): TeacherAssignmentRule[] {
     makeRule(2, GRADE_YG, [T1]),
     makeRule(3, GRADE_YB, [T2, T3]),
     makeRule(4, GRADE_YA, [T2, T3, T4]),
-    makeRule(5, GRADE_Y,  [T2, T3, T4]),
-    makeRule(6, GRADE_T,  [T2, T3, T4]),
+    makeRule(5, GRADE_Y, [T2, T3, T4]),
+    makeRule(6, GRADE_T, [T2, T3, T4]),
   ];
 }
 
@@ -185,10 +181,7 @@ describe('scenario 2 – single student in grade יג', () => {
 
 describe('scenario 3 – siblings in יד and יב', () => {
   it('assigns T1 to every event in the family (rule 1 fires first)', async () => {
-    const events = [
-      makeEvent('fam-siblings', GRADE_YD),
-      makeEvent('fam-siblings', GRADE_YB),
-    ];
+    const events = [makeEvent('fam-siblings', GRADE_YD), makeEvent('fam-siblings', GRADE_YB)];
     const result = await assign(events);
     for (const ev of events) {
       expect(result.get(ev.id!)).toBe(T1);
@@ -200,10 +193,7 @@ describe('scenario 3 – siblings in יד and יב', () => {
 
 describe('scenario 4 – siblings in יג and יב', () => {
   it('assigns T1 to every event in the family (rule 2 fires before rule 3)', async () => {
-    const events = [
-      makeEvent('fam-siblings', GRADE_YG),
-      makeEvent('fam-siblings', GRADE_YB),
-    ];
+    const events = [makeEvent('fam-siblings', GRADE_YG), makeEvent('fam-siblings', GRADE_YB)];
     const result = await assign(events);
     for (const ev of events) {
       expect(result.get(ev.id!)).toBe(T1);
@@ -253,11 +243,7 @@ describe('scenario 7 – three independent families in יא', () => {
     const evC = makeEvent('fam-C', GRADE_YA);
     const result = await assign([evA, evB, evC]);
 
-    const assigned = [
-      result.get(evA.id!)!,
-      result.get(evB.id!)!,
-      result.get(evC.id!)!,
-    ];
+    const assigned = [result.get(evA.id!)!, result.get(evB.id!)!, result.get(evC.id!)!];
 
     // All from T2/T3/T4
     assigned.forEach((t) => expect([T2, T3, T4]).toContain(t));
@@ -291,7 +277,7 @@ describe('scenario 9 – cross-grade load balancing (יב → יא)', () => {
   it('the first יא family gets T4 after T2 and T3 are loaded by יב', async () => {
     const evYB_A = makeEvent('fam-YB-A', GRADE_YB);
     const evYB_B = makeEvent('fam-YB-B', GRADE_YB);
-    const evYA   = makeEvent('fam-YA',   GRADE_YA);
+    const evYA = makeEvent('fam-YA', GRADE_YA);
 
     const result = await assign([evYB_A, evYB_B, evYA]);
 
@@ -329,15 +315,9 @@ describe('scenario 11 – clear assignments and re-assign', () => {
     expect(result1.get(evYG.id!)).toBe(T1);
 
     // Bulk-clear via manualTeacherAssignment (no teacher → null)
-    const { updateMock, teacherReferenceId } = await manualTeacherAssignment(
-      [evYD.id!, evYG.id!],
-      null,
-    );
+    const { updateMock, teacherReferenceId } = await manualTeacherAssignment([evYD.id!, evYG.id!], null);
     expect(teacherReferenceId).toBeNull();
-    expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: USER_ID }),
-      { teacherReferenceId: null },
-    );
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ userId: USER_ID }), { teacherReferenceId: null });
 
     // Apply cleared state and re-assign
     evYD.teacherReferenceId = null;
@@ -371,7 +351,7 @@ describe('scenario 13 – family with one high-priority sibling rescues a low-pr
    * Rule 1 (יד) fires first → whole family (including the ט event) gets T1.
    */
   it('both events get T1 due to the יד sibling', async () => {
-    const evT  = makeEvent('fam-mixed', GRADE_T);
+    const evT = makeEvent('fam-mixed', GRADE_T);
     const evYD = makeEvent('fam-mixed', GRADE_YD);
     const result = await assign([evT, evYD]);
     expect(result.get(evT.id!)).toBe(T1);
@@ -395,9 +375,6 @@ describe('scenario 14 – manualTeacherAssignment clear and set', () => {
   it('passing a valid teacher ID sets it', async () => {
     const { teacherReferenceId, updateMock } = await manualTeacherAssignment([5], T2);
     expect(teacherReferenceId).toBe(T2);
-    expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: USER_ID }),
-      { teacherReferenceId: T2 },
-    );
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ userId: USER_ID }), { teacherReferenceId: T2 });
   });
 });
