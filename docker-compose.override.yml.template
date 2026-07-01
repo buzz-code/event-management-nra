@@ -7,7 +7,6 @@ services:
             target: development
         environment:
             PORT: 3010
-            REACT_APP_API_URL: http://localhost:3011
         ports:
             - "3010:3010"
             - "24678:24678"
